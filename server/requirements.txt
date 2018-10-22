@@ -1,0 +1,9 @@
+flask
+flask-socketio
+eventlet
+peewee
+event-bus
+pyserial
+passlib
+bcrypt
+google-cloud-texttospeech
