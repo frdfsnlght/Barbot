@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name stepper_driver)(type Legacy)(uri ${KIPRJMOD}/../lib/stepper_driver.lib)(options "")(descr ""))
+)

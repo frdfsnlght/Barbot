@@ -1,0 +1,445 @@
+EESchema Schematic File Version 4
+LIBS:pump-cache
+EELAYER 26 0
+EELAYER END
+$Descr USLetter 8500 11000 portrait
+encoding utf-8
+Sheet 1 9
+Title "Barbot Pump Driver"
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 4150 1050 600  700 
+U 5BCF6D72
+F0 "Module0" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 1150 50 
+F3 "STEP" I L 4150 1350 50 
+F4 "DIR" I L 4150 1250 50 
+F5 "24V" I L 4150 1450 50 
+F6 "GND" I L 4150 1650 50 
+F7 "5V" I L 4150 1550 50 
+$EndSheet
+$Comp
+L Connector:Conn_01x15_Female H1
+U 1 1 5BCF8B18
+P 1750 4550
+F 0 "H1" H 1650 5400 50  0000 C CNN
+F 1 "Main" H 1650 3750 50  0000 C CNN
+F 2 "" H 1750 4550 50  0001 C CNN
+F 3 "~" H 1750 4550 50  0001 C CNN
+	1    1750 4550
+	-1   0    0    -1  
+$EndComp
+$Sheet
+S 4150 1950 600  700 
+U 5BCF8DAA
+F0 "Module1" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 2050 50 
+F3 "STEP" I L 4150 2250 50 
+F4 "DIR" I L 4150 2150 50 
+F5 "24V" I L 4150 2350 50 
+F6 "GND" I L 4150 2550 50 
+F7 "5V" I L 4150 2450 50 
+$EndSheet
+$Sheet
+S 4150 2850 600  700 
+U 5BCF8E71
+F0 "Module2" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 2950 50 
+F3 "STEP" I L 4150 3150 50 
+F4 "DIR" I L 4150 3050 50 
+F5 "24V" I L 4150 3250 50 
+F6 "GND" I L 4150 3450 50 
+F7 "5V" I L 4150 3350 50 
+$EndSheet
+$Sheet
+S 4150 3750 600  700 
+U 5BCF8E75
+F0 "Module3" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 3850 50 
+F3 "STEP" I L 4150 4050 50 
+F4 "DIR" I L 4150 3950 50 
+F5 "24V" I L 4150 4150 50 
+F6 "GND" I L 4150 4350 50 
+F7 "5V" I L 4150 4250 50 
+$EndSheet
+$Sheet
+S 4150 4650 600  700 
+U 5BCF8E79
+F0 "Module4" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 4750 50 
+F3 "STEP" I L 4150 4950 50 
+F4 "DIR" I L 4150 4850 50 
+F5 "24V" I L 4150 5050 50 
+F6 "GND" I L 4150 5250 50 
+F7 "5V" I L 4150 5150 50 
+$EndSheet
+$Sheet
+S 4150 5550 600  700 
+U 5BCF8E7D
+F0 "Module5" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 5650 50 
+F3 "STEP" I L 4150 5850 50 
+F4 "DIR" I L 4150 5750 50 
+F5 "24V" I L 4150 5950 50 
+F6 "GND" I L 4150 6150 50 
+F7 "5V" I L 4150 6050 50 
+$EndSheet
+$Sheet
+S 4150 6500 600  700 
+U 5BCF8E81
+F0 "Module6" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 6600 50 
+F3 "STEP" I L 4150 6800 50 
+F4 "DIR" I L 4150 6700 50 
+F5 "24V" I L 4150 6900 50 
+F6 "GND" I L 4150 7100 50 
+F7 "5V" I L 4150 7000 50 
+$EndSheet
+$Sheet
+S 4150 7450 600  700 
+U 5BCF8E85
+F0 "Module7" 50
+F1 "module.sch" 50
+F2 "~ENABLE" I L 4150 7550 50 
+F3 "STEP" I L 4150 7750 50 
+F4 "DIR" I L 4150 7650 50 
+F5 "24V" I L 4150 7850 50 
+F6 "GND" I L 4150 8050 50 
+F7 "5V" I L 4150 7950 50 
+$EndSheet
+Wire Wire Line
+	4150 1150 4000 1150
+Wire Wire Line
+	4000 1150 4000 2050
+Wire Wire Line
+	4000 2050 4150 2050
+Wire Wire Line
+	4000 2050 4000 2950
+Wire Wire Line
+	4000 2950 4150 2950
+Connection ~ 4000 2050
+Wire Wire Line
+	4000 3850 4150 3850
+Connection ~ 4000 2950
+Wire Wire Line
+	4000 3850 4000 4450
+Wire Wire Line
+	4000 4750 4150 4750
+Connection ~ 4000 3850
+Wire Wire Line
+	4000 4750 4000 5650
+Wire Wire Line
+	4000 5650 4150 5650
+Connection ~ 4000 4750
+Wire Wire Line
+	4150 1250 3900 1250
+Wire Wire Line
+	3900 1250 3900 2150
+Wire Wire Line
+	3900 2150 4150 2150
+Wire Wire Line
+	3900 2150 3900 3050
+Wire Wire Line
+	3900 3050 4150 3050
+Connection ~ 3900 2150
+Connection ~ 3900 3050
+Wire Wire Line
+	3900 4850 4150 4850
+Wire Wire Line
+	3900 4850 3900 5750
+Wire Wire Line
+	3900 5750 4150 5750
+Connection ~ 3900 4850
+Wire Wire Line
+	4150 1450 3800 1450
+Wire Wire Line
+	3800 1450 3800 2350
+Wire Wire Line
+	3800 2350 4150 2350
+Wire Wire Line
+	3800 2350 3800 3250
+Wire Wire Line
+	3800 3250 4150 3250
+Connection ~ 3800 2350
+Wire Wire Line
+	3800 3250 3800 3850
+Wire Wire Line
+	3800 4150 4150 4150
+Connection ~ 3800 3250
+Wire Wire Line
+	3800 4150 3800 5050
+Wire Wire Line
+	3800 5050 4150 5050
+Connection ~ 3800 4150
+Wire Wire Line
+	3800 5050 3800 5950
+Wire Wire Line
+	3800 5950 4150 5950
+Connection ~ 3800 5050
+Wire Wire Line
+	4150 1550 3700 1550
+Wire Wire Line
+	3700 1550 3700 2450
+Wire Wire Line
+	3700 2450 4150 2450
+Wire Wire Line
+	3700 2450 3700 3350
+Wire Wire Line
+	3700 3350 4150 3350
+Connection ~ 3700 2450
+Wire Wire Line
+	3700 4250 4150 4250
+Connection ~ 3700 3350
+Wire Wire Line
+	3700 4250 3700 4550
+Wire Wire Line
+	3700 5150 4150 5150
+Connection ~ 3700 4250
+Wire Wire Line
+	3700 5150 3700 6050
+Wire Wire Line
+	3700 6050 4150 6050
+Connection ~ 3700 5150
+Wire Wire Line
+	4150 1650 3600 1650
+Wire Wire Line
+	3600 1650 3600 2550
+Wire Wire Line
+	3600 2550 4150 2550
+Wire Wire Line
+	3600 2550 3600 3450
+Wire Wire Line
+	3600 3450 4150 3450
+Connection ~ 3600 2550
+Wire Wire Line
+	3600 3450 3600 3950
+Wire Wire Line
+	3600 4350 4150 4350
+Connection ~ 3600 3450
+Wire Wire Line
+	3600 4350 3600 5250
+Wire Wire Line
+	3600 5250 4150 5250
+Connection ~ 3600 4350
+Wire Wire Line
+	3600 5250 3600 6150
+Wire Wire Line
+	3600 6150 4150 6150
+Connection ~ 3600 5250
+Wire Wire Line
+	4000 5650 4000 6600
+Wire Wire Line
+	4000 6600 4150 6600
+Connection ~ 4000 5650
+Wire Wire Line
+	4000 6600 4000 7550
+Wire Wire Line
+	4000 7550 4150 7550
+Connection ~ 4000 6600
+Wire Wire Line
+	3900 5750 3900 6700
+Wire Wire Line
+	3900 6700 4150 6700
+Connection ~ 3900 5750
+Wire Wire Line
+	3900 6700 3900 7650
+Wire Wire Line
+	3900 7650 4150 7650
+Connection ~ 3900 6700
+Wire Wire Line
+	3800 5950 3800 6900
+Wire Wire Line
+	3800 6900 4150 6900
+Connection ~ 3800 5950
+Wire Wire Line
+	3800 6900 3800 7850
+Wire Wire Line
+	3800 7850 4150 7850
+Connection ~ 3800 6900
+Wire Wire Line
+	3700 6050 3700 7000
+Wire Wire Line
+	3700 7000 4150 7000
+Connection ~ 3700 6050
+Wire Wire Line
+	3700 7000 3700 7950
+Wire Wire Line
+	3700 7950 4150 7950
+Connection ~ 3700 7000
+Wire Wire Line
+	3600 6150 3600 7100
+Wire Wire Line
+	3600 7100 4150 7100
+Connection ~ 3600 6150
+Wire Wire Line
+	3600 7100 3600 8050
+Wire Wire Line
+	3600 8050 4150 8050
+Connection ~ 3600 7100
+Wire Wire Line
+	3900 3050 3900 3950
+Wire Wire Line
+	4150 3950 3900 3950
+Connection ~ 3900 3950
+Wire Wire Line
+	3900 3950 3900 4650
+Wire Wire Line
+	3700 3350 3700 4250
+Wire Wire Line
+	4000 2950 4000 3850
+Wire Wire Line
+	1950 4550 3700 4550
+Connection ~ 3700 4550
+Wire Wire Line
+	3700 4550 3700 5150
+Wire Wire Line
+	1950 4450 4000 4450
+Connection ~ 4000 4450
+Wire Wire Line
+	4000 4450 4000 4750
+Wire Wire Line
+	1950 4650 3900 4650
+Connection ~ 3900 4650
+Wire Wire Line
+	3900 4650 3900 4850
+Wire Wire Line
+	1950 4350 3500 4350
+Wire Wire Line
+	3500 4350 3500 4050
+Wire Wire Line
+	3500 4050 4150 4050
+Wire Wire Line
+	1950 4250 3400 4250
+Wire Wire Line
+	3400 4250 3400 3150
+Wire Wire Line
+	3400 3150 4150 3150
+Wire Wire Line
+	1950 4150 3300 4150
+Wire Wire Line
+	3300 4150 3300 2250
+Wire Wire Line
+	3300 2250 4150 2250
+Wire Wire Line
+	1950 4050 3200 4050
+Wire Wire Line
+	3200 4050 3200 1350
+Wire Wire Line
+	3200 1350 4150 1350
+Wire Wire Line
+	1950 4750 3500 4750
+Wire Wire Line
+	3500 4750 3500 4950
+Wire Wire Line
+	3500 4950 4150 4950
+Wire Wire Line
+	1950 4850 3400 4850
+Wire Wire Line
+	3400 4850 3400 5850
+Wire Wire Line
+	3400 5850 4150 5850
+Wire Wire Line
+	1950 4950 3300 4950
+Wire Wire Line
+	3300 4950 3300 6800
+Wire Wire Line
+	3300 6800 4150 6800
+Wire Wire Line
+	1950 5050 3200 5050
+Wire Wire Line
+	3200 5050 3200 7750
+Wire Wire Line
+	3200 7750 4150 7750
+Wire Wire Line
+	1950 3950 2200 3950
+Wire Wire Line
+	2200 3950 2200 5150
+Wire Wire Line
+	2200 5150 1950 5150
+Wire Wire Line
+	1950 3850 2300 3850
+Wire Wire Line
+	2300 3850 2300 5250
+Wire Wire Line
+	2300 5250 1950 5250
+Wire Wire Line
+	2300 3850 2900 3850
+Connection ~ 2300 3850
+Connection ~ 3800 3850
+Wire Wire Line
+	3800 3850 3800 4150
+Wire Wire Line
+	2200 3950 3100 3950
+Connection ~ 2200 3950
+Connection ~ 3600 3950
+Wire Wire Line
+	3600 3950 3600 4350
+Text Label 2500 3850 0    50   ~ 0
+24V
+Text Label 2500 3950 0    50   ~ 0
+GND
+Text Label 2500 4050 0    50   ~ 0
+P0
+Text Label 2500 4150 0    50   ~ 0
+P1
+Text Label 2500 4250 0    50   ~ 0
+P2
+Text Label 2500 4350 0    50   ~ 0
+P3
+Text Label 2500 4450 0    50   ~ 0
+~ENABLE
+Text Label 2500 4550 0    50   ~ 0
+5V
+Text Label 2500 4650 0    50   ~ 0
+DIR
+Text Label 2500 4750 0    50   ~ 0
+P4
+Text Label 2500 4850 0    50   ~ 0
+P5
+Text Label 2500 4950 0    50   ~ 0
+P6
+Text Label 2500 5050 0    50   ~ 0
+P7
+$Comp
+L power:PWR_FLAG #FLG0101
+U 1 1 5BD4DC20
+P 2900 3850
+F 0 "#FLG0101" H 2900 3925 50  0001 C CNN
+F 1 "PWR_FLAG" H 2900 4024 50  0000 C CNN
+F 2 "" H 2900 3850 50  0001 C CNN
+F 3 "~" H 2900 3850 50  0001 C CNN
+	1    2900 3850
+	1    0    0    -1  
+$EndComp
+Connection ~ 2900 3850
+Wire Wire Line
+	2900 3850 3800 3850
+$Comp
+L power:PWR_FLAG #FLG0102
+U 1 1 5BD4DC4D
+P 3100 3950
+F 0 "#FLG0102" H 3100 4025 50  0001 C CNN
+F 1 "PWR_FLAG" H 3100 4124 50  0000 C CNN
+F 2 "" H 3100 3950 50  0001 C CNN
+F 3 "~" H 3100 3950 50  0001 C CNN
+	1    3100 3950
+	1    0    0    -1  
+$EndComp
+Connection ~ 3100 3950
+Wire Wire Line
+	3100 3950 3600 3950
+$EndSCHEMATC

@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP Arduino_Pro_Mini
+D Arduino Pro Mini
+K Arduino Pro Mini Microcontroller Module Atmel AVR
+F https://store.arduino.cc/usa/arduino-pro-mini
+$ENDCMP
+#
+#End Doc Library

@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP LLC4
+D Dual-Supply, 4 Channel Signal Translator
+K Level shifter translator bidirectional
+$ENDCMP
+#
+#End Doc Library

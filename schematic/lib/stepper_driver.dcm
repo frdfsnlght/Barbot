@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP DRV8825_Carrier
+D DRV8825 Stepper Motor Driver Carrier
+K DRV8825 Stepper Motor Driver Carrier
+F https://www.pololu.com/product/2133
+$ENDCMP
+#
+#End Doc Library

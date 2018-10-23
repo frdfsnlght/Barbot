@@ -29,8 +29,8 @@ IN THE SOFTWARE.
 #include <StepControl.h>
 
 constexpr int PIN_LED                   = LED_BUILTIN;
-constexpr int PIN_ENABLE                = 21;
-constexpr int PIN_DIR                   = 22;
+constexpr int PIN_ENABLE                = 19;
+constexpr int PIN_DIR                   = 20;
 constexpr int SERIAL1_PIN_RX            = 0;
 constexpr int SERIAL1_PIN_TX            = 1;
 
@@ -79,7 +79,7 @@ Stepper pumpB(14, PIN_DIR);
 Stepper pumpC(15, PIN_DIR);
 Stepper pumpD(16, PIN_DIR);
 Stepper pumpE(17, PIN_DIR);
-Stepper pumpF(20, PIN_DIR);
+Stepper pumpF(18, PIN_DIR);
 
 Stepper* allPumps[] = {&pump0, &pump1, &pump2, &pump3, &pump4, &pump5, &pump6, &pump7,
                        &pump8, &pump9, &pumpA, &pumpB, &pumpC, &pumpD, &pumpE, &pumpF};
