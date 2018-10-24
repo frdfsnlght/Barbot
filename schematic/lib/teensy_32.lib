@@ -6,7 +6,7 @@ EESchema-LIBRARY Version 2.4
 DEF Teensy_32 A 0 40 Y Y 1 F N
 F0 "A" -200 1050 50 H V R CNN
 F1 "Teensy_32" -200 950 50 H V R CNN
-F2 "Module:Teensy_32" 300 -1050 50 H I L CNN
+F2 "teensy_32:teensy_32" 300 -1050 50 H I L CNN
 F3 "" -200 1050 50 H I C CNN
 $FPLIST
  Arduino*Pro*Mini*

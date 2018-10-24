@@ -140,6 +140,22 @@ X ~ 2 0 -150 130 U 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# Device_Jumper
+#
+DEF Device_Jumper JP 0 30 Y N 1 F N
+F0 "JP" 0 150 50 H V C CNN
+F1 "Device_Jumper" 0 -80 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+A 0 -26 125 1426 373 0 1 0 N -98 50 99 50
+C -100 0 35 0 1 0 N
+C 100 0 35 0 1 0 N
+X 1 1 -300 0 165 R 50 50 0 1 P
+X 2 2 300 0 165 L 50 50 0 1 P
+ENDDRAW
+ENDDEF
+#
 # Device_R_US
 #
 DEF Device_R_US R 0 0 N Y 1 F N
@@ -166,7 +182,7 @@ ENDDEF
 DEF arduino_pro_mini_Arduino_Pro_Mini A 0 40 Y Y 1 F N
 F0 "A" -200 1050 50 H V R CNN
 F1 "arduino_pro_mini_Arduino_Pro_Mini" -200 950 50 H V R CNN
-F2 "Module:Arduino_Pro_Mini" 150 -1050 50 H I L CNN
+F2 "arduino_pro_mini:arduino_pro_min" 150 -1050 50 H I L CNN
 F3 "" -200 1050 50 H I C CNN
 $FPLIST
  Arduino*Pro*Mini*
@@ -211,7 +227,7 @@ ENDDEF
 DEF logic_level_converter_LLC4 M 0 20 Y Y 1 F N
 F0 "M" -250 400 50 H V C CNN
 F1 "logic_level_converter_LLC4" 300 400 50 H V C CNN
-F2 "LLC4" 300 -400 50 H I C CNN
+F2 "logic_level_convert:LLC4" 300 -400 50 H I C CNN
 F3 "" 0 -100 50 H I C CNN
 DRAW
 S -300 350 300 -350 1 1 10 f
@@ -248,7 +264,7 @@ ENDDEF
 DEF teensy_32_Teensy_32 A 0 40 Y Y 1 F N
 F0 "A" -200 1050 50 H V R CNN
 F1 "teensy_32_Teensy_32" -200 950 50 H V R CNN
-F2 "Module:Teensy_32" 300 -1050 50 H I L CNN
+F2 "teensy_32:teensy_32" 300 -1050 50 H I L CNN
 F3 "" -200 1050 50 H I C CNN
 $FPLIST
  Arduino*Pro*Mini*

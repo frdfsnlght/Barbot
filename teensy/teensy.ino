@@ -29,8 +29,8 @@ IN THE SOFTWARE.
 #include <StepControl.h>
 
 constexpr int PIN_LED                   = LED_BUILTIN;
-constexpr int PIN_ENABLE                = 19;
-constexpr int PIN_DIR                   = 20;
+constexpr int PIN_ENABLE                = 11;
+constexpr int PIN_DIR                   = 10;
 constexpr int SERIAL1_PIN_RX            = 0;
 constexpr int SERIAL1_PIN_TX            = 1;
 
@@ -64,27 +64,27 @@ typedef struct {
 inputBuffer_t inputBuffers[INPUT_BUFFERS];
 int ch;
 
-Stepper pump0(2, PIN_DIR);
-Stepper pump1(3, PIN_DIR);
-Stepper pump2(4, PIN_DIR);
-Stepper pump3(5, PIN_DIR);
-Stepper pump4(6, PIN_DIR);
-Stepper pump5(7, PIN_DIR);
-Stepper pump6(8, PIN_DIR);
-Stepper pump7(9, PIN_DIR);
-Stepper pump8(10, PIN_DIR);
-Stepper pump9(11, PIN_DIR);
-Stepper pumpA(12, PIN_DIR);
-Stepper pumpB(14, PIN_DIR);
-Stepper pumpC(15, PIN_DIR);
-Stepper pumpD(16, PIN_DIR);
-Stepper pumpE(17, PIN_DIR);
-Stepper pumpF(18, PIN_DIR);
+Stepper pump0(23, PIN_DIR);
+Stepper pump1(22, PIN_DIR);
+Stepper pump2(21, PIN_DIR);
+Stepper pump3(20, PIN_DIR);
+Stepper pump4(19, PIN_DIR);
+Stepper pump5(18, PIN_DIR);
+Stepper pump6(17, PIN_DIR);
+Stepper pump7(16, PIN_DIR);
+Stepper pump8(9, PIN_DIR);
+Stepper pump9(8, PIN_DIR);
+Stepper pump10(7, PIN_DIR);
+Stepper pump11(6, PIN_DIR);
+Stepper pump12(5, PIN_DIR);
+Stepper pump13(4, PIN_DIR);
+Stepper pump14(3, PIN_DIR);
+Stepper pump15(2, PIN_DIR);
 
 Stepper* allPumps[] = {&pump0, &pump1, &pump2, &pump3, &pump4, &pump5, &pump6, &pump7,
-                       &pump8, &pump9, &pumpA, &pumpB, &pumpC, &pumpD, &pumpE, &pumpF};
+                       &pump8, &pump9, &pump10, &pump11, &pump12, &pump13, &pump14, &pump15};
 Stepper* pumpsBank0[] = {&pump0, &pump1, &pump2, &pump3, &pump4, &pump5, &pump6, &pump7};
-Stepper* pumpsBank1[] = {&pump8, &pump9, &pumpA, &pumpB, &pumpC, &pumpD, &pumpE, &pumpF};
+Stepper* pumpsBank1[] = {&pump8, &pump9, &pump10, &pump11, &pump12, &pump13, &pump14, &pump15};
 
 StepControl<> pumpCtrl0;
 StepControl<> pumpCtrl1;
