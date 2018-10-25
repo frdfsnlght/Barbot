@@ -43,11 +43,20 @@ IN THE SOFTWARE.
 constexpr int PIN_SERIAL_RX             = 0;
 constexpr int PIN_SERIAL_TX             = 1;
 
-constexpr int PIN_BUTTON                = 2;
+
+constexpr int PIN_LIGHTS                = 2;
 constexpr int PIN_SENSOR                = 3;
-constexpr int PIN_RELAY1                = 4;
-constexpr int PIN_RELAY2                = 5;
-constexpr int PIN_LIGHTS                = 6;
+constexpr int PIN_BUTTON                = 4;
+constexpr int PIN_RELAY1                = 5;
+constexpr int PIN_RELAY2                = 6;
+
+//constexpr int PIN_BUTTON                = 2;
+//constexpr int PIN_SENSOR                = 3;
+//constexpr int PIN_RELAY1                = 4;
+//constexpr int PIN_RELAY2                = 5;
+//constexpr int PIN_LIGHTS                = 6;
+
+
 constexpr int PIN_LED                   = 13;
 
 constexpr int NUM_PIXELS                = 60;
