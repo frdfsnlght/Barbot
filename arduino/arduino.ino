@@ -705,7 +705,7 @@ void sendMessage(const __FlashStringHelper *msg) {
 
 void sendSensorData() {
     send(F("*S"));
-    sendInt(proximityData);
+    sendInt(!proximityData);
     sendChar('\n');
 }
 
@@ -798,7 +798,7 @@ uint8_t playLightPattern(char* str) {
     byte patNum = (byte)readUInt(&str);
     readDelim(&str);
     
-//    send("segments: "); sendInt(segments); sendChar('\n');
+//    send("#segments: "); sendInt(segments); sendChar('\n');
     
     color_t colors[4];
     unsigned long interval1 = 0, interval2 = 0;
@@ -842,12 +842,12 @@ uint8_t playLightPattern(char* str) {
             mode = (uint8_t)readUInt(&str);
             
 /*
-            send("numColors: "); sendInt(steps); sendChar('\n');
+            send("#numColors: "); sendInt(steps); sendChar('\n');
             for (int i = 0; i < steps; i++) {
-                send("color "); sendInt(i); send(": "); sendLUInt(colors[i]); sendChar('\n');
+                send("#color "); sendInt(i); send(": "); sendLUInt(colors[i]); sendChar('\n');
             }
-            send("interval: "); sendLUInt(interval1); sendChar('\n');
-            send("mode: "); sendInt(mode); sendChar('\n');
+            send("#interval: "); sendLUInt(interval1); sendChar('\n');
+            send("#mode: "); sendInt(mode); sendChar('\n');
 */
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
