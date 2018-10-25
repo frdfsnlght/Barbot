@@ -93,10 +93,13 @@ def _socket_connect():
     emit('pumpSetup', core.pumpSetup)
     emit('glassReady', core.glassReady)
     emit('parentalLock', True if core.getParentalCode() else False)
-    emit('dispenseState', {'state': core.dispenseState, 'order': core.dispenseDrinkOrder})
+    dispenseDrinkOrder = core.dispenseDrinkOrder
+    if dispenseDrinkOrder:
+        dispenseDrinkOrder = dispenseDrinkOrder.toDict(drink = True, glass = True)
+    emit('dispenseState', {'state': core.dispenseState, 'order': dispenseDrinkOrder})
     emit('wifiState', wifi.state)
     bus.emit('socket/connect', request)
-    if not _consoleSessionId and request.remote_addr == '127.0.0.1':
+    if request.remote_addr == '127.0.0.1':
         _consoleSessionId = request.sid
         emit('volume', audio.getVolume())
         bus.emit('socket/consoleConnect')
@@ -455,7 +458,7 @@ def _bus_playFile(file, console, sessionId, broadcast):
         if sessionId:
             _logger.debug('Play {} on client {}'.format(file, sessionId))
             socket.emit('playAudio', file, room = sessionId)
-        if console and _consoleSessionId:
+        elif console and _consoleSessionId:
             _logger.debug('Play {} on console'.format(file))
             socket.emit('playAudio', file, room = _consoleSessionId)
 

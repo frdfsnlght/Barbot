@@ -4,6 +4,14 @@
     
     <loading v-if="loading"></loading>
     
+    <template v-else-if="!items.length">
+      <v-card flat>
+        <v-card-text>
+          <p class="text-xs-center">No drinks are currently available.</p>
+        </v-card-text>
+      </v-card>
+    </template>
+    
     <template v-else>
     
       <v-list two-line>
@@ -68,6 +76,9 @@
         </v-list>
       </v-menu>
       
+    </template>
+    
+    <template v-if="!loading">
       <v-btn
         fab
         fixed
@@ -77,98 +88,97 @@
       >
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
-
-      <v-dialog v-model="dialog" persistent scrollable max-width="480px">
-        <v-card>
-          <v-card-title>
-            <span
-              v-if="edit"
-              class="headline"
-            >Edit Drink</span>
-            <span
-              v-else
-              class="headline"
-            >Add Drink</span>
-          </v-card-title>
-          
-          <v-card-text>
-            <v-form ref="form" v-model="valid" lazy-validation>
-              <v-container grid-list-md>
-                <v-layout wrap>
-                
-                  <v-flex xs12>
-                    <v-text-field
-                      label="Primary name"
-                      v-model="item.primaryName"
-                      :rules="[v => !!v || 'Primary name is required']"
-                      required
-                      autofocus
-                    ></v-text-field>
-                  </v-flex>
-                  
-                  <v-flex xs12>
-                    <v-text-field
-                      label="Secondary name"
-                      v-model="item.secondaryName"
-                      hint="This is not required but can help distinguish similar drinks"
-                    ></v-text-field>
-                  </v-flex>
-                  
-                  <v-flex xs12>
-                    <v-checkbox
-                      label="Is this drink a favorite?"
-                      v-model="item.isFavorite"
-                      required
-                    ></v-checkbox>
-                  </v-flex>
-                  
-                  <v-flex xs12>
-                    <v-select
-                      :items="glasses"
-                      item-text="name"
-                      item-value="id"
-                      label="Glass"
-                      v-model="item.glassId"
-                      :rules="[v => !!v || 'Glass is required']"
-                      required
-                    ></v-select>
-                  </v-flex>
-
-                  <v-flex xs12>
-                    <drink-ingredients
-                      title="Ingredients"
-                      v-model="item.ingredients"></drink-ingredients>
-                  </v-flex>
-                  
-                  <v-flex xs12>
-                    <v-textarea
-                      label="Instructions"
-                      auto-grow
-                      v-model="item.instructions"
-                    ></v-textarea>
-                  </v-flex>
-      
-                </v-layout>
-              </v-container>
-            </v-form>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              flat
-              @click="closeDialog()">close</v-btn>
-            <v-btn
-              :disabled="!valid"
-              flat
-              @click="saveItem()">save</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <confirm ref="confirm"></confirm>
-      
     </template>
     
+    <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+      <v-card>
+        <v-card-title>
+          <span
+            v-if="edit"
+            class="headline"
+          >Edit Drink</span>
+          <span
+            v-else
+            class="headline"
+          >Add Drink</span>
+        </v-card-title>
+        
+        <v-card-text>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-container grid-list-md>
+              <v-layout wrap>
+              
+                <v-flex xs12>
+                  <v-text-field
+                    label="Primary name"
+                    v-model="item.primaryName"
+                    :rules="[v => !!v || 'Primary name is required']"
+                    required
+                    autofocus
+                  ></v-text-field>
+                </v-flex>
+                
+                <v-flex xs12>
+                  <v-text-field
+                    label="Secondary name"
+                    v-model="item.secondaryName"
+                    hint="This is not required but can help distinguish similar drinks"
+                  ></v-text-field>
+                </v-flex>
+                
+                <v-flex xs12>
+                  <v-checkbox
+                    label="Is this drink a favorite?"
+                    v-model="item.isFavorite"
+                    required
+                  ></v-checkbox>
+                </v-flex>
+                
+                <v-flex xs12>
+                  <v-select
+                    :items="glasses"
+                    item-text="name"
+                    item-value="id"
+                    label="Glass"
+                    v-model="item.glassId"
+                    :rules="[v => !!v || 'Glass is required']"
+                    required
+                  ></v-select>
+                </v-flex>
+
+                <v-flex xs12>
+                  <drink-ingredients
+                    title="Ingredients"
+                    v-model="item.ingredients"></drink-ingredients>
+                </v-flex>
+                
+                <v-flex xs12>
+                  <v-textarea
+                    label="Instructions"
+                    auto-grow
+                    v-model="item.instructions"
+                  ></v-textarea>
+                </v-flex>
+    
+              </v-layout>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            flat
+            @click="closeDialog()">close</v-btn>
+          <v-btn
+            :disabled="!valid"
+            flat
+            @click="saveItem()">save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <confirm ref="confirm"></confirm>
+      
   </v-card>
         
 </template>

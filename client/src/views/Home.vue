@@ -39,14 +39,15 @@ export default {
   },
   
   computed: {
-    ...mapState({
-      isConsole: state => state.isConsole,
-    })
+    ...mapState([
+        'isConsole',
+        'pumpSetup',
+    ])
   },
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      if (t.isConsole) {
+      if (t.isConsole && t.pumpSetup) {
         t.$socket.emit('stopPumpSetup', (res) => {
           if (res.error) {
             t.$store.commit('setError', res.error)

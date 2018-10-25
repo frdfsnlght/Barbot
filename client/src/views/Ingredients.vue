@@ -4,6 +4,14 @@
     
     <loading v-if="loading"></loading>
     
+    <template v-else-if="!items.length">
+      <v-card flat>
+        <v-card-text>
+          <p class="text-xs-center">No ingredients are currently available.</p>
+        </v-card-text>
+      </v-card>
+    </template>
+    
     <template v-else>
     
       <v-list>
@@ -66,6 +74,9 @@
         </v-list>
       </v-menu>
       
+    </template>
+    
+    <template v-if="!loading">
       <v-btn
         fab
         fixed
@@ -75,63 +86,62 @@
       >
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
-
-      <v-dialog v-model="dialog" persistent scrollable max-width="480px">
-        <v-card>
-          <v-card-title>
-            <span
-              v-if="edit"
-              class="headline"
-            >Edit Ingredient</span>
-            <span
-              v-else
-              class="headline"
-            >Add Ingredient</span>
-          </v-card-title>
-          <v-card-text>
-            <v-form ref="form" v-model="valid" lazy-validation>
-              <v-container grid-list-md>
-                <v-layout wrap>
-                
-                  <v-flex xs12>
-                    <v-text-field
-                      label="Name"
-                      v-model="item.name"
-                      :rules="[v => !!v || 'Name is required']"
-                      required
-                      autofocus
-                    ></v-text-field>
-                  </v-flex>
-                  
-                  <v-flex xs12>
-                    <v-checkbox
-                      label="Is this ingredient alcoholic?"
-                      v-model="item.isAlcoholic"
-                      required
-                    ></v-checkbox>
-                  </v-flex>
-                  
-                </v-layout>
-              </v-container>
-            </v-form>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              flat
-              @click="closeDialog()">close</v-btn>
-            <v-btn
-              :disabled="!valid"
-              flat
-              @click="saveItem()">save</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <confirm ref="confirm"></confirm>
-      
     </template>
     
+    <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+      <v-card>
+        <v-card-title>
+          <span
+            v-if="edit"
+            class="headline"
+          >Edit Ingredient</span>
+          <span
+            v-else
+            class="headline"
+          >Add Ingredient</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-container grid-list-md>
+              <v-layout wrap>
+              
+                <v-flex xs12>
+                  <v-text-field
+                    label="Name"
+                    v-model="item.name"
+                    :rules="[v => !!v || 'Name is required']"
+                    required
+                    autofocus
+                  ></v-text-field>
+                </v-flex>
+                
+                <v-flex xs12>
+                  <v-checkbox
+                    label="Is this ingredient alcoholic?"
+                    v-model="item.isAlcoholic"
+                    required
+                  ></v-checkbox>
+                </v-flex>
+                
+              </v-layout>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            flat
+            @click="closeDialog()">close</v-btn>
+          <v-btn
+            :disabled="!valid"
+            flat
+            @click="saveItem()">save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <confirm ref="confirm"></confirm>
+      
   </v-card>
         
 </template>

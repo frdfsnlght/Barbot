@@ -11,7 +11,7 @@ _logger = logging.getLogger('Models.Ingredient')
 
 class Ingredient(BarbotModel):
     name = CharField(unique = True)
-    isAlcoholic = BooleanField(default = True)
+    isAlcoholic = BooleanField(default = False)
     timesDispensed = IntegerField(default = 0)
     amountDispensed = FloatField(default = 0)
     

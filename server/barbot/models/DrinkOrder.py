@@ -85,10 +85,6 @@ class DrinkOrder(BarbotModel):
         if self.isBeingDispensed():
             raise ModelError('This order is currently being dispensed!')
             
-        for o in self.drinkOrders:
-            if o.isWaiting():
-                raise ModelError('This drink has a pending order!')
-    
         super().delete_instance(*args, **kwargs)
         bus.emit('model/drinkOrder/deleted', self)
             

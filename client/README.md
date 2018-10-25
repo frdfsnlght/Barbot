@@ -22,7 +22,6 @@ npm run lint
 ```
 
 ## TODO
-
 * About page
     * attribution for icons?
     * git commit hash/date

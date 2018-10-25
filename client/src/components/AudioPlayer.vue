@@ -9,6 +9,14 @@ import { mapState } from 'vuex'
 export default {
   name: 'AudioPlayer',
   
+  data() {
+    return {
+      player: false,
+      playing: false,
+      queue: [],
+    }
+  },
+  
   computed: {
     ...mapState([
       'volume',
@@ -16,16 +24,22 @@ export default {
   },
       
   methods: {
-    play(file) {
-      let audio = new Audio(this.$socket.io.uri + '/audio/' + file)
-      audio.volume = this.volume
-      audio.play()
+  
+    playNext() {
+      this.playing = false
+      let file = this.queue.shift()
+      if (file) {
+        this.player.src = this.$socket.io.uri + '/audio/' + file
+        this.player.volume = this.volume
+        this.player.play()
+        this.playing = true
+      }
     },
     
     setVolume(volume, play = true) {
       this.$socket.emit('setVolume', volume, (res) => {
         if (res.error) {
-          this.$store.commit('setError', res.error)          
+          this.$store.commit('setError', res.error)
         } else if (play) {
           let a = this.$refs.volumeEl
           if (! a.ended) {
@@ -40,8 +54,16 @@ export default {
   },
   
   sockets: {
+  
     playAudio(file) {
-      this.play(file)
+      this.queue.push(file)
+      if (! this.player) {
+        this.player = new Audio()
+        this.player.onended = this.playNext.bind(this)
+        this.playNext()
+      } else if (! this.playing) {
+        this.playNext()
+      }
     },
   },
   

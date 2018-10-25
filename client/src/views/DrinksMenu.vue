@@ -4,6 +4,14 @@
     
     <loading v-if="loading"></loading>
     
+    <template v-else-if="!items.length">
+      <v-card flat>
+        <v-card-text>
+          <p class="text-xs-center">No menu items are currently available. Try loading some ingredients or adding more recipes.</p>
+        </v-card-text>
+      </v-card>
+    </template>
+    
     <template v-else>
     
       <v-list two-line>

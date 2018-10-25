@@ -56,19 +56,21 @@
             </v-list-tile-action>
           </v-list-tile>
 
-          <v-list-tile @click="checkRestart()">
-            <v-list-tile-title>Restart</v-list-tile-title>
-            <v-list-tile-action>
-              <v-icon>mdi-restart</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
+          <template v-if="isConsole">
+            <v-list-tile @click="checkRestart()">
+              <v-list-tile-title>Restart</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-restart</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
 
-          <v-list-tile @click="checkShutdown()">
-            <v-list-tile-title>Shutdown</v-list-tile-title>
-            <v-list-tile-action>
-              <v-icon>mdi-power</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
+            <v-list-tile @click="checkShutdown()">
+              <v-list-tile-title>Shutdown</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-power</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
+          </template>
         </v-list-group>
         
       </v-list>
@@ -95,44 +97,49 @@
       <v-toolbar-title>{{title}}</v-toolbar-title>
       <v-spacer></v-spacer>
 
-      <template v-if="isConsole && wifiState">
-        <v-icon v-if="!wifiState.ssid">mdi-wifi-off</v-icon>
-        <v-icon v-else-if="wifiState.bars === 0">mdi-wifi-strength-outline</v-icon>
-        <v-icon v-else-if="wifiState.bars === 1">mdi-wifi-strength-1</v-icon>
-        <v-icon v-else-if="wifiState.bars === 2">mdi-wifi-strength-2</v-icon>
-        <v-icon v-else-if="wifiState.bars === 3">mdi-wifi-strength-3</v-icon>
-        <v-icon v-else-if="wifiState.bars === 4">mdi-wifi-strength-4</v-icon>
-      </template>
+      <template v-if="isConsole">
+      
+        <v-icon v-show="glassReady">mdi-glass-cocktail</v-icon>
 
-      <v-menu
-        v-if="isConsole"
-        bottom left
-        offset-y
-        :close-on-content-click="false"
-      >
-        <v-btn
-          slot="activator"
-          dark
-          icon
+        <template v-if="wifiState">
+          <v-icon v-if="!wifiState.ssid">mdi-wifi-off</v-icon>
+          <v-icon v-else-if="wifiState.bars === 0">mdi-wifi-strength-outline</v-icon>
+          <v-icon v-else-if="wifiState.bars === 1">mdi-wifi-strength-1</v-icon>
+          <v-icon v-else-if="wifiState.bars === 2">mdi-wifi-strength-2</v-icon>
+          <v-icon v-else-if="wifiState.bars === 3">mdi-wifi-strength-3</v-icon>
+          <v-icon v-else-if="wifiState.bars === 4">mdi-wifi-strength-4</v-icon>
+        </template>
+
+        <v-menu
+          bottom left
+          offset-y
+          :close-on-content-click="false"
         >
-          <v-icon v-if="volume < 0.33">mdi-volume-low</v-icon>
-          <v-icon v-else-if="volume >= 0.33 && volume < 0.66">mdi-volume-medium</v-icon>
-          <v-icon v-else>mdi-volume-high</v-icon>
-        </v-btn>
-        <v-list>
-          <v-list-tile>
-            <v-slider
-              v-model="volume"
-              min="0"
-              max="1"
-              step="0.05"
-              prepend-icon="mdi-minus"              
-              append-icon="mdi-plus"
-              @end="changeVolume"
-            ></v-slider>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+          <v-btn
+            slot="activator"
+            dark
+            icon
+          >
+            <v-icon v-if="volume < 0.33">mdi-volume-low</v-icon>
+            <v-icon v-else-if="volume >= 0.33 && volume < 0.66">mdi-volume-medium</v-icon>
+            <v-icon v-else>mdi-volume-high</v-icon>
+          </v-btn>
+          <v-list>
+            <v-list-tile>
+              <v-slider
+                v-model="volume"
+                min="0"
+                max="1"
+                step="0.05"
+                prepend-icon="mdi-minus"              
+                append-icon="mdi-plus"
+                @end="changeVolume"
+              ></v-slider>
+            </v-list-tile>
+          </v-list>
+        </v-menu>
+        
+      </template>
           
       <v-btn v-if="user.name" icon @click="logout()">
         <v-icon>mdi-logout</v-icon>
@@ -270,6 +277,7 @@ export default {
       'snackbarColor',
       'snackbarText',
       'user',
+      'glassReady',
     ]),
     ...mapState({
       wifiState: state => state.wifi.state

@@ -1,7 +1,7 @@
 
 import os, os.path, configparser, logging, random, subprocess, hashlib, re
 from threading import Thread, Event
-from queue import LifoQueue, Empty
+from queue import Queue, Empty
 
 from .bus import bus
 from .config import config
@@ -21,7 +21,7 @@ _phrasesFile = os.path.join(config.getpath('audio', 'audioDir'), _phrasesFileNam
 _clipsFile = os.path.join(config.getpath('audio', 'audioDir'), _clipsFileName)
 
 _lastModifiedTime = None
-_playQueue = LifoQueue()
+_playQueue = Queue()
 _ttsJobs = []
 _clips = {}
 
@@ -59,7 +59,7 @@ def _bus_configLoaded():
         
 @bus.on('socket/consoleConnect')
 def _bus_consoleConnect():
-    bus.emit('audio/play', 'startup')
+    bus.emit('audio/play', 'startup', console = True)
 
 def _threadLoop():
     _logger.info('Audio thread started')
@@ -76,7 +76,9 @@ def _threadLoop():
     _logger.info('Audio thread stopped')
 
 @bus.on('audio/play')
-def _on_audioPlay(clip, console = True, sessionId = False, broadcast = False):
+def _on_audioPlay(clip, console = False, sessionId = False, broadcast = False):
+    if not console and not sessionId and not broadcast:
+        raise ValueError('No destination for audio!')
     _playQueue.put_nowait({
         'clip': clip,
         'console': console,
@@ -149,9 +151,11 @@ def _load():
     _logger.info('Audio clips loaded')
         
 def _phraseToFileName(phrase):
-    langCode = config.get('audio', 'googleTTSLanguageCode')
-    voiceName = config.get('audio', 'googleTTSVoiceName')
-    return _ttsFileFormat.format(hashlib.md5((langCode + voiceName + phrase).encode()).hexdigest())
+    langCode = config.get('googleTTS', 'languageCode')
+    name = config.get('googleTTS', 'name')
+    pitch = config.get('googleTTS', 'pitch')
+    speakingRate = config.get('googleTTS', 'speakingRate')
+    return _ttsFileFormat.format(hashlib.md5((langCode + name + pitch + speakingRate + phrase).encode()).hexdigest())
 
 def _audioFileExists(fileName):
     return os.path.isfile(os.path.join(config.getpath('audio', 'audioDir'), fileName))
@@ -191,11 +195,12 @@ def _checkFiles():
         _load()
 
 def _playClip(item):
-    if not item['clip'] in _clips:
-        _logger.debug('No configured clips for {}'.format(item['clip']))
-        return
     clipName = item['clip']
     del(item['clip'])
+    if not clipName in _clips:
+        _logger.debug('No configured clips for {}'.format(clipName))
+        return
+    _logger.debug('Playing clip {}'.format(clipName))
     clip = _clips[clipName]
     r = random.random()
     for file in clip:
@@ -237,15 +242,17 @@ def _processTTSJob(job):
 def tts(phrase, fileName):    
     try:
         from google.cloud import texttospeech
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config.getpath('audio', 'googleApplicationCredentials')
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config.getpath('googleTTS', 'googleApplicationCredentials')
         client = texttospeech.TextToSpeechClient()
         input = texttospeech.types.SynthesisInput(text = phrase)
         voice = texttospeech.types.VoiceSelectionParams(
-            language_code = config.get('audio', 'googleTTSLanguageCode'),
-            name = config.get('audio', 'googleTTSVoiceName'),
+            language_code = config.get('googleTTS', 'languageCode'),
+            name = config.get('googleTTS', 'name'),
         )
         audio_config = texttospeech.types.AudioConfig(
-            audio_encoding = texttospeech.enums.AudioEncoding.MP3
+            audio_encoding = texttospeech.enums.AudioEncoding.MP3,
+            pitch = config.getfloat('googleTTS', 'pitch'),
+            speaking_rate = config.getfloat('googleTTS', 'speakingRate'),
         )
         response = client.synthesize_speech(input, voice, audio_config)
         with open(fileName, 'wb') as file:

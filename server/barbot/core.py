@@ -68,6 +68,7 @@ def _bus_serialEvent(e):
             
 @bus.on('socket/consoleConnect')
 def _bus_consoleConnect():
+    _resetTimers()
     try:
         serial.write('RO', timeout = 1)  # power on, turn off lights
     except serial.SerialError as e:
@@ -104,7 +105,7 @@ def restart():
         _logger.error('Error trying to restart: {}'.format(out.stdout))
         return
     bus.emit('lights/play', 'restart')
-    bus.emit('audio/play', 'restart')
+    bus.emit('audio/play', 'restart', console = True)
         
 def shutdown():
     cmd = config.get('server', 'shutdownCommand').split(' ')
@@ -120,7 +121,7 @@ def shutdown():
     except SerialError as e:
         _logger.error(e)
     bus.emit('lights/play', 'shutdown')
-    bus.emit('audio/play', 'shutdown')
+    bus.emit('audio/play', 'shutdown', console = True)
     
 def toggleDispenserHold():
     global dispenserHold
@@ -203,9 +204,7 @@ def _threadLoop():
             o = DrinkOrder.getFirstPending()
             if o:
                 _dispenseDrinkOrder(o)
-                t = time.time()
-                _lastDrinkOrderCheckTime = t
-                _lastIdleAudioCheckTime = t
+                _resetTimers()
                 continue
 
         _checkIdle()
@@ -213,12 +212,18 @@ def _threadLoop():
             
     _logger.info('Core thread stopped')
 
+def _resetTimers():
+    global _lastDrinkOrderCheckTime, _lastIdleAudioCheckTime
+    t = time.time()
+    _lastDrinkOrderCheckTime = t
+    _lastIdleAudioCheckTime = t
+   
 def _checkIdle():
     global _lastIdleAudioCheckTime
     if (time.time() - _lastIdleAudioCheckTime) > config.getfloat('core', 'idleAudioInterval'):
         _lastIdleAudioCheckTime = time.time()
         if random.random() <= config.getfloat('core', 'idleAudioChance'):
-            bus.emit('audio/play', 'idle')
+            bus.emit('audio/play', 'idle', console = True)
     
 def _dispenseDrinkOrder(o):
     global dispenseState, dispenseDrinkOrder, dispenseControl
@@ -236,7 +241,7 @@ def _dispenseDrinkOrder(o):
     dispenseControl = None
     bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
     bus.emit('lights/play', 'waitForDispense')
-    bus.emit('audio/play', 'waitForDispense')
+    bus.emit('audio/play', 'waitForDispense', console = True)
     
     while True:
         _dispenseEvent.wait()
@@ -246,21 +251,21 @@ def _dispenseDrinkOrder(o):
         if dispenseControl == CTL_CANCEL:
             _logger.info('Cancelled dispensing {}'.format(dispenseDrinkOrder.desc()))
             dispenseDrinkOrder.placeOnHold()
-            bus.emit('lights/play', None)
-            bus.emit('audio/play', 'cancelledDispense')
+            bus.emit('audio/play', 'cancelledDispense', console = True)
             bus.emit('audio/play', 'drinkOrderOnHold', sessionId = dispenseDrinkOrder.sessionId)
             dispenseDrinkOrder = None
             dispenseState = None
+            _resetTimers()
             bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
-
+            bus.emit('lights/play', None)
             return
         
         if dispenseControl == CTL_START and glassReady:
             dispenseState = ST_DISPENSE
-            bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
-            bus.emit('lights/play', 'startDispense')
-            bus.emit('audio/play', 'startDispense')
             _logger.info('Starting to dispense {}'.format(dispenseDrinkOrder.desc()))
+            bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
+            bus.emit('audio/play', 'startDispense', console = True)
+            bus.emit('lights/play', 'startDispense')
             break
     
     drink = dispenseDrinkOrder.drink
@@ -299,23 +304,25 @@ def _dispenseDrinkOrder(o):
                     _logger.warning('Glass removed while dispensing {}'.format(dispenseDrinkOrder.desc()))
                     for pump in pumps:
                         pump.stop()
-                    bus.emit('lights/play', 'glassRemovedDispense')
-                    bus.emit('audio/play', 'glassRemovedDispense')
+                    bus.emit('audio/play', 'glassRemovedDispense', console = True)
                     bus.emit('audio/play', 'drinkOrderOnHold', sessionId = dispenseDrinkOrder.sessionId)
                     dispenseDrinkOrder.placeOnHold()
                     dispenseDrinkOrder = None
                     dispenseState = ST_GLASS_CLEAR
+                    bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
+                    bus.emit('lights/play', 'glassRemovedDispense')
 
                 if dispenseControl == CTL_CANCEL:
                     _logger.info('Cancelled dispensing {}'.format(dispenseDrinkOrder.desc()))
                     for pump in pumps:
                         pump.stop()
-                    bus.emit('lights/play', None)
-                    bus.emit('audio/play', 'cancelledDispense')
+                    bus.emit('audio/play', 'cancelledDispense', console = True)
                     bus.emit('audio/play', 'drinkOrderOnHold', sessionId = dispenseDrinkOrder.sessionId)
                     dispenseDrinkOrder.placeOnHold()
                     dispenseDrinkOrder = None
                     dispenseState = ST_CANCEL_CLEAR
+                    bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
+                    bus.emit('lights/play', None)
 
         if dispenseState != ST_DISPENSE:
             break
@@ -333,12 +340,12 @@ def _dispenseDrinkOrder(o):
         dispenseDrinkOrder.completedDate = datetime.datetime.now()
         dispenseDrinkOrder.save()
         dispenseState = ST_PICKUP
+        bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
+        bus.emit('audio/play', 'endDispense', console = True)
+        bus.emit('audio/play', 'drinkOrderReady', sessionId = dispenseDrinkOrder.sessionId)
         bus.emit('lights/play', 'endDispense')
-        bus.emit('audio/play', 'endDispense')
-        bus.emit('audio/play', 'endDispense', sessionId = dispenseDrinkOrder.sessionId)
         
     _dispenseEvent.clear()
-    bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
 
     while dispenseState is not None:
         if _dispenseEvent.wait(0.5):
@@ -352,7 +359,7 @@ def _dispenseDrinkOrder(o):
                     
     bus.emit('core/dispenseState', dispenseState, dispenseDrinkOrder)
     bus.emit('lights/play', None)
-         
+    _resetTimers()
     _rebuildMenu()
     
     DrinkOrder.deleteOldCompleted(config.getint('core', 'maxDrinkOrderAge'))
@@ -365,7 +372,7 @@ def _bus_drinkSaved(drink):
 @bus.on('model/drink/deleted')
 def _bus_drinkDeleted(drink):
     _rebuildMenu()
-    
+
 @db.atomic()
 def _rebuildMenu():
     global _suppressMenuRebuild

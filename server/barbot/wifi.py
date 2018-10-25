@@ -128,13 +128,13 @@ def _updateState():
 def _getState():
     #-------------------------------------
     # TODO: remove test code someday
-    return {
-        'ssid': 'Bennedum',
-        'quality': '40/70',
-        'signal': -50,
-        'bars': 3,
-        'connected': True
-    }
+#    return {
+#        'ssid': 'Bennedum',
+#        'quality': '40/70',
+#        'signal': -50,
+#        'bars': 3,
+#        'connected': True
+#    }
     # end test code
     #-------------------------------------
 
@@ -170,26 +170,26 @@ def _scanNetworks():
     
     #-------------------------------------
     # TODO: remove test code someday
-    network = {
-        'ssid': 'Fake scanned network',
-        'quality': '40/70',
-        'signal': -50,
-        'bars': 2,
-        'auth': ['WPA2 PSK'],
-        'scanned': True,
-        'secured': True,
-    }
-    networks.append(network)
-    network = {
-        'ssid': 'Bennedum',
-        'quality': '40/70',
-        'signal': -50,
-        'bars': 3,
-        'auth': ['WPA2 PSK'],
-        'scanned': True,
-        'secured': True,
-    }
-    networks.append(network)
+#    network = {
+#        'ssid': 'Fake scanned network',
+#        'quality': '40/70',
+#        'signal': -50,
+#        'bars': 2,
+#        'auth': ['WPA2 PSK'],
+#        'scanned': True,
+#        'secured': True,
+#    }
+#    networks.append(network)
+#    network = {
+#        'ssid': 'Bennedum',
+#        'quality': '40/70',
+#        'signal': -50,
+#        'bars': 3,
+#        'auth': ['WPA2 PSK'],
+#        'scanned': True,
+#        'secured': True,
+#    }
+#    networks.append(network)
     # end test code
     #-------------------------------------
 
