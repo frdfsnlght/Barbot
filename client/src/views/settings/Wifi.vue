@@ -63,7 +63,14 @@
       
     </v-list>
     
-    <v-dialog v-model="connectDialog" persistent scrollable max-width="400px" @keydown.esc="connectDialog = false">
+    <v-dialog
+      v-model="connectNewDialog"
+      persistent
+      scrollable
+      max-width="400px"
+      @keydown.esc="connectNewDialog = false"
+      @keydown.enter="connectToNewNetwork()"
+    >
       <v-card>
         <v-card-title>
           <span v-if="!network.scanned" class="headline">Add Network</span>
@@ -115,31 +122,68 @@
           <v-spacer></v-spacer>
           <v-btn
             flat
-            @click="connectDialog = false">cancel</v-btn>
-          <v-btn
-            v-show="network.saved"
-            flat
-            @click="forgetNetwork()">forget</v-btn>
+            @click="connectNewDialog = false">cancel</v-btn>
           <v-btn
             :disabled="!valid"
             flat
-            @click="connectToNetwork()">{{network.scanned ? 'connect' : 'save'}}</v-btn>
+            @click="connectToNewNetwork()">connect</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="disconnectDialog" max-width="400px" @keydown.esc="disconnectDialog = false">
+    <v-dialog
+      v-model="connectOrForgetDialog"
+      persistent
+      scrollable
+      max-width="400px"
+      @keydown.esc="connectOrForgetDialog = false"
+      @keydown.enter="connectToSavedNetwork()"
+    >
       <v-card>
         <v-toolbar dark color="primary" dense flat>
           <v-toolbar-title class="white--text">{{network.ssid}}</v-toolbar-title>
         </v-toolbar>
-        <v-card-text>Disconnect from this network?</v-card-text>
-        <v-card-actions class="pt-0">
-          <v-spacer></v-spacer>
-          <v-btn flat @click="disconnectDialog = false">cancel</v-btn>
-          <v-btn flat @click="forgetNetwork()">forget</v-btn>
-          <v-btn flat @click="disconnectFromNetwork()">disconnect</v-btn>
-        </v-card-actions>
+        <v-card-text class="text-xs-center">
+          <v-btn
+            color="primary"
+            large
+            @click="connectToSavedNetwork()">connect</v-btn>
+          <v-btn
+            color="secondary"
+            large
+            @click="forgetNetwork()">forget</v-btn>
+          <v-btn
+            color="secondary"
+            large
+            @click="connectOrForgetDialog = false">cancel</v-btn>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="disconnectDialog"
+      max-width="400px"
+      @keydown.esc="disconnectDialog = false"
+      @keydown.enter="disconnectFromNetwork()"
+    >
+      <v-card>
+        <v-toolbar dark color="primary" dense flat>
+          <v-toolbar-title class="white--text">{{network.ssid}}</v-toolbar-title>
+        </v-toolbar>
+        <v-card-text class="text-xs-center">
+          <v-btn
+            color="primary"
+            large
+            @click="disconnectFromNetwork()">disconnect</v-btn>
+          <v-btn
+            color="secondary"
+            large
+            @click="forgetNetwork()">forget</v-btn>
+          <v-btn
+            color="secondary"
+            large
+            @click="disconnectDialog = false">cancel</v-btn>
+        </v-card-text>
       </v-card>
     </v-dialog>
 
@@ -170,7 +214,8 @@ export default {
         scanned: undefined,
       },
       showPassword: false,
-      connectDialog: false,
+      connectNewDialog: false,
+      connectOrForgetDialog: false,
       disconnectDialog: false,
     }
   },
@@ -215,13 +260,17 @@ export default {
       this.network.security = 'None'
       this.network.password = undefined
       this.network.scanned = false
-      this.connectDialog = true
+      this.connectNewDialog = true
     },
     
     selectNetwork(network) {
       if (network.connected) {
         this.network.ssid = network.ssid
         this.disconnectDialog = true
+      
+      } else if (network.saved) {
+        this.network.ssid = network.ssid
+        this.connectOrForgetDialog = true
         
       } else if (network.scanned) {
         this.$refs.connectForm.reset()
@@ -232,15 +281,11 @@ export default {
         
         if (network.secured) {
           this.network.security = 'not none'
-          this.connectDialog = true
+          this.connectNewDialog = true
         } else {
           this.network.security = 'None'
-          this.connectToNetwork()
+          this.connectToNewNetwork()
         }
-        
-      } else if (network.saved) {
-        this.network.ssid = network.ssid
-        this.forgetNetwork()
       }
     },
 
@@ -251,14 +296,14 @@ export default {
               this.$store.commit('setError', res.error)
           } else {
             this.refreshNetworks()
-            this.connectDialog = false
+            this.connectNewDialog = false
             this.disconnectDialog = false
           }
         })
       })
     },
     
-    connectToNetwork() {
+    connectToNewNetwork() {
       if (! this.$refs.connectForm.validate()) return
       let params = {
         ssid: this.network.ssid,
@@ -269,8 +314,22 @@ export default {
         if (res.error) {
             this.$store.commit('setError', res.error)
         } else {
-          this.connectDialog = false
-          this.refreshNetworks()
+          this.connectNewDialog = false
+          //this.refreshNetworks()
+        }
+      })
+    },
+    
+    connectToSavedNetwork() {
+      let params = {
+        ssid: this.network.ssid,
+      }
+      this.$socket.emit('connectToWifiNetwork', params, (res) => {
+        if (res.error) {
+            this.$store.commit('setError', res.error)
+        } else {
+          this.connectOrForgetDialog = false
+          //this.refreshNetworks()
         }
       })
     },
@@ -281,7 +340,7 @@ export default {
             this.$store.commit('setError', res.error)
         } else {
           this.disconnectDialog = false
-          this.refreshNetworks()
+          //this.refreshNetworks()
         }
       })
     },

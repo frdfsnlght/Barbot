@@ -22,12 +22,13 @@ npm run lint
 ```
 
 ## TODO
+* Keyboard enter on dialogs screws things up.
+* Need onscreen keyboard
+
 * About page
     * attribution for icons?
     * git commit hash/date
     * vue build date
     * copyright notice
     
-* test console/non-console behavior
-
 * change fonts to fonts-awesome svg?
