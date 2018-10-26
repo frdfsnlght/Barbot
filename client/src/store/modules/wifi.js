@@ -7,7 +7,6 @@ export default {
         state: false,
         networks: [],
         networksLoading: false,
-        networksLoaded: false,
     },
     
     getters: {
@@ -28,25 +27,18 @@ export default {
         
         networksLoading(state) {
             state.networksLoading = true
-            state.networksLoaded = false
-            console.log('loading networks...')
         },
         
         networksLoaded(state, networks) {
             state.networks = networks
             state.networksLoading = false
-            state.networksloaded = true
-            console.log('loaded ' + networks.length + ' networks')
-            console.dir(networks)
         },
         
         destroyNetworks(state) {
             state.networks = []
-            state.networksLoaded = false
-            console.log('destroyed networks')
         },
         
-        socket_wifiState(state, wifi) {
+        setWifiState(state, wifi) {
             state.state = wifi
         },
         
@@ -55,7 +47,6 @@ export default {
     actions: {
         
         loadNetworks({commit, state}) {
-            if (state.networksLoaded) return
             commit('networksLoading')
             Vue.prototype.$socket.emit('getWifiNetworks', (res) => {
                 if (res.error) {
@@ -65,6 +56,13 @@ export default {
                     commit('networksLoaded', res.networks)
                 }
             })
+        },
+
+        socket_wifiState({commit, dispatch, state}, wifi) {
+            if (state.networks && state.state && (state.state.ssid != wifi.ssid)) {
+                dispatch('loadNetworks')
+            }
+            commit('setWifiState', wifi)
         },
         
     }
