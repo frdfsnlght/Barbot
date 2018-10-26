@@ -20,18 +20,18 @@ logger = logging.getLogger('Server')
 
 from barbot.bus import bus
 import barbot.daemon as daemon
-from barbot.db import db, models, ModelError
-from barbot.app import app
-from barbot.socket import socket
-
 import barbot.serial
-import barbot.core
-import barbot.models
-from barbot.models.User import User
 import barbot.wifi
 import barbot.lights
 import barbot.audio
 
+from barbot.db import db, models, ModelError
+import barbot.models
+import barbot.core
+from barbot.models.User import User
+
+from barbot.app import app
+from barbot.socket import socket
 
 webThread = None
 exitEvent = Event()
@@ -73,6 +73,7 @@ def startServer():
     webThread.daemon = True
     webThread.start()
 
+    bus.emit('server/start1')
     bus.emit('server/start')
     
     logger.info('Server started')

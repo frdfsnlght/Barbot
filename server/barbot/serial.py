@@ -23,9 +23,17 @@ _responseLines = []
 class SerialError(Exception):
     pass
     
-@bus.on('server/start')
+@bus.on('server/start1')
 def _bus_serverStart():
-    global _thread
+    global _thread, _port
+    
+    try:
+        _port = serial.Serial(config.get('serial', 'port'), config.getint('serial', 'speed'), timeout = None)
+        _logger.info('Serial port {} opened at {}'.format(_port.name, _port.baudrate))
+    except IOError as e:
+        _logger.error(str(e))
+        _logger.info('Serial port {} could not be opened'.format(config.get('serial', 'port')))
+    
     _exitEvent.clear()
     _thread = Thread(target = _threadLoop, name = 'SerialThread')
     _thread.daemon = True
@@ -39,15 +47,13 @@ def _threadLoop():
     global _port
     _logger.info('Serial thread started')
     try:
-        _port = serial.Serial(config.get('serial', 'port'), config.getint('serial', 'speed'), timeout = None)
-        _logger.info('Serial port {} opened at {}'.format(_port.name, _port.baudrate))
         while not _exitEvent.is_set():
             _readPort()
     except IOError as e:
         _logger.error(str(e))
-        if _port:
-            _port.close()
-            _port = None
+    finally:
+        _port.close()
+        _port = None
     _logger.info('Serial thread stopped')
     
 def _readPort():

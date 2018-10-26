@@ -405,10 +405,10 @@ def _but_configReloaded():
     
 @bus.on('serial/event')
 def _bus_serialEvent(e):
-    _logger.debug('Got shutdown request')
     if _consoleSessionId:
         m = _shutdownEventPattern.match(e)
         if m:
+            _logger.debug('Got shutdown request')
             socket.emit('shutdownRequest', room = _consoleSessionId)
     
 #-------------------------------

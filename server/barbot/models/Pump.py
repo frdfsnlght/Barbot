@@ -281,7 +281,7 @@ class Pump(BarbotModel):
                 _logger.error('Pump error: {}'.format(str(e)))
         
     def stop(self):
-        _logger.info('Pump {} stop'.format(self.name(), amount))
+        _logger.info('Pump {} stop'.format(self.name()))
 
         with self.lock:
             try:
