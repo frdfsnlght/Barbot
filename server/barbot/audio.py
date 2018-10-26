@@ -78,7 +78,8 @@ def _threadLoop():
 @bus.on('audio/play')
 def _on_audioPlay(clip, console = False, sessionId = False, broadcast = False):
     if not console and not sessionId and not broadcast:
-        raise ValueError('No destination for audio!')
+        _logger.warning('No destination for audio!')
+        return
     _playQueue.put_nowait({
         'clip': clip,
         'console': console,
