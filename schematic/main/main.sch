@@ -50,34 +50,34 @@ $EndComp
 $Comp
 L Connector:Conn_01x02_Male J1
 U 1 1 5BCF83FD
-P 1150 2200
-F 0 "J1" H 1256 2378 50  0000 C CNN
-F 1 "Button" H 1256 2287 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 1150 2200 50  0001 C CNN
-F 3 "~" H 1150 2200 50  0001 C CNN
-	1    1150 2200
+P 1150 3050
+F 0 "J1" H 1256 3228 50  0000 C CNN
+F 1 "Button" H 1256 3137 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 1150 3050 50  0001 C CNN
+F 3 "~" H 1150 3050 50  0001 C CNN
+	1    1150 3050
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x03_Male J3
 U 1 1 5BCF8720
-P 1150 3150
-F 0 "J3" H 1256 3428 50  0000 C CNN
-F 1 "5V Relay" H 1256 3337 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1150 3150 50  0001 C CNN
-F 3 "~" H 1150 3150 50  0001 C CNN
-	1    1150 3150
+P 1150 3600
+F 0 "J3" H 1256 3878 50  0000 C CNN
+F 1 "5V Relay" H 1256 3787 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1150 3600 50  0001 C CNN
+F 3 "~" H 1150 3600 50  0001 C CNN
+	1    1150 3600
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x03_Male J4
 U 1 1 5BCF8793
-P 1150 3600
-F 0 "J4" H 1256 3878 50  0000 C CNN
-F 1 "24V Relay" H 1256 3787 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1150 3600 50  0001 C CNN
-F 3 "~" H 1150 3600 50  0001 C CNN
-	1    1150 3600
+P 1150 4100
+F 0 "J4" H 1256 4378 50  0000 C CNN
+F 1 "24V Relay" H 1256 4287 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1150 4100 50  0001 C CNN
+F 3 "~" H 1150 4100 50  0001 C CNN
+	1    1150 4100
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -94,13 +94,13 @@ $EndComp
 $Comp
 L Device:R_US R1
 U 1 1 5BCF9849
-P 2000 4100
-F 0 "R1" V 1795 4100 50  0000 C CNN
-F 1 "330" V 1886 4100 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 2040 4090 50  0001 C CNN
-F 3 "~" H 2000 4100 50  0001 C CNN
-	1    2000 4100
-	0    1    1    0   
+P 2400 2200
+F 0 "R1" V 2600 2200 50  0000 C CNN
+F 1 "330" V 2500 2200 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" V 2440 2190 50  0001 C CNN
+F 3 "~" H 2400 2200 50  0001 C CNN
+	1    2400 2200
+	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:CP1 C1
@@ -111,50 +111,6 @@ F 1 "1000u" H 2315 4705 50  0000 L CNN
 F 2 "Capacitors_THT:CP_Radial_D12.5mm_P5.00mm" H 2200 4750 50  0001 C CNN
 F 3 "~" H 2200 4750 50  0001 C CNN
 	1    2200 4750
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:Conn_01x01_Male T4
-U 1 1 5BCFA260
-P 1150 6800
-F 0 "T4" H 1256 6978 50  0000 C CNN
-F 1 "GND" H 1256 6887 50  0000 C CNN
-F 2 "Wire_Pads:SolderWirePad_2x_1-5mmDrill" H 1150 6800 50  0001 C CNN
-F 3 "~" H 1150 6800 50  0001 C CNN
-	1    1150 6800
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:Conn_01x01_Male T1
-U 1 1 5BCFA2B1
-P 1150 1100
-F 0 "T1" H 1256 1278 50  0000 C CNN
-F 1 "5V" H 1256 1187 50  0000 C CNN
-F 2 "Wire_Pads:SolderWirePad_2x_1-5mmDrill" H 1150 1100 50  0001 C CNN
-F 3 "~" H 1150 1100 50  0001 C CNN
-	1    1150 1100
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:Conn_01x01_Male T2
-U 1 1 5BCFA304
-P 1150 4550
-F 0 "T2" H 1256 4728 50  0000 C CNN
-F 1 "5VS" H 1256 4637 50  0000 C CNN
-F 2 "Wire_Pads:SolderWirePad_2x_1-5mmDrill" H 1150 4550 50  0001 C CNN
-F 3 "~" H 1150 4550 50  0001 C CNN
-	1    1150 4550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:Conn_01x01_Male T3
-U 1 1 5BCFA351
-P 1150 5100
-F 0 "T3" H 1256 5278 50  0000 C CNN
-F 1 "24VS" H 1256 5187 50  0000 C CNN
-F 2 "Wire_Pads:SolderWirePad_2x_1-5mmDrill" H 1150 5100 50  0001 C CNN
-F 3 "~" H 1150 5100 50  0001 C CNN
-	1    1150 5100
 	1    0    0    -1  
 $EndComp
 NoConn ~ 3400 1600
@@ -189,88 +145,26 @@ NoConn ~ 3800 2350
 NoConn ~ 3800 2250
 Connection ~ 3200 3800
 Wire Wire Line
-	1350 2200 2800 2200
-Wire Wire Line
-	1350 2550 1900 2550
-Wire Wire Line
-	1900 2550 1900 2300
-Wire Wire Line
-	1900 2300 2800 2300
-Wire Wire Line
 	1350 3150 2000 3150
 Wire Wire Line
-	2000 3150 2000 2400
-Wire Wire Line
-	2000 2400 2800 2400
-Wire Wire Line
 	1350 3600 2100 3600
-Wire Wire Line
-	2100 3600 2100 2500
-Wire Wire Line
-	2100 2500 2800 2500
 $Comp
 L Connector:Conn_01x03_Male J5
 U 1 1 5BCFDB4F
-P 1150 4100
-F 0 "J5" H 1256 4378 50  0000 C CNN
-F 1 "LEDs" H 1256 4287 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1150 4100 50  0001 C CNN
-F 3 "~" H 1150 4100 50  0001 C CNN
-	1    1150 4100
+P 1150 2200
+F 0 "J5" H 1256 2478 50  0000 C CNN
+F 1 "LEDs" H 1256 2387 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1150 2200 50  0001 C CNN
+F 3 "~" H 1150 2200 50  0001 C CNN
+	1    1150 2200
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1350 4100 1850 4100
-Wire Wire Line
-	2150 4100 2200 4100
-Wire Wire Line
-	2200 4100 2200 2600
-Wire Wire Line
-	2200 2600 2800 2600
-Wire Wire Line
-	1350 2300 1550 2300
-Wire Wire Line
-	1550 2300 1550 2750
-Wire Wire Line
-	1550 2750 1350 2750
-Wire Wire Line
-	1550 2750 1550 3250
-Wire Wire Line
-	1550 3250 1350 3250
-Connection ~ 1550 2750
-Wire Wire Line
-	1550 3250 1550 3700
-Wire Wire Line
-	1550 3700 1350 3700
-Connection ~ 1550 3250
-Wire Wire Line
-	1550 3700 1550 4200
-Wire Wire Line
-	1550 4200 1350 4200
-Connection ~ 1550 3700
-Wire Wire Line
 	1350 4550 1650 4550
 Wire Wire Line
-	1650 4550 1650 4000
-Wire Wire Line
-	1650 4000 1350 4000
-Connection ~ 1650 4000
-Wire Wire Line
 	1550 6800 1350 6800
-Connection ~ 1550 4200
 Wire Wire Line
 	1350 2650 1650 2650
-Wire Wire Line
-	1650 2650 1650 4000
-Wire Wire Line
-	1350 3500 1750 3500
-Wire Wire Line
-	1750 3500 1750 3050
-Wire Wire Line
-	1750 3050 1350 3050
-Wire Wire Line
-	1750 3050 1750 1100
-Connection ~ 1750 3050
 Connection ~ 1750 1100
 Wire Wire Line
 	1750 1100 2500 1100
@@ -417,15 +311,15 @@ Text Label 1800 6800 0    50   ~ 0
 GND
 Text Label 1850 5100 0    50   ~ 0
 24VS
-Text Label 2200 3850 2    50   ~ 0
+Text Label 2350 2600 2    50   ~ 0
 D6
-Text Label 2100 3400 2    50   ~ 0
+Text Label 2350 2500 2    50   ~ 0
 D5
-Text Label 2000 3000 2    50   ~ 0
+Text Label 2150 2400 2    50   ~ 0
 D4
-Text Label 1900 2450 2    50   ~ 0
+Text Label 2150 2300 2    50   ~ 0
 D3
-Text Label 2000 2200 2    50   ~ 0
+Text Label 2150 2200 2    50   ~ 0
 D2
 Text Label 3500 1300 2    50   ~ 0
 A1_D1
@@ -476,33 +370,17 @@ DIR
 $Comp
 L Connector:Conn_01x02_Male J6
 U 1 1 5BE5E3EF
-P 1150 5400
-F 0 "J6" H 1256 5578 50  0000 C CNN
-F 1 "Fan" H 1256 5487 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 1150 5400 50  0001 C CNN
-F 3 "~" H 1150 5400 50  0001 C CNN
-	1    1150 5400
+P 1150 5500
+F 0 "J6" H 1256 5678 50  0000 C CNN
+F 1 "Fan" H 1256 5587 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 1150 5500 50  0001 C CNN
+F 3 "~" H 1150 5500 50  0001 C CNN
+	1    1150 5500
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1350 5100 1700 5100
-Wire Wire Line
 	4950 6800 3200 6800
 Connection ~ 3200 6800
-Wire Wire Line
-	1550 4200 1550 5500
-Wire Wire Line
-	1350 5400 1700 5400
-Wire Wire Line
-	1700 5400 1700 5100
-Connection ~ 1700 5100
-Wire Wire Line
-	1700 5100 5500 5100
-Wire Wire Line
-	1350 5500 1550 5500
-Connection ~ 1550 5500
-Wire Wire Line
-	1550 5500 1550 6800
 Wire Wire Line
 	5950 4850 7450 4850
 Wire Wire Line
@@ -534,7 +412,7 @@ L Connector:Conn_01x15_Male CON2
 U 1 1 5BCFD97B
 P 5750 5550
 F 0 "CON2" H 5850 6400 50  0000 C CNN
-F 1 "Right Pumps" H 5850 4750 50  0000 C CNN
+F 1 "Right" H 5850 4750 50  0000 C CNN
 F 2 "Pin_Headers:Pin_Header_Angled_1x15_Pitch2.54mm" H 5750 5550 50  0001 C CNN
 F 3 "~" H 5750 5550 50  0001 C CNN
 	1    5750 5550
@@ -545,7 +423,7 @@ L Connector:Conn_01x15_Male CON1
 U 1 1 5BCFD9D4
 P 9550 5550
 F 0 "CON1" H 9650 6400 50  0000 C CNN
-F 1 "Left Pumps" H 9650 4750 50  0000 C CNN
+F 1 "Left" H 9650 4750 50  0000 C CNN
 F 2 "Pin_Headers:Pin_Header_Angled_1x15_Pitch2.54mm" H 9550 5550 50  0001 C CNN
 F 3 "~" H 9550 5550 50  0001 C CNN
 	1    9550 5550
@@ -718,27 +596,161 @@ Wire Wire Line
 	7000 5650 5950 5650
 NoConn ~ 7200 3200
 Wire Wire Line
-	5400 2200 5600 2200
+	4300 1400 4300 2100
 Wire Wire Line
-	5600 2200 5600 2000
+	4400 1300 4400 2000
 Wire Wire Line
-	5600 2000 7200 2000
+	1350 5100 5500 5100
+$Comp
+L Connector:Conn_01x02_Male J7
+U 1 1 5BD40086
+P 1150 5900
+F 0 "J7" H 1256 6078 50  0000 C CNN
+F 1 "Pi" H 1256 5987 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 1150 5900 50  0001 C CNN
+F 3 "~" H 1150 5900 50  0001 C CNN
+	1    1150 5900
+	1    0    0    -1  
+$EndComp
 Wire Wire Line
-	5400 2300 5700 2300
+	1350 5900 1550 5900
+Connection ~ 1550 5900
 Wire Wire Line
-	5700 2300 5700 2100
+	1550 5900 1550 6800
 Wire Wire Line
-	5700 2100 7200 2100
+	1350 6000 1650 6000
 Wire Wire Line
-	4300 2300 4600 2300
+	1650 4550 1650 5600
 Wire Wire Line
-	4300 1400 4300 2300
+	1350 5500 1550 5500
+Connection ~ 1550 5500
 Wire Wire Line
-	4400 2200 4600 2200
+	1550 5500 1550 5900
 Wire Wire Line
-	4400 1300 4400 2200
-NoConn ~ 4600 2000
-NoConn ~ 4600 2100
-NoConn ~ 5400 2000
-NoConn ~ 5400 2100
+	1350 5600 1650 5600
+Connection ~ 1650 5600
+Wire Wire Line
+	1650 5600 1650 6000
+Wire Wire Line
+	1350 3500 1550 3500
+Connection ~ 1550 3500
+Wire Wire Line
+	1350 3700 1750 3700
+Wire Wire Line
+	1350 3050 1550 3050
+Connection ~ 1550 3050
+Wire Wire Line
+	1550 3050 1550 3500
+Wire Wire Line
+	1350 2750 1900 2750
+Wire Wire Line
+	1900 2300 1900 2750
+Wire Wire Line
+	1350 2550 1550 2550
+Connection ~ 1550 2550
+Wire Wire Line
+	1550 2550 1550 3050
+Wire Wire Line
+	1350 2100 1550 2100
+Wire Wire Line
+	1550 2100 1550 2550
+Wire Wire Line
+	1350 2300 1650 2300
+Wire Wire Line
+	1650 2300 1650 2650
+Connection ~ 1650 2650
+Wire Wire Line
+	1350 2200 2250 2200
+Wire Wire Line
+	2550 2200 2800 2200
+Text Label 2600 2200 0    50   ~ 0
+D2_2
+Wire Wire Line
+	1900 2300 2800 2300
+Wire Wire Line
+	1550 3500 1550 4000
+Wire Wire Line
+	1650 2650 1650 4550
+Wire Wire Line
+	1350 4200 1750 4200
+Wire Wire Line
+	1750 4200 1750 3700
+Connection ~ 1750 3700
+Wire Wire Line
+	1350 4000 1550 4000
+Connection ~ 1550 4000
+Wire Wire Line
+	1550 4000 1550 5500
+Wire Wire Line
+	1750 1100 1750 3700
+Wire Wire Line
+	2000 3150 2000 2400
+Wire Wire Line
+	2000 2400 2800 2400
+Wire Wire Line
+	2100 3600 2100 2500
+Wire Wire Line
+	2100 2500 2800 2500
+Wire Wire Line
+	1350 4100 2200 4100
+Wire Wire Line
+	2200 4100 2200 2600
+Wire Wire Line
+	2200 2600 2800 2600
+$Comp
+L spade_terminal:Spade_Terminal T1
+U 1 1 5BE122D0
+P 1150 1100
+F 0 "T1" H 1150 1200 50  0000 C CNN
+F 1 "5V" H 1150 1000 50  0000 C CNN
+F 2 "spade_terminal:Spade_Terminal_1_4" H 1150 1100 50  0001 C CNN
+F 3 "" H 1150 1100 50  0001 C CNN
+	1    1150 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L spade_terminal:Spade_Terminal T2
+U 1 1 5BE139A1
+P 1150 4550
+F 0 "T2" H 1150 4650 50  0000 C CNN
+F 1 "5VS" H 1150 4450 50  0000 C CNN
+F 2 "spade_terminal:Spade_Terminal_1_4" H 1150 4550 50  0001 C CNN
+F 3 "" H 1150 4550 50  0001 C CNN
+	1    1150 4550
+	1    0    0    -1  
+$EndComp
+$Comp
+L spade_terminal:Spade_Terminal T3
+U 1 1 5BE13A21
+P 1150 5100
+F 0 "T3" H 1150 5200 50  0000 C CNN
+F 1 "24VS" H 1150 5000 50  0000 C CNN
+F 2 "spade_terminal:Spade_Terminal_1_4" H 1150 5100 50  0001 C CNN
+F 3 "" H 1150 5100 50  0001 C CNN
+	1    1150 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L spade_terminal:Spade_Terminal T4
+U 1 1 5BE141DB
+P 1150 6800
+F 0 "T4" H 1150 6900 50  0000 C CNN
+F 1 "GND" H 1150 6700 50  0000 C CNN
+F 2 "spade_terminal:Spade_Terminal_1_4" H 1150 6800 50  0001 C CNN
+F 3 "" H 1150 6800 50  0001 C CNN
+	1    1150 6800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4600 2000 4400 2000
+Wire Wire Line
+	4600 2100 4300 2100
+Wire Wire Line
+	5400 2000 7200 2000
+Wire Wire Line
+	5400 2100 7200 2100
+NoConn ~ 4600 2200
+NoConn ~ 4600 2300
+NoConn ~ 5400 2200
+NoConn ~ 5400 2300
 $EndSCHEMATC

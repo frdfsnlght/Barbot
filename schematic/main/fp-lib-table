@@ -2,4 +2,5 @@
   (lib (name arduino_pro_mini)(type KiCad)(uri ${KIPRJMOD}/../lib/arduino_pro_mini.pretty)(options "")(descr ""))
   (lib (name teensy_32)(type KiCad)(uri ${KIPRJMOD}/../lib/teensy_32.pretty)(options "")(descr ""))
   (lib (name logic_level_converter)(type KiCad)(uri ${KIPRJMOD}/../lib/logic_level_converter.pretty)(options "")(descr ""))
+  (lib (name spade_terminal)(type KiCad)(uri ${KIPRJMOD}/../lib/spade_terminal.pretty)(options "")(descr ""))
 )

@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP Spade_Terminal
+D Spade terminal
+K spade terminal connector
+$ENDCMP
+#
+#End Doc Library

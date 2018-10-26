@@ -26,7 +26,7 @@ AR Path="/5BCF8E7D/5BCF6E5D" Ref="A5"  Part="1"
 AR Path="/5BCF8E81/5BCF6E5D" Ref="A6"  Part="1" 
 AR Path="/5BCF8E85/5BCF6E5D" Ref="A7"  Part="1" 
 AR Path="/5BCF6D72/5BCF6E5D" Ref="A0"  Part="1" 
-F 0 "A3" H 5350 4450 50  0000 C CNN
+F 0 "A1" H 5350 4450 50  0000 C CNN
 F 1 "DRV8825_Carrier" H 6150 4450 50  0000 C CNN
 F 2 "Modules:Pololu_Breakout-16_15.2x20.3mm" H 5850 2950 50  0001 L CNN
 F 3 "https://www.pololu.com/product/2133" H 5500 4550 50  0001 C CNN
@@ -45,7 +45,7 @@ AR Path="/5BCF8E7D/5BCF6EE0" Ref="C5"  Part="1"
 AR Path="/5BCF8E81/5BCF6EE0" Ref="C6"  Part="1" 
 AR Path="/5BCF8E85/5BCF6EE0" Ref="C7"  Part="1" 
 AR Path="/5BCF6D72/5BCF6EE0" Ref="C0"  Part="1" 
-F 0 "C3" V 4715 4546 50  0000 L CNN
+F 0 "C1" V 4715 4546 50  0000 L CNN
 F 1 "100u" H 4715 4455 50  0000 L CNN
 F 2 "Capacitors_THT:CP_Radial_D6.3mm_P2.50mm" H 4600 4500 50  0001 C CNN
 F 3 "~" H 4600 4500 50  0001 C CNN
@@ -55,7 +55,7 @@ $EndComp
 $Comp
 L Connector:Conn_01x04_Male J1
 U 1 1 5BCF6FDD
-P 6700 3400
+P 6700 3500
 AR Path="/5BCF8DAA/5BCF6FDD" Ref="J1"  Part="1" 
 AR Path="/5BCF8E71/5BCF6FDD" Ref="J2"  Part="1" 
 AR Path="/5BCF8E75/5BCF6FDD" Ref="J3"  Part="1" 
@@ -64,12 +64,12 @@ AR Path="/5BCF8E7D/5BCF6FDD" Ref="J5"  Part="1"
 AR Path="/5BCF8E81/5BCF6FDD" Ref="J6"  Part="1" 
 AR Path="/5BCF8E85/5BCF6FDD" Ref="J7"  Part="1" 
 AR Path="/5BCF6D72/5BCF6FDD" Ref="J0"  Part="1" 
-F 0 "J3" H 6672 3373 50  0000 R CNN
-F 1 "Motor" H 6672 3282 50  0000 R CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 6700 3400 50  0001 C CNN
-F 3 "~" H 6700 3400 50  0001 C CNN
-	1    6700 3400
-	-1   0    0    -1  
+F 0 "J1" H 6672 3473 50  0000 R CNN
+F 1 "Motor" H 6672 3382 50  0000 R CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 6700 3500 50  0001 C CNN
+F 3 "~" H 6700 3500 50  0001 C CNN
+	1    6700 3500
+	-1   0    0    1   
 $EndComp
 Text HLabel 3700 3300 0    50   Input ~ 0
 ~ENABLE

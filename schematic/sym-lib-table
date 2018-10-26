@@ -3,4 +3,5 @@
   (lib (name logic_level_converter)(type Legacy)(uri ${KIPRJMOD}/lib/logic_level_converter.lib)(options "")(descr ""))
   (lib (name teensy_32)(type Legacy)(uri ${KIPRJMOD}/lib/teensy_32.lib)(options "")(descr ""))
   (lib (name stepper_driver)(type Legacy)(uri ${KIPRJMOD}/lib/stepper_driver.lib)(options "")(descr ""))
+  (lib (name spade_terminal)(type Legacy)(uri ${KIPRJMOD}/lib/spade_terminal.lib)(options "")(descr ""))
 )
