@@ -96,7 +96,7 @@ def _bus_consoleConnect():
 #---------------------
 
 def restart():
-    cmd = config.get('server', 'restartCommand').split(' ')
+    cmd = config.get('core', 'restartCommand').split(' ')
     out = subprocess.run(cmd,
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
@@ -108,7 +108,7 @@ def restart():
     bus.emit('audio/play', 'restart', console = True)
         
 def shutdown():
-    cmd = config.get('server', 'shutdownCommand').split(' ')
+    cmd = config.get('core', 'shutdownCommand').split(' ')
     out = subprocess.run(cmd,
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
@@ -117,7 +117,7 @@ def shutdown():
         _logger.error('Error trying to shutdown: {}'.format(out.stdout))
     return
     try:
-        serial.write('RT{}'.format(config.get('server', 'shutdownTimer')))
+        serial.write('RT{}'.format(config.get('core', 'shutdownTimer')))
     except SerialError as e:
         _logger.error(e)
     bus.emit('lights/play', 'shutdown')
