@@ -96,6 +96,10 @@ def _bus_consoleConnect():
 #---------------------
 
 def restart():
+    bus.emit('lights/play', 'restart')
+    bus.emit('audio/play', 'restart', console = True)
+    time.sleep(2)
+    
     cmd = config.get('core', 'restartCommand').split(' ')
     out = subprocess.run(cmd,
             stdout = subprocess.PIPE,
@@ -103,11 +107,16 @@ def restart():
             universal_newlines = True)
     if out.returncode != 0:
         _logger.error('Error trying to restart: {}'.format(out.stdout))
-        return
-    bus.emit('lights/play', 'restart')
-    bus.emit('audio/play', 'restart', console = True)
         
 def shutdown():
+    bus.emit('lights/play', 'shutdown')
+    bus.emit('audio/play', 'shutdown', console = True)
+    try:
+        serial.write('RT{}'.format(config.get('core', 'shutdownTimer')))
+    except SerialError as e:
+        _logger.error(e)
+    time.sleep(2)
+    
     cmd = config.get('core', 'shutdownCommand').split(' ')
     out = subprocess.run(cmd,
             stdout = subprocess.PIPE,
@@ -115,13 +124,6 @@ def shutdown():
             universal_newlines = True)
     if out.returncode != 0:
         _logger.error('Error trying to shutdown: {}'.format(out.stdout))
-    return
-    try:
-        serial.write('RT{}'.format(config.get('core', 'shutdownTimer')))
-    except SerialError as e:
-        _logger.error(e)
-    bus.emit('lights/play', 'shutdown')
-    bus.emit('audio/play', 'shutdown', console = True)
     
 def toggleDispenserHold():
     global dispenserHold
