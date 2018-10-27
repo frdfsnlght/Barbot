@@ -40,6 +40,8 @@ IN THE SOFTWARE.
 #include <FireNeoPixelPattern.h>
 #include <Colors.h>
 
+#define DEBUG_PATTERNS
+
 constexpr int PIN_SERIAL_RX             = 0;
 constexpr int PIN_SERIAL_TX             = 1;
 
@@ -50,17 +52,13 @@ constexpr int PIN_BUTTON                = 4;
 constexpr int PIN_RELAY1                = 5;
 constexpr int PIN_RELAY2                = 6;
 
-//constexpr int PIN_BUTTON                = 2;
-//constexpr int PIN_SENSOR                = 3;
-//constexpr int PIN_RELAY1                = 4;
-//constexpr int PIN_RELAY2                = 5;
-//constexpr int PIN_LIGHTS                = 6;
-
-
 constexpr int PIN_LED                   = 13;
 
-constexpr int NUM_PIXELS                = 60;
-constexpr int NUM_SEGMENTS              = 5;
+
+constexpr int NUM_PIXELS_PER_SUBSEGMENT = 13;
+constexpr int NUM_SUBSEGMENTS           = 4;
+constexpr int NUM_SEGMENTS              = NUM_SUBSEGMENTS + 1;
+constexpr int NUM_PIXELS                = NUM_PIXELS_PER_SUBSEGMENT * NUM_SUBSEGMENTS;
 constexpr int NUM_PATTERN_SLOTS         = 8;
 constexpr int PATTERN_SLOT_BASE         = 0;
 
@@ -71,6 +69,7 @@ constexpr unsigned long LED_TOGGLE_INTERVAL_SLOW    = 1000;
 constexpr unsigned long SENSOR_READ_INTERVAL        = 250;
 constexpr unsigned long BUTTON_PRESS_SHORT          = 1000;
 constexpr unsigned long BUTTON_PRESS_LONG           = 8000;
+constexpr unsigned long RELAY_ON_DELAY              = 2000;
 
 constexpr byte PATTERN_WIPE             = 0;
 constexpr byte PATTERN_MULTIWIPE        = 1;
@@ -152,8 +151,9 @@ void setup() {
     turnOffRelays();
     
     lights.setupSegment(0, 0, NUM_PIXELS);
-    for (int i = 0; i < NUM_SEGMENTS - 1; i++) {
-        lights.setupSegment(i + 1, i * NUM_PIXELS / (NUM_SEGMENTS - 1), NUM_PIXELS / (NUM_SEGMENTS - 1));
+    for (int i = 0; i < NUM_SUBSEGMENTS; i++) {
+        lights.setupSegment(i + 1, i * NUM_PIXELS_PER_SUBSEGMENT, NUM_PIXELS_PER_SUBSEGMENT);
+        //lights.setupSegment(i + 1, i * NUM_PIXELS / (NUM_SEGMENTS - 1), NUM_PIXELS / (NUM_SEGMENTS - 1));
     }
     lights.begin();
     lights.setSegmentColor(COLOR_OFF, 0);
@@ -675,6 +675,17 @@ void sendLUInt(long unsigned i) {
     Serial.print(i);
 }
 
+void sendColor(color_t color) {
+    byte r = (color >> 16) & 0xff;
+    byte g = (color >> 8) & 0xff;
+    byte b = color & 0xff;
+    Serial.print(r);
+    Serial.print(':');
+    Serial.print(g);
+    Serial.print(':');
+    Serial.print(b);
+}
+
 void sendOK() {
     send(F("OK\n"));
 }
@@ -711,6 +722,7 @@ void sendSensorData() {
 
 void turnOnRelays() {
     digitalWrite(PIN_RELAY1, LOW);
+    delay(RELAY_ON_DELAY);
     digitalWrite(PIN_RELAY2, LOW);
 }
 
@@ -798,7 +810,10 @@ uint8_t playLightPattern(char* str) {
     byte patNum = (byte)readUInt(&str);
     readDelim(&str);
     
-//    send("#segments: "); sendInt(segments); sendChar('\n');
+#ifdef DEBUG_PATTERNS
+    send("# segments: "); sendInt(segments); sendChar('\n');
+    send("# pattern: "); sendInt(patNum); sendChar('\n');
+#endif
     
     color_t colors[4];
     unsigned long interval1 = 0, interval2 = 0;
@@ -819,6 +834,13 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             mode = (uint8_t)readUInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# color: "); sendColor(colors[0]); sendChar('\n');
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+            send("# mode: "); sendInt(mode); sendChar('\n');
+#endif
+            
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     WipeNeoPixelPattern* pattern = new WipeNeoPixelPattern();
@@ -840,15 +862,15 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             mode = (uint8_t)readUInt(&str);
-            
-/*
-            send("#numColors: "); sendInt(steps); sendChar('\n');
+
+#ifdef DEBUG_PATTERNS
+            send("# colors: "); sendInt(steps); sendChar('\n');
             for (int i = 0; i < steps; i++) {
-                send("#color "); sendInt(i); send(": "); sendLUInt(colors[i]); sendChar('\n');
+                send("# color "); sendInt(i); send(": "); sendColor(colors[i]); sendChar('\n');
             }
-            send("#interval: "); sendLUInt(interval1); sendChar('\n');
-            send("#mode: "); sendInt(mode); sendChar('\n');
-*/
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+            send("# mode: "); sendInt(mode); sendChar('\n');
+#endif
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
@@ -870,6 +892,14 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             interval2 = (unsigned long)readUInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# color 0: "); sendColor(colors[0]); sendChar('\n');
+            send("# color 1: "); sendColor(colors[1]); sendChar('\n');
+            send("# interval 1: "); sendInt(interval1); sendChar('\n');
+            send("# interval 2: "); sendInt(interval2); sendChar('\n');
+#endif
+            
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     BlinkNeoPixelPattern* pattern = new BlinkNeoPixelPattern();
@@ -883,6 +913,12 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             direction = (uint8_t)readInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+            send("# direction: "); sendInt(direction); sendChar('\n');
+#endif
+            
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     RainbowNeoPixelPattern* pattern = new RainbowNeoPixelPattern();
@@ -900,6 +936,14 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             direction = (uint8_t)readInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# color 0: "); sendColor(colors[0]); sendChar('\n');
+            send("# color 1: "); sendColor(colors[1]); sendChar('\n');
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+            send("# direction: "); sendInt(direction); sendChar('\n');
+#endif
+            
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     ChaseNeoPixelPattern* pattern = new ChaseNeoPixelPattern();
@@ -913,6 +957,12 @@ uint8_t playLightPattern(char* str) {
             colors[0] = readColor(&str);
             readDelim(&str);
             interval1 = (unsigned long)readUInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# color: "); sendColor(colors[0]); sendChar('\n');
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+#endif
+            
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     ScanNeoPixelPattern* pattern = new ScanNeoPixelPattern();
@@ -932,6 +982,15 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             mode = (uint8_t)readInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# color 0: "); sendColor(colors[0]); sendChar('\n');
+            send("# color 1: "); sendColor(colors[1]); sendChar('\n');
+            send("# steps: "); sendInt(steps); sendChar('\n');
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+            send("# mode: "); sendInt(mode); sendChar('\n');
+#endif
+
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     FadeNeoPixelPattern* pattern = new FadeNeoPixelPattern();
@@ -949,6 +1008,14 @@ uint8_t playLightPattern(char* str) {
             interval1 = (unsigned long)readUInt(&str);
             readDelim(&str);
             direction = (uint8_t)readUInt(&str);
+            
+#ifdef DEBUG_PATTERNS
+            send("# cooling: "); sendInt(cooling); sendChar('\n');
+            send("# sparking: "); sendInt(sparking); sendChar('\n');
+            send("# interval: "); sendInt(interval1); sendChar('\n');
+            send("# direction: "); sendInt(direction); sendChar('\n');
+#endif
+            
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
                     FireNeoPixelPattern* pattern = new FireNeoPixelPattern();
