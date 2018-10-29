@@ -47,11 +47,12 @@ constexpr int PIN_SERIAL_TX             = 1;
 
 
 constexpr int PIN_LIGHTS                = 2;
-constexpr int PIN_SENSOR                = 3;
-constexpr int PIN_BUTTON                = 4;
-constexpr int PIN_RELAY1                = 5;
-constexpr int PIN_RELAY2                = 6;
-
+constexpr int PIN_SENSOR0               = 3;
+constexpr int PIN_SENSOR1               = 4;
+constexpr int PIN_RELAY0                = 5;
+constexpr int PIN_RELAY1                = 6;
+constexpr int PIN_RELAY2                = 7;
+constexpr int PIN_BUTTON                = 8;
 constexpr int PIN_LED                   = 13;
 
 
@@ -61,6 +62,8 @@ constexpr int NUM_SEGMENTS              = NUM_SUBSEGMENTS + 1;
 constexpr int NUM_PIXELS                = NUM_PIXELS_PER_SUBSEGMENT * NUM_SUBSEGMENTS;
 constexpr int NUM_PATTERN_SLOTS         = 8;
 constexpr int PATTERN_SLOT_BASE         = 0;
+constexpr int NUM_SENSORS               = 2;
+constexpr int SENSOR_PINS[]             = {PIN_SENSOR0, PIN_SENSOR1};
 
 constexpr int INPUT_BUFFER_LENGTH       = 64;
 
@@ -69,7 +72,8 @@ constexpr unsigned long LED_TOGGLE_INTERVAL_SLOW    = 1000;
 constexpr unsigned long SENSOR_READ_INTERVAL        = 250;
 constexpr unsigned long BUTTON_PRESS_SHORT          = 1000;
 constexpr unsigned long BUTTON_PRESS_LONG           = 8000;
-constexpr unsigned long RELAY_ON_DELAY              = 2000;
+constexpr unsigned long RELAY1_ON_DELAY             = 1000;
+constexpr unsigned long RELAY2_ON_DELAY             = 0;
 
 constexpr byte PATTERN_WIPE             = 0;
 constexpr byte PATTERN_MULTIWIPE        = 1;
@@ -89,9 +93,9 @@ constexpr byte STATE_ON                 = 5;
 constexpr byte STATE_ON_P               = 6;
 constexpr byte STATE_ON_SP              = 7;
 
-constexpr int ERR_OK                   = 0;
-constexpr int ERR_NO_PATTERN           = 1;
-constexpr int ERR_INVALID_PATTERN      = 2;
+constexpr int ERR_OK                    = 0;
+constexpr int ERR_NO_PATTERN            = 1;
+constexpr int ERR_INVALID_PATTERN       = 2;
 
 
 
@@ -124,7 +128,7 @@ uint8_t segments = 0;
 // on a live circuit...if you must, connect GND first.
 
 
-bool proximityData = false;
+bool sensors[NUM_SENSORS];
 uint32_t lastSensorReadTime = 0;
 
 bool ledOn = false;
@@ -140,12 +144,19 @@ uint32_t buttonPressedTime = 0;
 void setup() {
     Serial.begin(115200, SERIAL_8N1);
 
-    pinMode(PIN_BUTTON, INPUT);
-    pinMode(PIN_SENSOR, INPUT);
-    digitalWrite(PIN_BUTTON, HIGH); // enable pullup
-    digitalWrite(PIN_SENSOR, HIGH); // enable pullup
+    pinMode(PIN_RELAY0, OUTPUT);
     pinMode(PIN_RELAY1, OUTPUT);
     pinMode(PIN_RELAY2, OUTPUT);
+    
+    for (int i = 0; i < NUM_SENSORS; i++) {
+        sensors[i] = false;
+        pinMode(SENSOR_PINS[i], INPUT);
+        digitalWrite(SENSOR_PINS[i], HIGH); // enable pullup
+    }
+    
+    pinMode(PIN_BUTTON, INPUT);
+    digitalWrite(PIN_BUTTON, HIGH); // enable pullup
+    
     pinMode(PIN_LED, OUTPUT);
     
     turnOffRelays();
@@ -291,10 +302,12 @@ void loopButton() {
 void loopSensor() {
     if ((millis() - lastSensorReadTime) >= SENSOR_READ_INTERVAL) {
         lastSensorReadTime = millis();
-        bool sensor = digitalRead(PIN_SENSOR);
-        if (sensor != proximityData) {
-            proximityData = sensor;
-            sendSensorData();
+        for (int i = 0; i < NUM_SENSORS; i++) {
+            bool s = digitalRead(SENSOR_PINS[i]);
+            if (s != sensors[i]) {
+                sensors[i] = s;
+                sendSensorData(i);
+            }
         }
     }
 }
@@ -498,10 +511,13 @@ void processSensorCommand(char* cmd) {
 }
 
 void cmdSensorStatus() {
-    send(F("sensor: "));
-    send(proximityData ? "true" : "false");
-    sendChar('\n');
-    
+    for (int i = 0; i < NUM_SENSORS; i++) {
+        send(F("sensor"));
+        sendInt(i);
+        send(F(": "));
+        send(sensors[i] ? F("true") : F("false"));
+        sendChar('\n');
+    }
     sendOK();
 }
 
@@ -714,19 +730,23 @@ void sendMessage(const __FlashStringHelper *msg) {
     sendChar('\n');
 }
 
-void sendSensorData() {
+void sendSensorData(byte s) {
     send(F("*S"));
-    sendInt(!proximityData);
+    sendInt(s);
+    sendInt(!sensors[s]);
     sendChar('\n');
 }
 
 void turnOnRelays() {
+    digitalWrite(PIN_RELAY0, LOW);
+    delay(RELAY1_ON_DELAY);
     digitalWrite(PIN_RELAY1, LOW);
-    delay(RELAY_ON_DELAY);
+    delay(RELAY2_ON_DELAY);
     digitalWrite(PIN_RELAY2, LOW);
 }
 
 void turnOffRelays() {
+    digitalWrite(PIN_RELAY0, HIGH);
     digitalWrite(PIN_RELAY1, HIGH);
     digitalWrite(PIN_RELAY2, HIGH);
 }
