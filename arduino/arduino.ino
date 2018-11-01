@@ -42,9 +42,10 @@ IN THE SOFTWARE.
 
 #define DEBUG_PATTERNS
 
+constexpr int SERIAL_SPEED              = 57600;
+
 constexpr int PIN_SERIAL_RX             = 0;
 constexpr int PIN_SERIAL_TX             = 1;
-
 
 constexpr int PIN_LIGHTS                = 2;
 constexpr int PIN_SENSOR0               = 3;
@@ -142,7 +143,7 @@ uint32_t buttonPressedTime = 0;
 
 
 void setup() {
-    Serial.begin(115200, SERIAL_8N1);
+    Serial.begin(SERIAL_SPEED, SERIAL_8N1);
 
     pinMode(PIN_RELAY0, OUTPUT);
     pinMode(PIN_RELAY1, OUTPUT);
@@ -702,6 +703,19 @@ void sendColor(color_t color) {
     Serial.print(b);
 }
 
+void sendSegments(uint8_t segs) {
+    bool sentFirst = false;
+    for (int i = 0; i < NUM_SEGMENTS; i++) {
+        if (segs & (1 << i)) {
+            if (sentFirst)
+                Serial.print(':');
+            else
+                sentFirst = true;
+            Serial.print(i);
+        }
+    }
+}
+
 void sendOK() {
     send(F("OK\n"));
 }
@@ -831,7 +845,7 @@ uint8_t playLightPattern(char* str) {
     readDelim(&str);
     
 #ifdef DEBUG_PATTERNS
-    send("# segments: "); sendInt(segments); sendChar('\n');
+    send("# segments: "); sendSegments(segments); sendChar('\n');
     send("# pattern: "); sendInt(patNum); sendChar('\n');
 #endif
     

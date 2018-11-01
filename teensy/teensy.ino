@@ -28,6 +28,9 @@ IN THE SOFTWARE.
 #include <avr_functions.h>
 #include <StepControl.h>
 
+//constexpr int SERIAL_SPEED              = 57600;
+constexpr int SERIAL_SPEED              = 58824;    // as per Teensy docs for talking to Arduino at 57600
+
 constexpr int PIN_LED                   = LED_BUILTIN;
 constexpr int PIN_ENABLE                = 11;
 constexpr int PIN_DIR                   = 10;
@@ -105,11 +108,12 @@ uint32_t lastLEDToggle = 0;
 
 void setup() {
     Serial.begin(115200); // speed is ignored
-    Serial1.begin(115200, SERIAL_8N1);
+    Serial1.begin(SERIAL_SPEED, SERIAL_8N1);
 
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_ENABLE, OUTPUT);
     turnOffLED();
+    disablePumps();
     
     sendMessage("Hello");
 }
