@@ -100,9 +100,11 @@ def _socket_connect():
     emit('wifiState', wifi.state)
     bus.emit('socket/connect', request)
     if request.remote_addr == '127.0.0.1':
+        newConnect = _consoleSessionId != request.sid
         _consoleSessionId = request.sid
         emit('volume', audio.getVolume())
-        bus.emit('socket/consoleConnect')
+        if newConnect:
+            bus.emit('socket/consoleConnect')
 
 @socket.on('disconnect')
 def _socket_disconnect():

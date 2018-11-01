@@ -12,7 +12,7 @@ _levelPattern = re.compile(r"^level\.(.*)")
 def _bus_configReloaded():
     _setLoggingLevels()
     
-def configure(console = False):
+def configure():
     root = logging.getLogger()
     root.setLevel(getattr(logging, config.get('logging', 'logLevel')))
     
@@ -24,7 +24,7 @@ def configure(console = False):
     handler.setFormatter(logging.Formatter(fmt = config.get('logging', 'logFormat')))
     root.addHandler(handler)
 
-    if console:
+    if config.getboolean('logging', 'console'):
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter(fmt = config.get('logging', 'logFormat')))
         root.addHandler(handler)
