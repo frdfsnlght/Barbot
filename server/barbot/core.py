@@ -24,7 +24,7 @@ CTL_CANCEL = 'cancel'
 CTL_OK = 'ok'
 
 
-_sensorEventPattern = re.compile(r"(?i)S(\d)")
+_sensorEventPattern = re.compile(r"(?i)S(\d)(\d)")
 
 _logger = logging.getLogger('Barbot')
 _exitEvent = Event()
@@ -59,8 +59,8 @@ def _bus_serverStop():
 def _bus_serialEvent(e):
     global glassReady
     m = _sensorEventPattern.match(e)
-    if m:
-        newGlassReady = m.group(1) == '1'
+    if m and m.group(1) == '0':
+        newGlassReady = m.group(2) == '1'
         if newGlassReady != glassReady:
             glassReady = newGlassReady
             bus.emit('core/glassReady', glassReady)
@@ -113,7 +113,7 @@ def shutdown():
     bus.emit('audio/play', 'shutdown', console = True)
     try:
         serial.write('RT{}'.format(config.get('core', 'shutdownTimer')))
-    except SerialError as e:
+    except serial.SerialError as e:
         _logger.error(e)
     time.sleep(2)
     

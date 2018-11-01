@@ -5,6 +5,9 @@ Barbot's server.
 * python3
 
 ## TODO
+* add PID check to daemon startup; if process isn't running, start it
+*   how to detect if crashed?
+
 * debug sproadic lights
 
 * record audio

@@ -33,6 +33,7 @@ def _bus_serverStart():
     except IOError as e:
         _logger.error(str(e))
         _logger.info('Serial port {} could not be opened'.format(config.get('serial', 'port')))
+        return
     
     _exitEvent.clear()
     _thread = Thread(target = _threadLoop, name = 'SerialThread')

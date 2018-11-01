@@ -15,7 +15,7 @@ config = barbot.config.load()
 
 import barbot.logging
 
-barbot.logging.configure(config.getboolean('server', 'developmentMode'))
+barbot.logging.configure()
 logger = logging.getLogger('Server')
 
 from barbot.bus import bus
@@ -119,10 +119,9 @@ if len(sys.argv) >= 2:
     cmd = sys.argv[1].lower()
     
     if cmd == 'start':
-        if (config.getboolean('server', 'developmentMode')):
-            startServer()
-        else:
-            daemon.start(startServer)
+        daemon.start(startServer)
+    elif cmd == 'debug':
+        startServer()
     elif cmd == 'stop':
         daemon.stop()
     elif cmd == 'restart':

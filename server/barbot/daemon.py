@@ -50,8 +50,8 @@ def _deletePID():
 def start(main):
     pid = getDaemonPID()
     if pid:
-        sys.stderr.write("pidfile %s already exist. Daemon already running?\n" % getPIDFile())
-        sys.exit(1)
+        sys.stderr.write("pidfile %s already exist. Daemon might be running?\n" % getPIDFile())
+        #sys.exit(1)
    
     # Start the daemon
     _daemonize()
