@@ -1,4 +1,3 @@
 *.skb
-*.gcode
-*.stl
+gcode/*
 
