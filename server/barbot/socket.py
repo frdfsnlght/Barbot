@@ -99,6 +99,7 @@ def _socket_connect():
         dispenseDrinkOrder = dispenseDrinkOrder.toDict(drink = True, glass = True)
     emit('dispenseState', {'state': core.dispenseState, 'order': dispenseDrinkOrder})
     emit('wifiState', wifi.state)
+    emit('alerts', alerts.getAll())
     bus.emit('socket/connect', request)
     if request.remote_addr == '127.0.0.1':
         newConnect = _consoleSessionId != request.sid
@@ -423,7 +424,10 @@ def _bus_serialEvent(e):
 @bus.on('alerts/add')
 @bus.on('alerts/clear')
 def _bus_alert():
-    socket.emit('alerts', alerts.getAll())
+    try:
+        socket.emit('alerts', alerts.getAll())
+    except:
+        pass
     
 #-------------------------------
 # core

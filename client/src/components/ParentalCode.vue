@@ -1,5 +1,7 @@
 <template>
 
+<div>
+
   <v-dialog v-model="dialog" persistent scrollable max-width="400px" @keydown.esc="cancel" @keydown.enter="submit">
     <v-card>
       <v-card-title>
@@ -13,6 +15,10 @@
             
               <v-flex xs12>
                 <v-text-field
+                  @focus="kbShow"
+                  @blur="kbHide"
+                  data-kbLayout="compact"
+                  
                   label="Code"
                   v-model="code"
                   :append-icon="showCode ? 'mdi-eye-off' : 'mdi-eye'"
@@ -38,7 +44,19 @@
           @click="submit()">submit</v-btn>
       </v-card-actions>
     </v-card>
+    
+    
   </v-dialog>
+  
+    <vue-touch-keyboard
+      v-if="kbVisible"
+      :layout="kbLayout"
+      :input="kbInput"
+      :cancel="kbHide"
+      :accept="kbAccept"
+    />
+    
+  </div>
   
 </template>
 
@@ -54,6 +72,10 @@ export default {
       code: null,
       showCode: false,
       valid: true,
+      
+      kbVisible: false,
+      kbLayout: null,
+      kbInput: null,
     }
   },
 
@@ -85,6 +107,24 @@ export default {
       this.reject()
       this.dialog = false
     },
+    
+    kbShow(e) {
+      console.log('kbShow')
+      console.dir(e)
+      this.kbInput = e.target
+      this.kbLayout = e.target.dataset.kbLayout
+      this.kbVisible = true
+    },
+    
+    kbHide() {
+      //console.log('kbHide')
+    },
+    
+    kbAccept(input) {
+      this.code = input
+      this.submit()
+    },
+    
     
   }
 }

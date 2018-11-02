@@ -98,6 +98,13 @@
       <v-spacer></v-spacer>
 
       <template v-if="isConsole">
+
+        <v-btn
+          v-if="alerts.length"
+          icon
+          @click="gotoAlerts()">
+          <v-icon>mdi-alert</v-icon>
+        </v-btn>      
       
         <v-icon v-show="glassReady">mdi-glass-cocktail</v-icon>
 
@@ -217,6 +224,29 @@
       </v-btn>
     </v-snackbar>
     
+    <v-footer
+      height="auto"
+      color="primary"
+    >
+      <input type="text" placeholder="Text input" @focus="kbShow" data-layout="compact" />
+      <v-text-field
+        @focus="kbShow"
+        @blur="kbHide"
+        data-kbLayout="compact"
+        label="Test"
+        v-model="test"
+      ></v-text-field>
+    </v-footer>
+    
+    <v-bottom-sheet
+      v-model="kbVisible"
+      full-width
+    >
+      <keyboard
+      
+      />
+    </v-bottom-sheet>
+    
   </v-app>
 </template>
 
@@ -228,6 +258,7 @@ import HTMLTitle from './components/HTMLTitle'
 import Confirm from './components/Confirm'
 import Login from './components/Login'
 import AudioPlayer from './components/AudioPlayer'
+import Keyboard from './components/Keyboard'
 
 export default {
   name: 'App',
@@ -236,6 +267,12 @@ export default {
       pageTitle: false,
       drawer: false,
       showBack: false,
+      
+      test: null,
+      kbVisible: false,
+      kbLayout: 'compact',
+      kbInput: null,
+      
     }
   },
   
@@ -244,6 +281,7 @@ export default {
     Confirm,
     Login,
     AudioPlayer,
+    Keyboard,
   },
   
   computed: {
@@ -278,6 +316,7 @@ export default {
       'snackbarText',
       'user',
       'glassReady',
+      'alerts',
     ]),
     ...mapState({
       wifiState: state => state.wifi.state
@@ -290,6 +329,10 @@ export default {
       window.history.length > 1
         ? this.$router.go(-1)
         : this.$router.push('/')
+    },
+    
+    gotoAlerts() {
+      this.$router.push({name: 'alerts'})
     },
     
     gotoDrinks() {
@@ -374,6 +417,23 @@ export default {
       if ((! this.$store.state.options[opt]) || this.$store.state.user.isAdmin)
         return new Promise((res) => { res() })
       return this.$refs.login.open()
+    },
+    
+    kbShow(e) {
+      console.log('kbShow')
+      console.dir(e)
+      this.kbInput = e.target
+      this.kbLayout = e.target.dataset.kbLayout
+      this.kbVisible = true
+    },
+    
+    kbHide() {
+      console.log('kbHide')
+    },
+    
+    kbAccept(input) {
+      this.test = input
+      this.submit()
     },
     
   },
