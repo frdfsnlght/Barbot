@@ -14,14 +14,14 @@ the stepper motor can be printed and all parts have been exported to the STLs di
 
 ## Print Settings
 
-File            | Part                        | Material  | Layer Height| Infill            | Perimeters| Top/Bot
----             | ---                         | ---       | ---         | ---               | ---       | ---
-Enclosure       | Dispenser Head Part A       | PLA       | 0.15        | 40% Grid          | 2         | 7/5
-Enclosure       | Dispenser Head Part B       | PLA       | 0.15        | 20% Grid          | 2         | 7/5
-Enclosure       | Dispenser Head Part C       | PLA       | 0.15        | 40% Grid          | 2         | 7/5
-Enclosure       | Dispenser Head Part D       | ABS       | 0.15        | 40% Grid          | 2         | 7/5
-Pump            | Sun Gear                    | PLA       | 0.15        | 100% Rectilinear  | 5         | 7/5
-Pump            | Sun Roller                  | PLA       | 0.15        | 50% Grid          | 5         | 7/5
+File            | Part                        | Material  | Layer Height| Infill            | Perimeters| Top/Bot   | Quantity
+---             | ---                         | ---       | ---         | ---               | ---       | ---       | ---
+Enclosure       | Dispenser Head Part A       | PLA       | 0.15        | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | Dispenser Head Part B       | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 1
+Enclosure       | Dispenser Head Part C       | PLA       | 0.15        | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | Dispenser Head Part D       | ABS       | 0.15        | 40% Grid          | 2         | 7/5       | 1
+Pump            | Sun Gear                    | PLA       | 0.15        | 100% Rectilinear  | 5         | 7/5       | 32
+Pump            | Sun Roller                  | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16
 
 
 Motor plate, Clamp Blocks: PLA, 20% infill, 2 perimeters, 7 top, 5 bottom
