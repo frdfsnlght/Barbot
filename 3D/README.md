@@ -29,3 +29,5 @@ Ring A/B, Body A/B plates, Rollers: PLA, 50% Grid, 5 perimeters, 7 top, 5 bottom
 Sun/Planet Gears: PLA, 100% Rectilinear, 5 perimeters, 7 top, 5 bottom
 
 
+## Hardware BOM
+

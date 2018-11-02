@@ -193,7 +193,13 @@ void loopSerial() {
         ch = Serial.read();
         if ((ch == '\r') || (ch == '\n')) {
             if (inputBuffer.length) {
-                processCommand();
+                if (strcmp(inputBuffer.data, "PING") == 0)
+                    send("PONG\n");
+                else {
+                    send(inputBuffer.data);
+                    sendChar('\n');
+                    processCommand();
+                }
             }
             inputBuffer.data[0] = '\0';
             inputBuffer.length = 0;

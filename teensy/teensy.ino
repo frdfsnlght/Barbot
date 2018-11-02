@@ -28,9 +28,6 @@ IN THE SOFTWARE.
 #include <avr_functions.h>
 #include <StepControl.h>
 
-//constexpr int SERIAL_SPEED              = 57600;
-constexpr int SERIAL_SPEED              = 58824;    // as per Teensy docs for talking to Arduino at 57600
-
 constexpr int PIN_LED                   = LED_BUILTIN;
 constexpr int PIN_ENABLE                = 11;
 constexpr int PIN_DIR                   = 10;
@@ -57,6 +54,10 @@ constexpr unsigned long LED_TOGGLE_INTERVAL = 500;
 
 constexpr int ERR_OK                    = 0;
 constexpr int ERR_PUMPS_ARE_RUNNING     = 1;
+
+constexpr int SERIAL_SPEEDS[]           = {115200, 58824, 38400, 19200, 9600};
+constexpr int NUM_SERIAL_SPEEDS         = sizeof(SERIAL_SPEEDS) / sizeof(int);
+constexpr int PING_TIMEOUT              = 3000;
 
 
 typedef struct {
@@ -101,6 +102,8 @@ int pumpSpeed = PUMP_DEF_SPEED;
 unsigned pumpAccel = PUMP_DEF_ACCEL;
 bool pumpsEnabled = false;
 
+int serialSpeed = 0;
+
 bool ledOn = false;
 uint32_t lastLEDToggle = 0;
 
@@ -108,8 +111,9 @@ uint32_t lastLEDToggle = 0;
 
 void setup() {
     Serial.begin(115200); // speed is ignored
-    Serial1.begin(SERIAL_SPEED, SERIAL_8N1);
-
+    
+    detectSerial1Speed();
+    
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_ENABLE, OUTPUT);
     turnOffLED();
@@ -130,29 +134,27 @@ void loopSerial() {
         ch = Serial.read();
         if ((ch == '\r') || (ch == '\n')) {
             if (inputBuffers[BUF_SERIAL].length) {
+                send(inputBuffers[BUF_SERIAL].data);
+                sendChar('\n');
                 processCommand();
             }
-            inputBuffers[BUF_SERIAL].data[0] = '\0';
-            inputBuffers[BUF_SERIAL].length = 0;
+            resetInputBuffer(BUF_SERIAL);
         } else if (ch == 8) {
             if (inputBuffers[BUF_SERIAL].length) {
                 inputBuffers[BUF_SERIAL].length--;
             }
         } else if (ch == 27) {
             if (inputBuffers[BUF_SERIAL].length) {
-                inputBuffers[BUF_SERIAL].data[0] = '\0';
-                inputBuffers[BUF_SERIAL].length = 0;
+                resetInputBuffer(BUF_SERIAL);
                 send("CANCELED\n");
             }
         } else if ((ch >= 32) && (ch <= 126)) {
             if (inputBuffers[BUF_SERIAL].length == INPUT_BUFFER_LENGTH) {
-                inputBuffers[BUF_SERIAL].data[0] = '\0';
-                inputBuffers[BUF_SERIAL].length = 0;
+                resetInputBuffer(BUF_SERIAL);
                 sendError("overflow");
                 return;
             }
-            inputBuffers[BUF_SERIAL].data[inputBuffers[BUF_SERIAL].length++] = ch;
-            inputBuffers[BUF_SERIAL].data[inputBuffers[BUF_SERIAL].length] = '\0';
+            appendInputBuffer(BUF_SERIAL, ch);
         }
     }
 }
@@ -165,11 +167,9 @@ void loopSerial1() {
                 send(inputBuffers[BUF_SERIAL1].data);
                 sendChar('\n');
             }
-            inputBuffers[BUF_SERIAL1].data[0] = '\0';
-            inputBuffers[BUF_SERIAL1].length = 0;
+            resetInputBuffer(BUF_SERIAL1);
         } else {
-            inputBuffers[BUF_SERIAL1].data[inputBuffers[BUF_SERIAL1].length++] = ch;
-            inputBuffers[BUF_SERIAL1].data[inputBuffers[BUF_SERIAL1].length] = '\0';
+            appendInputBuffer(BUF_SERIAL1, ch);
         }
     }
 }
@@ -199,6 +199,64 @@ void loopLED() {
         lastLEDToggle = millis();
         toggleLED();
     }
+}
+
+void detectSerial1Speed() {
+    for (int i = 0; i < NUM_SERIAL_SPEEDS; i++) {
+        send("# trying ");
+        sendInt(SERIAL_SPEEDS[i]);
+        sendChar('\n');
+        
+        Serial1.begin(SERIAL_SPEEDS[i], SERIAL_8N1);
+        if (ping()) {
+            serialSpeed = SERIAL_SPEEDS[i];
+            send("# detected ");
+            sendInt(serialSpeed);
+            sendChar('\n');
+            return;
+        }
+    }
+    sendError("unable to detect serial speed");
+    serialSpeed = 0;
+}
+
+bool ping() {
+    Serial1.println("PING");
+    unsigned long time = millis();
+    while ((millis() - time) < PING_TIMEOUT) {
+        while (Serial1.available()) {
+            ch = Serial1.read();
+            if ((ch == '\r') || (ch == '\n')) {
+                if (inputBuffers[BUF_SERIAL1].length && 
+                    strcmp(inputBuffers[BUF_SERIAL1].data, "PONG") == 0) {
+                    resetInputBuffer(BUF_SERIAL1);
+                    return true;
+                }
+                resetInputBuffer(BUF_SERIAL1);
+            } else if (inputBuffers[BUF_SERIAL1].length == 0) {
+                if (ch == 'P') {
+                    appendInputBuffer(BUF_SERIAL1, ch);
+                }
+            } else if ((ch >= 32) && (ch <= 126)) {
+                if (inputBuffers[BUF_SERIAL1].length == INPUT_BUFFER_LENGTH) {
+                    resetInputBuffer(BUF_SERIAL1);
+                } else {
+                    appendInputBuffer(BUF_SERIAL1, ch);
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void resetInputBuffer(int buf) {
+    inputBuffers[buf].data[0] = '\0';
+    inputBuffers[buf].length = 0;
+}
+
+void appendInputBuffer(int buf, char ch) {
+    inputBuffers[buf].data[inputBuffers[buf].length++] = ch;
+    inputBuffers[buf].data[inputBuffers[buf].length] = '\0';
 }
 
 void enablePumps() {
@@ -239,6 +297,10 @@ void setPumpSpeed(int speed) {
 void processCommand() {
     char* cmd = inputBuffers[BUF_SERIAL].data;
     switch (cmd[0]) {
+        case 'C':
+        case 'c':
+            processCommCommand(cmd + 1);
+            break;
         case 'P':
         case 'p':
             processPumpCommand(cmd + 1);
@@ -249,9 +311,45 @@ void processCommand() {
             processPowerCommand(cmd + 1);
             break;
         default:
-            Serial1.println(inputBuffers[BUF_SERIAL].data);
+            if (serialSpeed)
+                Serial1.println(inputBuffers[BUF_SERIAL].data);
             break;
     }
+}
+
+
+
+// =========== Comm commands
+void processCommCommand(char* cmd) {
+    switch (cmd[0]) {
+        case 'D':
+        case 'd':
+            detectSerial1Speed();
+            cmdCommStatus();
+            sendOK();
+            return;
+        case 'P':
+        case 'p':
+            if (ping())
+                sendOK();
+            else
+                sendError("timeout");
+            break;
+        case '?':
+            cmdCommStatus();
+            break;
+        default:
+            sendError("invalid comm command");
+            break;
+    }
+}
+
+void cmdCommStatus() {
+    send("speed: ");
+    sendInt(serialSpeed);
+    sendChar('\n');
+    
+    sendOK();
 }
 
 // =========== Pump commands

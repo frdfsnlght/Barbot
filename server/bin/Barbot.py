@@ -19,6 +19,7 @@ barbot.logging.configure()
 logger = logging.getLogger('Server')
 
 from barbot.bus import bus
+import barbot.alerts
 import barbot.daemon as daemon
 import barbot.serial
 import barbot.wifi
