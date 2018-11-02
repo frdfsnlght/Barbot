@@ -10,6 +10,7 @@ from .db import ModelError
 from . import core
 from . import wifi
 from . import audio
+from . import alerts
 
 from .models.Drink import Drink
 from .models.DrinkIngredient import DrinkIngredient
@@ -388,8 +389,10 @@ def socket_cleanPump(params):
     except ModelError as e:
         return error(e)
 
-
-    
+@socket.on('clearAlerts')
+def socket_clearAlerts():
+    alerts.clear()
+    return success()
     
     
     
@@ -412,6 +415,15 @@ def _bus_serialEvent(e):
         if m:
             _logger.debug('Got shutdown request')
             socket.emit('shutdownRequest', room = _consoleSessionId)
+    
+#-------------------------------
+# alert
+#
+    
+@bus.on('alerts/add')
+@bus.on('alerts/clear')
+def _bus_alert():
+    socket.emit('alerts', alerts.getAll())
     
 #-------------------------------
 # core

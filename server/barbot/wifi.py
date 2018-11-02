@@ -4,6 +4,7 @@ from threading import Thread, Event
 
 from .config import config
 from .bus import bus
+from . import alerts
 
 
 _wpaSupplicantNetworkBeginPattern    = re.compile(r"\s*network\s*=\s*\{")
@@ -47,12 +48,15 @@ def _startThread():
 
 def _threadLoop():
     _logger.info('Wifi thread started')
-    while not _exitEvent.is_set():
-        _updateState()
-        _readWPASupplicant(config.getpath('wifi', 'wpaSupplicantFile'))
-        _exitEvent.wait(config.getint('wifi', 'checkInterval'))
-            
+    try:
+        while not _exitEvent.is_set():
+            _updateState()
+            _readWPASupplicant(config.getpath('wifi', 'wpaSupplicantFile'))
+            _exitEvent.wait(config.getint('wifi', 'checkInterval'))
+    except Exception as e:
+        _logger.exception(str(e))
     _logger.info('Wifi thread stopped')
+    alerts.add('Wifi thread stopped!')
     
 def _readWPASupplicant(path):
     global _wpaSupplicantHeader, _wpaSupplicantNetworks

@@ -4,6 +4,7 @@ from threading import Thread, Event
 from queue import Queue, Empty
 
 from .bus import bus
+from . import alerts
 from .config import config
 
 
@@ -63,17 +64,21 @@ def _bus_consoleConnect():
 
 def _threadLoop():
     _logger.info('Audio thread started')
-    while not _exitEvent.is_set():
-        timeout = config.getfloat('audio', 'fileCheckInterval')
-        if _ttsJobs:
-            timeout = 0.1
-            _processTTSJob(_ttsJobs.pop(0))
-        try:
-            item = _playQueue.get(block = True, timeout = timeout)
-            _playClip(item)
-        except Empty:
-            _checkFiles()
+    try:
+        while not _exitEvent.is_set():
+            timeout = config.getfloat('audio', 'fileCheckInterval')
+            if _ttsJobs:
+                timeout = 0.1
+                _processTTSJob(_ttsJobs.pop(0))
+            try:
+                item = _playQueue.get(block = True, timeout = timeout)
+                _playClip(item)
+            except Empty:
+                _checkFiles()
+    except Exception as e:
+        _logger.exception(str(e))
     _logger.info('Audio thread stopped')
+    alerts.add('Audio thread stopped!')
 
 @bus.on('audio/play')
 def _on_audioPlay(clip, console = False, sessionId = False, broadcast = False):

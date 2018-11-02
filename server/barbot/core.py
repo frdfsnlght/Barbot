@@ -189,29 +189,31 @@ def setDispenseControl(ctl):
 def _threadLoop():
     global _lastDrinkOrderCheckTime, _lastDrinkOrderCheckTime, _requestPumpSetup, pumpSetup
     _logger.info('Core thread started')
-    while not _exitEvent.is_set():
-        if _requestPumpSetup:
-            _requestPumpSetup = False
-            pumpSetup = True
-            bus.emit('core/pumpSetup', pumpSetup)
+    try:
+        while not _exitEvent.is_set():
+            if _requestPumpSetup:
+                _requestPumpSetup = False
+                pumpSetup = True
+                bus.emit('core/pumpSetup', pumpSetup)
+                
+            while pumpSetup or dispenserHold or anyPumpsRunning():
+                _checkIdle()
+                time.sleep(1)
             
-        while pumpSetup or dispenserHold or anyPumpsRunning():
+            t = time.time()
+            
+            if (t - _lastDrinkOrderCheckTime) > config.getfloat('core', 'drinkOrderCheckInterval'):
+                _lastDrinkOrderCheckTime = t
+                o = DrinkOrder.getFirstPending()
+                if o:
+                    _dispenseDrinkOrder(o)
+                    _resetTimers()
+                    continue
+
             _checkIdle()
             time.sleep(1)
-        
-        t = time.time()
-        
-        if (t - _lastDrinkOrderCheckTime) > config.getfloat('core', 'drinkOrderCheckInterval'):
-            _lastDrinkOrderCheckTime = t
-            o = DrinkOrder.getFirstPending()
-            if o:
-                _dispenseDrinkOrder(o)
-                _resetTimers()
-                continue
-
-        _checkIdle()
-        time.sleep(1)
-            
+    except Exception as e:
+        _logger.exception(str(e))
     _logger.info('Core thread stopped')
 
 def _resetTimers():
