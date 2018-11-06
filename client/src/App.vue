@@ -156,7 +156,8 @@
     
     <v-content>
       <router-view
-        @show-page="showPage"/>
+        @show-page="showPage"
+      />
     </v-content>
     
     <v-dialog
@@ -226,26 +227,23 @@
     
     <v-footer
       height="auto"
-      color="primary"
+      v-show="kbVisible"
+      color="secondary lighten-3"
+      @mousedown.prevent=""
+      style="z-index: 400"
     >
-      <input type="text" placeholder="Text input" @focus="kbShow" data-layout="compact" />
-      <v-text-field
-        @focus="kbShow"
-        @blur="kbHide"
-        data-kbLayout="compact"
-        label="Test"
-        v-model="test"
-      ></v-text-field>
+      <v-layout
+        justify-center
+        row
+        @mousedown.prevent=""
+      >
+        <keyboard
+          ref="keyboard"
+          @show="kbVisible = true"
+          @hide="kbVisible = false"
+        />
+      </v-layout>
     </v-footer>
-    
-    <v-bottom-sheet
-      v-model="kbVisible"
-      full-width
-    >
-      <keyboard
-      
-      />
-    </v-bottom-sheet>
     
   </v-app>
 </template>
@@ -267,12 +265,8 @@ export default {
       pageTitle: false,
       drawer: false,
       showBack: false,
-      
-      test: null,
       kbVisible: false,
-      kbLayout: 'compact',
       kbInput: null,
-      
     }
   },
   
@@ -419,23 +413,6 @@ export default {
       return this.$refs.login.open()
     },
     
-    kbShow(e) {
-      console.log('kbShow')
-      console.dir(e)
-      this.kbInput = e.target
-      this.kbLayout = e.target.dataset.kbLayout
-      this.kbVisible = true
-    },
-    
-    kbHide() {
-      console.log('kbHide')
-    },
-    
-    kbAccept(input) {
-      this.test = input
-      this.submit()
-    },
-    
   },
   
   sockets: {
@@ -446,6 +423,13 @@ export default {
   },  
   
   created() {
+    bus.$on('keyboard-install', (c) => {
+      this.$refs.keyboard.installHooks(c.$el)
+    })
+    bus.$on('keyboard-remove', (c) => {
+      this.$refs.keyboard.removeHooks(c.$el)
+    })
+    
     if (this.isConsole)
       console.log('Client is running as console.')
     else

@@ -88,7 +88,7 @@
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
       <v-card>
         <v-card-title>
           <span
@@ -112,6 +112,7 @@
                     :rules="[v => !!v || 'Name is required']"
                     required
                     autofocus
+                    :data-kbUCWords="true"
                   ></v-text-field>
                 </v-flex>
                 
@@ -151,6 +152,7 @@
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
+import bus from '../bus'
 
 export default {
   name: 'Ingredients',
@@ -203,17 +205,20 @@ export default {
         name: undefined
       }
       this.edit = false
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
     
     editItem() {
       this.edit = true
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
     
     closeDialog() {
       this.dialog = false
       this.item = {}
+      bus.$emit('keyboard-remove', this.$refs.form)
     },
     
     saveItem() {

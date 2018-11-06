@@ -1,8 +1,6 @@
 <template>
 
-<div>
-
-  <v-dialog v-model="dialog" persistent scrollable max-width="400px" @keydown.esc="cancel" @keydown.enter="submit">
+  <v-dialog v-model="dialog" persistent scrollable max-width="400px" @keydown.esc="cancel" @keydown.enter.prevent="submit">
     <v-card>
       <v-card-title>
         <span class="headline">Set Parental Code</span>
@@ -15,10 +13,6 @@
             
               <v-flex xs12>
                 <v-text-field
-                  @focus="kbShow"
-                  @blur="kbHide"
-                  data-kbLayout="compact"
-                  
                   label="Code"
                   v-model="code"
                   :append-icon="showCode ? 'mdi-eye-off' : 'mdi-eye'"
@@ -48,19 +42,11 @@
     
   </v-dialog>
   
-    <vue-touch-keyboard
-      v-if="kbVisible"
-      :layout="kbLayout"
-      :input="kbInput"
-      :cancel="kbHide"
-      :accept="kbAccept"
-    />
-    
-  </div>
-  
 </template>
 
 <script>
+
+import bus from '../bus'
 
 export default {
   name: 'ParentalCode',
@@ -72,16 +58,13 @@ export default {
       code: null,
       showCode: false,
       valid: true,
-      
-      kbVisible: false,
-      kbLayout: null,
-      kbInput: null,
     }
   },
 
   methods: {
   
     open() {
+      bus.$emit('keyboard-install', this.$refs.form)
       this.$refs.form.reset()
       this.code = null
       this.dialog = true
@@ -91,13 +74,18 @@ export default {
       })
     },
 
+    close() {
+      this.dialog = false
+      bus.$emit('keyboard-remove', this.$refs.form)
+    },
+    
     submit() {
       if (! this.$refs.form.validate()) return
       this.$socket.emit('setParentalLock', this.code, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)          
         } else {
-          this.dialog = false
+          this.close()
           this.resolve()
         }
       })
@@ -105,26 +93,8 @@ export default {
 
     cancel() {
       this.reject()
-      this.dialog = false
+      this.close()
     },
-    
-    kbShow(e) {
-      console.log('kbShow')
-      console.dir(e)
-      this.kbInput = e.target
-      this.kbLayout = e.target.dataset.kbLayout
-      this.kbVisible = true
-    },
-    
-    kbHide() {
-      //console.log('kbHide')
-    },
-    
-    kbAccept(input) {
-      this.code = input
-      this.submit()
-    },
-    
     
   }
 }

@@ -90,7 +90,7 @@
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
       <v-card>
         <v-card-title>
           <span
@@ -115,6 +115,7 @@
                     :rules="[v => !!v || 'Primary name is required']"
                     required
                     autofocus
+                    :data-kbUCWords="true"
                   ></v-text-field>
                 </v-flex>
                 
@@ -123,6 +124,7 @@
                     label="Secondary name"
                     v-model="item.secondaryName"
                     hint="This is not required but can help distinguish similar drinks"
+                    :data-kbUCWords="true"
                   ></v-text-field>
                 </v-flex>
                 
@@ -157,6 +159,7 @@
                     label="Instructions"
                     auto-grow
                     v-model="item.instructions"
+                    :data-kbUCFirst="true"
                   ></v-textarea>
                 </v-flex>
     
@@ -189,6 +192,7 @@ import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
 import DrinkIngredients from '../components/DrinkIngredients'
+import bus from '../bus'
 
 export default {
   name: 'Drinks',
@@ -250,18 +254,21 @@ export default {
       }
       this.edit = false
       this.$store.dispatch('glasses/loadAll')
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
     
     editItem() {
       this.edit = true
       this.$store.dispatch('glasses/loadAll')
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
     
     closeDialog() {
       this.dialog = false
       this.item = {}
+      bus.$emit('keyboard-remove', this.$refs.form)
     },
     
     saveItem() {

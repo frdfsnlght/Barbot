@@ -1,7 +1,7 @@
 <template>
   <div>
   
-    <v-dialog v-model="loadDialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="loadDialog" persistent scrollable max-width="480px" @keydown.esc="closeLoad" @keydown.enter.prevent="submitLoad">
       <v-card>
         <v-card-title>
           <span v-if="!isReload" class="headline">Load Pump {{pump.name}}</span>
@@ -21,6 +21,7 @@
                     :rules="[v => !!v || 'Container size is required']"
                     mask="####"
                     required
+                    data-kbType="positiveInteger"
                   ></v-text-field>
                 </v-flex>
                   
@@ -77,7 +78,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="primeDialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="primeDialog" persistent scrollable max-width="480px" @keydown.esc="closePrime">
       <v-card>
         <v-card-title>
           <span class="headline">Prime Pump {{pump.name}}</span>
@@ -145,7 +146,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="cleanDialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="cleanDialog" persistent scrollable max-width="480px" @keydown.esc="closeClean">
       <v-card>
         <v-card-title>
           <span class="headline">Clean Pump {{pump.name}}</span>
@@ -203,6 +204,7 @@
 import { mapState } from 'vuex'
 import SelectIngredient from '../components/SelectIngredient'
 import SelectUnits from '../components/SelectUnits'
+import bus from '../bus'
 
 export default {
   name: 'PumpWizard',
@@ -240,6 +242,7 @@ export default {
   methods: {
 
     openLoad() {
+      bus.$emit('keyboard-install', this.$refs.loadForm)
       this.$refs.loadForm.reset()
       if (! this.pump.state) {
         this.isReload = false
@@ -264,9 +267,12 @@ export default {
     },
     
     closeLoad() {
-      this.$refs.loadForm.reset()
-      this.loadParams = {}
-      this.loadDialog = false
+      if (this.loadDialog) {
+        this.$refs.loadForm.reset()
+        this.loadParams = {}
+        this.loadDialog = false
+        bus.$emit('keyboard-remove', this.$refs.loadForm)
+      }
     },
     
     submitLoad() {
