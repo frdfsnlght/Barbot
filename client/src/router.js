@@ -12,6 +12,14 @@ export default new Router({
     name: 'home',
     component: Home,
   }, {
+    path: '/keyboardTest',
+    name: 'keyboardTest',
+    component: () => import(/* webpackChunkName: "keyboardTest" */ './views/KeyboardTest.vue'),
+  }, {
+    path: '/alerts',
+    name: 'alerts',
+    component: () => import(/* webpackChunkName: "alerts" */ './views/Alerts.vue'),
+  }, {
     path: '/drinks',
     name: 'drinks',
     component: () => import(/* webpackChunkName: "drinks" */ './views/Drinks.vue'),

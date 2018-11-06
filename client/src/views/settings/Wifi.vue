@@ -69,7 +69,7 @@
       scrollable
       max-width="400px"
       @keydown.esc="connectNewDialog = false"
-      @keydown.enter="connectToNewNetwork()"
+      @keydown.enter.prevent="connectToNewNetwork()"
     >
       <v-card>
         <v-card-title>
@@ -260,6 +260,7 @@ export default {
       this.network.security = 'None'
       this.network.password = undefined
       this.network.scanned = false
+      bus.$emit('keyboard-install', this.$refs.connectForm)
       this.connectNewDialog = true
     },
     
@@ -281,6 +282,7 @@ export default {
         
         if (network.secured) {
           this.network.security = 'not none'
+          bus.$emit('keyboard-install', this.$refs.connectForm)
           this.connectNewDialog = true
         } else {
           this.network.security = 'None'
@@ -298,6 +300,7 @@ export default {
             this.refreshNetworks()
             this.connectNewDialog = false
             this.disconnectDialog = false
+            bus.$emit('keyboard-remove', this.$refs.connectForm)
           }
         })
       })
@@ -315,6 +318,7 @@ export default {
             this.$store.commit('setError', res.error)
         } else {
           this.connectNewDialog = false
+            bus.$emit('keyboard-remove', this.$refs.connectForm)
           //this.refreshNetworks()
         }
       })

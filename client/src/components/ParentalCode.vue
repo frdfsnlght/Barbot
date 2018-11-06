@@ -1,6 +1,6 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable max-width="400px" @keydown.esc="cancel" @keydown.enter="submit">
+  <v-dialog v-model="dialog" persistent scrollable max-width="400px" @keydown.esc="cancel" @keydown.enter.prevent="submit">
     <v-card>
       <v-card-title>
         <span class="headline">Set Parental Code</span>
@@ -38,11 +38,15 @@
           @click="submit()">submit</v-btn>
       </v-card-actions>
     </v-card>
+    
+    
   </v-dialog>
   
 </template>
 
 <script>
+
+import bus from '../bus'
 
 export default {
   name: 'ParentalCode',
@@ -60,6 +64,7 @@ export default {
   methods: {
   
     open() {
+      bus.$emit('keyboard-install', this.$refs.form)
       this.$refs.form.reset()
       this.code = null
       this.dialog = true
@@ -69,13 +74,18 @@ export default {
       })
     },
 
+    close() {
+      this.dialog = false
+      bus.$emit('keyboard-remove', this.$refs.form)
+    },
+    
     submit() {
       if (! this.$refs.form.validate()) return
       this.$socket.emit('setParentalLock', this.code, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)          
         } else {
-          this.dialog = false
+          this.close()
           this.resolve()
         }
       })
@@ -83,7 +93,7 @@ export default {
 
     cancel() {
       this.reject()
-      this.dialog = false
+      this.close()
     },
     
   }

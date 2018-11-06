@@ -1,6 +1,6 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+  <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="cancel" @keydown.enter.prevent="submit">
     <v-card>
       <v-card-title>
         <span class="headline">Order Drink</span>
@@ -20,6 +20,7 @@
                   label="Name"
                   v-model="order.name"
                   autofocus
+                  :data-kbUCWords="true"
                 ></v-text-field>
               </v-flex>
               
@@ -65,6 +66,7 @@
 <script>
 
 import { mapState } from 'vuex'
+import bus from '../bus'
 
 export default {
   name: 'OrderDrink',
@@ -89,6 +91,7 @@ export default {
   methods: {
 
     open(drink) {
+      bus.$emit('keyboard-install', this.$refs.form)
       this.$refs.form.reset()
       this.drink = drink
       this.order.drinkId = drink.id
@@ -104,6 +107,7 @@ export default {
     
     close() {
       this.dialog = false
+      bus.$emit('keyboard-remove', this.$refs.form)
     },
     
     submit() {
@@ -112,7 +116,7 @@ export default {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {
-          this.dialog = false
+          this.close()
           this.resolve()
         }
       })
@@ -120,7 +124,7 @@ export default {
 
     cancel() {
       this.reject()
-      this.dialog = false
+      this.close()
     },
     
   },

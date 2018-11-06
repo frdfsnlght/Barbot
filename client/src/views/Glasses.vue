@@ -81,7 +81,7 @@
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
       <v-card>
         <v-card-title>
           <span
@@ -105,6 +105,7 @@
                     :rules="[v => !!v || 'Type is required']"
                     required
                     autofocus
+                    :data-kbUCWords="true"
                   ></v-text-field>
                 </v-flex>
                 
@@ -115,17 +116,16 @@
                     v-model="item.size"
                     :rules="[v => !!v || 'Size is required']"
                     required
+                    data-kbType="positiveInteger"
                   ></v-text-field>
                 </v-flex>
                 
                 <v-flex xs6>
-                  <v-select
-                    :items="['oz', 'ml']"
-                    label="Units"
+                  <select-units
                     v-model="item.units"
-                    :rules="[v => !!v || 'Units is required']"
                     required
-                  ></v-select>
+                    :rules="[v => !!v || 'Units is required']"
+                  ></select-units>
                 </v-flex>
 
                 <v-flex xs12>
@@ -133,6 +133,7 @@
                     label="Description"
                     auto-grow
                     v-model="item.description"
+                    :data-kbUCFirst="true"
                   ></v-textarea>
                 </v-flex>
     
@@ -164,6 +165,8 @@
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
+import SelectUnits from '../components/SelectUnits'
+import bus from '../bus'
 
 export default {
   name: 'Glasses',
@@ -180,7 +183,8 @@ export default {
   },
   components: {
     Loading,
-    Confirm
+    Confirm,
+    SelectUnits
   },
   created() {
     this.$emit('show-page', 'Glasses')
@@ -219,17 +223,20 @@ export default {
         description: undefined
       }
       this.edit = false
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
     
     editItem() {
       this.edit = true
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
     
     closeDialog() {
       this.dialog = false
       this.item = {}
+      bus.$emit('keyboard-remove', this.$refs.form)
     },
     
     saveItem() {

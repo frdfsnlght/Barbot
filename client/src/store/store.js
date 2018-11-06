@@ -39,6 +39,7 @@ export default new Vuex.Store({
         parentalLock: false,
         volume: 1,
         user: {},
+        alerts: [],
     },
     
     mutations: {
@@ -87,7 +88,10 @@ export default new Vuex.Store({
             state.volume = volume
         },
 
-
+        socket_alerts(state, alerts) {
+            state.alerts = alerts
+        },
+        
     
         setError(state, error) {
             state.errorMsg = error

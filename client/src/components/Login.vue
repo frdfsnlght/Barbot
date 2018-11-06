@@ -1,6 +1,6 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable max-width="300px" @keydown.esc="cancel" @keydown.enter="login">
+  <v-dialog v-model="dialog" persistent scrollable max-width="300px" @keydown.esc="cancel" @keydown.enter.prevent="login">
     <v-card>
       <v-card-title>
         <span class="headline">Login</span>
@@ -54,6 +54,8 @@
 
 <script>
 
+import bus from '../bus'
+
 export default {
   name: 'Login',
   data() {
@@ -72,6 +74,7 @@ export default {
   methods: {
   
     open() {
+      bus.$emit('keyboard-install', this.$refs.form)
       this.$refs.form.reset()
       this.name = 'admin'
       this.password = null
@@ -82,6 +85,11 @@ export default {
       })
     },
 
+    close() {
+      this.dialog = false
+      bus.$emit('keyboard-remove', this.$refs.form)
+    },
+    
     login() {
       if (! this.$refs.form.validate()) return
       let params = {
@@ -93,7 +101,7 @@ export default {
           this.loginError = [res.error]
         } else {
           this.$store.commit('setUser', res.user)
-          this.dialog = false
+          this.close()
           this.resolve()
         }
       })
@@ -115,7 +123,7 @@ export default {
     
     cancel() {
       this.reject()
-      this.dialog = false
+      this.close()
     }
   }
 }

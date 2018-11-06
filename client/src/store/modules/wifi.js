@@ -46,7 +46,7 @@ export default {
     
     actions: {
         
-        loadNetworks({commit, state}) {
+        loadNetworks({commit}) {
             commit('networksLoading')
             Vue.prototype.$socket.emit('getWifiNetworks', (res) => {
                 if (res.error) {

@@ -98,6 +98,13 @@
       <v-spacer></v-spacer>
 
       <template v-if="isConsole">
+
+        <v-btn
+          v-if="alerts.length"
+          icon
+          @click="gotoAlerts()">
+          <v-icon>mdi-alert</v-icon>
+        </v-btn>      
       
         <v-icon v-show="glassReady">mdi-glass-cocktail</v-icon>
 
@@ -149,7 +156,8 @@
     
     <v-content>
       <router-view
-        @show-page="showPage"/>
+        @show-page="showPage"
+      />
     </v-content>
     
     <v-dialog
@@ -217,6 +225,26 @@
       </v-btn>
     </v-snackbar>
     
+    <v-footer
+      height="auto"
+      v-show="kbVisible"
+      color="secondary lighten-3"
+      @mousedown.prevent=""
+      style="z-index: 400"
+    >
+      <v-layout
+        justify-center
+        row
+        @mousedown.prevent=""
+      >
+        <keyboard
+          ref="keyboard"
+          @show="kbVisible = true"
+          @hide="kbVisible = false"
+        />
+      </v-layout>
+    </v-footer>
+    
   </v-app>
 </template>
 
@@ -228,6 +256,7 @@ import HTMLTitle from './components/HTMLTitle'
 import Confirm from './components/Confirm'
 import Login from './components/Login'
 import AudioPlayer from './components/AudioPlayer'
+import Keyboard from './components/Keyboard'
 
 export default {
   name: 'App',
@@ -236,6 +265,8 @@ export default {
       pageTitle: false,
       drawer: false,
       showBack: false,
+      kbVisible: false,
+      kbInput: null,
     }
   },
   
@@ -244,6 +275,7 @@ export default {
     Confirm,
     Login,
     AudioPlayer,
+    Keyboard,
   },
   
   computed: {
@@ -278,6 +310,7 @@ export default {
       'snackbarText',
       'user',
       'glassReady',
+      'alerts',
     ]),
     ...mapState({
       wifiState: state => state.wifi.state
@@ -290,6 +323,10 @@ export default {
       window.history.length > 1
         ? this.$router.go(-1)
         : this.$router.push('/')
+    },
+    
+    gotoAlerts() {
+      this.$router.push({name: 'alerts'})
     },
     
     gotoDrinks() {
@@ -386,6 +423,13 @@ export default {
   },  
   
   created() {
+    bus.$on('keyboard-install', (c) => {
+      this.$refs.keyboard.installHooks(c.$el)
+    })
+    bus.$on('keyboard-remove', (c) => {
+      this.$refs.keyboard.removeHooks(c.$el)
+    })
+    
     if (this.isConsole)
       console.log('Client is running as console.')
     else
