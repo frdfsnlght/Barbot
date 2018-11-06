@@ -59,7 +59,7 @@
       </v-list-tile>
     </v-list>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
       <v-card>
         <v-card-title>
           <span
@@ -85,6 +85,7 @@
                     mask="##"
                     required
                     autofocus
+                    data-kbType="positiveInteger"
                   ></v-text-field>
                 </v-flex>
 
@@ -95,6 +96,7 @@
                     :rules="[v => !!v || 'Amount is required']"
                     mask="###"
                     required
+                    data-kbType="positiveNumber"
                   ></v-text-field>
                 </v-flex>
 
@@ -143,6 +145,7 @@ import SelectIngredient from '../components/SelectIngredient'
 import SelectUnits from '../components/SelectUnits'
 //import { toML, convertUnits } from '../utils'
 import utils from '../utils'
+import bus from '../bus'
 
 
 export default {
@@ -213,6 +216,7 @@ export default {
         step: maxStep,
       }
       this.editIndex = -1
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
   
@@ -220,11 +224,13 @@ export default {
       this.$refs.form.reset()
       this.item = JSON.parse(JSON.stringify(item))
       this.editIndex = this.items.indexOf(item)
+      bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
   
     closeDialog() {
       this.dialog = false
+      bus.$emit('keyboard-remove', this.$refs.form)
       this.item = {}
     },
 
