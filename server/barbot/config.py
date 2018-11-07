@@ -58,6 +58,7 @@ def _load():
     bus.emit('config/loaded')
 
 def _resolvePath(str):
+    str = os.path.expanduser(str)
     if os.path.isabs(str):
         return str
     else:

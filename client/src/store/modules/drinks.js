@@ -48,17 +48,17 @@ export default {
                 let d = state.items.find((e) => { return e.id === item.id })
                 if (d) {
                     Object.assign(d, item)
-                    this.commit('showSnackbar', {text: 'Drink updated'}, {root: true})
+                    this.commit('notify', 'Drink updated', {root: true})
                     console.log('updated drink ' + item.id)
                 } else {
                     state.items.push(item)
-                    this.commit('showSnackbar', {text: 'Drink added'}, {root: true})
+                    this.commit('notify', 'Drink added', {root: true})
                     console.log('added drink '  + item.id)
                 }
             }
             if (state.loadedOne && state.item.id === item.id) {
                 Object.assign(state.item, item)
-                this.commit('showSnackbar', {text: 'Drink updated'}, {root: true})
+                this.commit('notify', 'Drink updated', {root: true})
             }
         },
 
@@ -69,14 +69,14 @@ export default {
                     let i = state.items.indexOf(d)
                     if (i != -1) {
                         state.items.splice(i, 1)
-                        this.commit('showSnackbar', {text: 'Drink deleted'}, {root: true})
+                        this.commit('notify', 'Drink deleted', {root: true})
                         console.log('deleted drink '  + item.id)
                     }
                 }
             }
             if (state.loadedOne && state.item.id === item.id) {
                 state.item = {}
-                this.commit('showSnackbar', {text: 'Drink deleted'}, {root: true})
+                this.commit('notify', 'Drink deleted', {root: true})
             }
         },
 

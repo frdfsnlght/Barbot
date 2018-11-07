@@ -17,6 +17,7 @@
                   v-model="name"
                   required
                   :rules="[v => !!v || 'Username is required']"
+                  tabindex="1"
                 ></v-text-field>
               </v-flex>
               
@@ -31,6 +32,7 @@
                   :error-messages="loginError"
                   @click:append="showPassword = !showPassword"
                   :rules="[v => !!v || 'Password is required']"
+                  tabindex="2"
                 ></v-text-field>
               </v-flex>
               

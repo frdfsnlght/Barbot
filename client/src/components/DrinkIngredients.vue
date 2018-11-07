@@ -86,6 +86,7 @@
                     required
                     autofocus
                     data-kbType="positiveInteger"
+                    tabindex="1"
                   ></v-text-field>
                 </v-flex>
 
@@ -97,6 +98,7 @@
                     mask="###"
                     required
                     data-kbType="positiveNumber"
+                    tabindex="2"
                   ></v-text-field>
                 </v-flex>
 
@@ -113,6 +115,7 @@
                     v-model="item.ingredientId"
                     required
                     :rules="[v => !!v || 'Ingredient is required']"
+                    tabindex="3"
                   ></select-ingredient>
                 
                 </v-flex>

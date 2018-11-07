@@ -106,45 +106,13 @@
           <v-icon>mdi-alert</v-icon>
         </v-btn>      
       
-        <v-icon v-show="glassReady">mdi-glass-cocktail</v-icon>
+        <v-icon v-if="glassReady">mdi-glass-cocktail</v-icon>
 
         <template v-if="wifiState">
-          <v-icon v-if="!wifiState.ssid">mdi-wifi-off</v-icon>
-          <v-icon v-else-if="wifiState.bars === 0">mdi-wifi-strength-outline</v-icon>
-          <v-icon v-else-if="wifiState.bars === 1">mdi-wifi-strength-1</v-icon>
-          <v-icon v-else-if="wifiState.bars === 2">mdi-wifi-strength-2</v-icon>
-          <v-icon v-else-if="wifiState.bars === 3">mdi-wifi-strength-3</v-icon>
-          <v-icon v-else-if="wifiState.bars === 4">mdi-wifi-strength-4</v-icon>
+          <wifi-signal-icon :wifiOn="wifiState.ssid" :bars="wifiState.bars"/>
         </template>
 
-        <v-menu
-          bottom left
-          offset-y
-          :close-on-content-click="false"
-        >
-          <v-btn
-            slot="activator"
-            dark
-            icon
-          >
-            <v-icon v-if="volume < 0.33">mdi-volume-low</v-icon>
-            <v-icon v-else-if="volume >= 0.33 && volume < 0.66">mdi-volume-medium</v-icon>
-            <v-icon v-else>mdi-volume-high</v-icon>
-          </v-btn>
-          <v-list>
-            <v-list-tile>
-              <v-slider
-                v-model="volume"
-                min="0"
-                max="1"
-                step="0.05"
-                prepend-icon="mdi-minus"              
-                append-icon="mdi-plus"
-                @end="changeVolume"
-              ></v-slider>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
+        <volume-control @changed="changeVolume"/>
         
       </template>
           
@@ -160,90 +128,13 @@
       />
     </v-content>
     
-    <v-dialog
-      v-model="connectingDialog"
-      persistent
-      max-width="400"
-    >
-      <v-card
-        color="primary"
-        dark
-      >
-        <v-card-text>
-          Attempting to connect...
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-    
-    <v-dialog
-      v-model="error"
-      persistent
-      max-width="400"
-    >
-      <v-card
-        color="red"
-      >
-        <v-card-title>
-          <span class="headline">Error</span>
-        </v-card-title>
-      
-        <v-card-text>
-          {{errorMsg}}
-        </v-card-text>
-        
-        <v-card-actions>
-          <v-spacer></v-spacer>
-            <v-btn
-              flat
-              @click="clearError()">ok</v-btn>
-        </v-card-actions>
-        
-      </v-card>
-    </v-dialog>
-    
-    <confirm ref="confirm"></confirm>
-    <login ref="login"></login>
-    <audio-player ref="audioPlayer"></audio-player>
-    
-    <v-snackbar
-      v-model="snackbar"
-      :color="snackbarColor"
-      :timeout="4000"
-    >
-      {{ snackbarText }}
-      <v-btn
-        dark
-        flat
-        @click="snackbar = false"
-      >
-        Close
-      </v-btn>
-    </v-snackbar>
-    
-    <v-footer
-      height="auto"
-      v-show="kbVisible"
-      color="secondary lighten-3"
-      @mousedown.prevent=""
-      style="z-index: 400"
-    >
-      <v-layout
-        justify-center
-        row
-        @mousedown.prevent=""
-      >
-        <keyboard
-          ref="keyboard"
-          @show="kbVisible = true"
-          @hide="kbVisible = false"
-        />
-      </v-layout>
-    </v-footer>
+    <connecting-dialog/>
+    <error-dialog/>
+    <notifier/>
+    <confirm ref="confirm"/>
+    <login ref="login"/>
+    <audio-player ref="audioPlayer"/>
+    <keyboard-overlay v-if="isConsole"/>
     
   </v-app>
 </template>
@@ -254,9 +145,14 @@ import { mapState } from 'vuex'
 import bus from './bus'
 import HTMLTitle from './components/HTMLTitle'
 import Confirm from './components/Confirm'
+import ConnectingDialog from './components/ConnectingDialog'
+import ErrorDialog from './components/ErrorDialog'
+import Notifier from './components/Notifier'
 import Login from './components/Login'
 import AudioPlayer from './components/AudioPlayer'
-import Keyboard from './components/Keyboard'
+import KeyboardOverlay from './components/KeyboardOverlay'
+import WifiSignalIcon from './components/WifiSignalIcon'
+import VolumeControl from './components/VolumeControl'
 
 export default {
   name: 'App',
@@ -265,49 +161,29 @@ export default {
       pageTitle: false,
       drawer: false,
       showBack: false,
-      kbVisible: false,
-      kbInput: null,
     }
   },
   
   components: {
     'html-title': HTMLTitle,
     Confirm,
+    ConnectingDialog,
+    ErrorDialog,
+    Notifier,
     Login,
     AudioPlayer,
-    Keyboard,
+    KeyboardOverlay,
+    WifiSignalIcon,
+    VolumeControl,
   },
   
   computed: {
     title () {
       return this.options.appTitle + (this.pageTitle ? (": " + this.pageTitle) : "");
     },
-    connectingDialog() {
-      return !this.$store.state.connected
-    },
-    snackbar: {
-      get: function() {
-        return this.$store.state.snackbar
-      },
-      set: function(newValue) {
-        this.$store.commit('setSnackbar', newValue)
-      },
-    },
-    volume: {
-      get: function() {
-        return this.$store.state.volume
-      },
-      set: function() {
-        // nop
-      },
-    },
     ...mapState([
       'options',
       'isConsole',
-      'error',
-      'errorMsg',
-      'snackbarColor',
-      'snackbarText',
       'user',
       'glassReady',
       'alerts',
@@ -399,11 +275,7 @@ export default {
       this.showBack = !!pageTitle
     },
     
-    clearError() {
-      this.$store.commit('clearError')
-    },
-    
-    changeVolume: function(v) {
+    changeVolume(v) {
       this.$refs.audioPlayer.setVolume(v)
     },
     
@@ -423,13 +295,6 @@ export default {
   },  
   
   created() {
-    bus.$on('keyboard-install', (c) => {
-      this.$refs.keyboard.installHooks(c.$el)
-    })
-    bus.$on('keyboard-remove', (c) => {
-      this.$refs.keyboard.removeHooks(c.$el)
-    })
-    
     if (this.isConsole)
       console.log('Client is running as console.')
     else

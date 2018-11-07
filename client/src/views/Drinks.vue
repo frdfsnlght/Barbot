@@ -116,6 +116,7 @@
                     required
                     autofocus
                     :data-kbUCWords="true"
+                    tabindex="1"
                   ></v-text-field>
                 </v-flex>
                 
@@ -125,7 +126,8 @@
                     v-model="item.secondaryName"
                     hint="This is not required but can help distinguish similar drinks"
                     :data-kbUCWords="true"
-                  ></v-text-field>
+                    tabindex="2"
+                    ></v-text-field>
                 </v-flex>
                 
                 <v-flex xs12>
@@ -133,6 +135,7 @@
                     label="Is this drink a favorite?"
                     v-model="item.isFavorite"
                     required
+                    tabindex="3"
                   ></v-checkbox>
                 </v-flex>
                 
@@ -145,6 +148,7 @@
                     v-model="item.glassId"
                     :rules="[v => !!v || 'Glass is required']"
                     required
+                    tabindex="4"
                   ></v-select>
                 </v-flex>
 
@@ -160,6 +164,7 @@
                     auto-grow
                     v-model="item.instructions"
                     :data-kbUCFirst="true"
+                    tabindex="5"
                   ></v-textarea>
                 </v-flex>
     

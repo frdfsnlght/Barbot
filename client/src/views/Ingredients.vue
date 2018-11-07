@@ -113,6 +113,7 @@
                     required
                     autofocus
                     :data-kbUCWords="true"
+                    tabindex="1"
                   ></v-text-field>
                 </v-flex>
                 
