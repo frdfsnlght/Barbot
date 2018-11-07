@@ -1,0 +1,33 @@
+
+
+
+effects:
+    - sox {i} {o} gain -l 3
+
+tts:
+    credentials: ~/.google/appCredentials.json
+    voice.language_code: en-AU
+    voice.name: en-AU-Wavenet-A
+    audio.pitch: 0
+    audio.speaking_rate: 1.2
+    effects:
+        - sox {i} {o} remix 1 0
+    
+clips:
+    startup: # Played on the console
+#        -   foo.mp3
+        -   clip: foo.wav
+            weight: 0.9
+            effects:
+                - increaseVolume
+                - sox {i} {o} bass 3
+        -   text: Hello
+            tts:
+                audio.speaking_rate: 1
+            # effects-pre:
+            # effects:
+            effects-post:
+                - sox {i} {o} bass 3
+        - Hello World!
+        - I'm alive!
+        - The bar is open.

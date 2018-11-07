@@ -1,5 +1,5 @@
 
-import os, os.path, configparser, logging, random, subprocess, hashlib, re
+import os, os.path, yaml, logging, random, subprocess, hashlib, re, tempfile, json
 from threading import Thread, Event
 from queue import Queue, Empty
 
@@ -8,38 +8,22 @@ from . import alerts
 from .config import config
 
 
-_ttsFilePattern = re.compile(r"^tts-[0-9a-f]+\.mp3$")
-_ttsFileFormat = 'tts-{}.mp3'
-_phrasesFileName = 'phrases.ini'
-_clipsFileName = 'clips.ini'
+_audioFileName = 'audio.yaml'
 
 _logger = logging.getLogger('Audio')
 _exitEvent = Event()
 _thread = None
-_phrasesConfig = None
-_clipsConfig = None
-_phrasesFile = os.path.join(config.getpath('audio', 'audioDir'), _phrasesFileName)
-_clipsFile = os.path.join(config.getpath('audio', 'audioDir'), _clipsFileName)
+_audioConfig = None
+_audioFile = os.path.join(config.getpath('audio', 'audioDir'), _audioFileName)
 
 _lastModifiedTime = None
 _playQueue = Queue()
-_ttsJobs = []
 _clips = {}
 
 
 @bus.on('server/start')
 def _bus_serverStart():
-    global _thread, _phrasesConfig, _clipsConfig
-    _phrasesConfig = configparser.ConfigParser(
-        interpolation = None,
-        allow_no_value = True,
-    )
-    _phrasesConfig.optionxform = str    # preserve option case
-    _clipsConfig = configparser.ConfigParser(
-        interpolation = None,
-        allow_no_value = True,
-    )
-    _clipsConfig.optionxform = str    # preserve option case
+    global _thread
     _load()
     _exitEvent.clear()
     _thread = Thread(target = _threadLoop, name = 'AudioThread')
@@ -52,10 +36,9 @@ def _bus_serverStop():
 
 @bus.on('config/loaded')
 def _bus_configLoaded():
-    global _phrasesFile, _clipsFile
+    global _audioFile
     ad = config.getpath('audio', 'audioDir')
-    _phrasesFile = os.path.join(ad, _phrasesFileName)
-    _clipsFile = os.path.join(ad, _clipsFileName)
+    _audioFile = os.path.join(ad, _audioFileName)
     _load()
         
 @bus.on('socket/consoleConnect')
@@ -67,19 +50,38 @@ def _threadLoop():
     try:
         while not _exitEvent.is_set():
             timeout = config.getfloat('audio', 'fileCheckInterval')
-            if _ttsJobs:
-                timeout = 0.1
-                _processTTSJob(_ttsJobs.pop(0))
             try:
                 item = _playQueue.get(block = True, timeout = timeout)
                 _playClip(item)
             except Empty:
-                _checkFiles()
+                _checkConfig()
     except Exception as e:
         _logger.exception(str(e))
     _logger.info('Audio thread stopped')
     alerts.add('Audio thread stopped!')
 
+def _checkConfig():
+    t = 0
+    if os.path.isfile(_audioFile):
+        t = os.path.getmtime(_audioFile)
+    if t > _lastModifiedTime:
+        _load()
+
+def _playClip(item):
+    clipName = item['clip']
+    del(item['clip'])
+    if not clipName in _clips:
+        _logger.debug('No configured clips for {}'.format(clipName))
+        return
+    _logger.debug('Playing clip {}'.format(clipName))
+    clip = _clips[clipName]
+    r = random.random()
+    for file in clip:
+        if r < file[1]:
+            bus.emit('audio/playFile', **{'file': file[0], **item})
+            return
+    _logger.warning('No file found for {}!'.format(clipName))
+    
 @bus.on('audio/play')
 def _on_audioPlay(clip, console = False, sessionId = False, broadcast = False):
     if not console and not sessionId and not broadcast:
@@ -103,167 +105,276 @@ def getVolume():
         return 1
     
 def _load():
-    global _lastModifiedTime, _ttsJobs
+    global _lastModifiedTime, _audioConfig, _clips
     
-    _phrasesConfig.clear()
-    _clipsConfig.clear()
+    _audioConfig = {}
     _lastModifiedTime = 0
     
-    if os.path.isfile(_phrasesFile):
-        _phrasesConfig.read(_phrasesFile)
-        _lastModifiedTime = os.path.getmtime(_phrasesFile)
-    if os.path.isfile(_clipsFile):
-        _clipsConfig.read(_clipsFile)
-        _lastModifiedTime = max(_lastModifiedTime, os.path.getmtime(_clipsFile))
+    if os.path.isfile(_audioFile):
+        try:
+            with open(_audioFile) as f:
+                _audioConfig = yaml.load(f)
+            _lastModifiedTime = os.path.getmtime(_audioFile)
+        except Error as e:
+            _logger.error('Error while loading audio configuration: {}'.format(e))
+            return
 
-    phrasesMap = {}
-    _ttsJobs = []
-    for clipName in _phrasesConfig.keys():
-        for (phrase, weight) in _phrasesConfig.items(clipName):
-            weight = 1 if weight is None else float(weight)
-            fileName = _phraseToFileName(phrase)
-            phrasesMap[phrase] = fileName
-            
-            if _audioFileExists(fileName):
-                if not _clipsConfig.has_section(clipName):
-                    _clipsConfig.add_section(clipName)
-                _clipsConfig.set(clipName, fileName, str(weight))
-            else:
-                _ttsJobs.append({
-                    'clip': clipName,
-                    'phrase': phrase,
-                    'fileName': fileName,
-                    'weight': weight,
-                })
-    _updateClips()
-    
-    if config.getboolean('audio', 'phrasesMap'):
-        mapFile = os.path.join(config.getpath('audio', 'audioDir'), 'phrases.map')
-        if not phrasesMap:
-            if os.path.isfile(mapFile):
-                os.remove(mapFile)
-        else:
-            with open(mapFile, 'w') as file:
-                for (phrase, fileName) in phrasesMap.items():
-                    file.write('{} = {}\n'.format(phrase, fileName))
-    
-    if config.getboolean('audio', 'purgePhrases'):
-        for file in [f for f in os.listdir(config.getpath('audio', 'audioDir')) if os.path.isfile(os.path.join(config.getpath('audio', 'audioDir'), f)) and _ttsFilePattern.match(f)]:
-            if file not in phrasesMap.values():
-                _logger.info('Purged TTS file {}'.format(file))
-                os.remove(os.path.join(config.getpath('audio', 'audioDir'), file))
-
-    bus.emit('audio/clipsLoaded')
-    _logger.info('Audio clips loaded')
+    if 'tts' not in _audioConfig or not isinstance(_audioConfig['tts'], dict):
+        _audioConfig['tts'] = {}
+    if 'effects' not in _audioConfig or not isinstance(_audioConfig['effects'], list):
+        _audioConfig['effects'] = []
         
-def _phraseToFileName(phrase):
-    langCode = config.get('googleTTS', 'languageCode')
-    name = config.get('googleTTS', 'name')
-    pitch = config.get('googleTTS', 'pitch')
-    speakingRate = config.get('googleTTS', 'speakingRate')
-    return _ttsFileFormat.format(hashlib.md5((langCode + name + pitch + speakingRate + phrase).encode()).hexdigest())
-
-def _audioFileExists(fileName):
-    return os.path.isfile(os.path.join(config.getpath('audio', 'audioDir'), fileName))
-    
-def _updateClips():
-    global _clips
     _clips = {}
-    for clipName in _clipsConfig.keys():
-        # validate files, read and total file weights
+    
+    for clipName in _audioConfig['clips'].keys():
+    
         clipFiles = {}
-        total = 0
-        for (file, weight) in _clipsConfig.items(clipName):
-            if not _audioFileExists(file):
-                _logger.warning('Clip file {} not found!'.format(file))
-                continue
+        totalWeight = 0
+        
+        for clipConfig in _audioConfig['clips'][clipName]:
+        
+            clipConfig = _normalizeClipConfig(clipConfig)
+            if clipConfig is None: continue
             
-            weight = 1 if weight is None else float(weight)
-            total = total + weight
+            file = _generateClipFileName(clipName, clipConfig)
+            if file is None: continue
+            
+            #print('-------------------')
+            #print('clipConfig: ' + str(clipConfig))
+            #print('file: ' + file)
+            
+            if _isAudioFile(file):
+                _logger.info('Found clip {} for {}'.format(file, clipName))
+            else:
+                _logger.info('Generating clip {} for {}'.format(file, clipName))
+                if not _generateClipFile(file, clipConfig):
+                    continue
+                _logger.info('Generated clip {} for {}'.format(file, clipName))
+                                
+            weight = 1 if 'weight' not in clipConfig else float(clipConfig['weight'])
+            totalWeight = totalWeight + weight
             clipFiles[file] = weight
-
-        # build clip
+                    
+        # build weighted clip
         clip = []
         runningTotal = 0
         for (file, weight) in clipFiles.items():
-            clip.append((file, runningTotal + (weight / total)))
-            runningTotal = runningTotal + (weight / total)
+            clip.append((file, runningTotal + (weight / totalWeight)))
+            runningTotal = runningTotal + (weight / totalWeight)
         if clip:
             _clips[clipName] = clip
-    
-def _checkFiles():
-    t = 0
-    if os.path.isfile(_phrasesFile):
-        t = os.path.getmtime(_phrasesFile)
-    if os.path.isfile(_clipsFile):
-        t = max(t, os.path.getmtime(_clipsFile))
-    if t > _lastModifiedTime:
-        _load()
 
-def _playClip(item):
-    clipName = item['clip']
-    del(item['clip'])
-    if not clipName in _clips:
-        _logger.debug('No configured clips for {}'.format(clipName))
-        return
-    _logger.debug('Playing clip {}'.format(clipName))
-    clip = _clips[clipName]
-    r = random.random()
-    for file in clip:
-        if r < file[1]:
-            bus.emit('audio/playFile', **{'file': file[0], **item})
-            return
-    _logger.warning('No file found for {}!'.format(clipName))
-
-def _processTTSJob(job):
-    _logger.info('Processing TTS job {}'.format(job['fileName']))
+            
+    # TODO: generate map
+    # TODO: delete old files
     
-    bin = os.path.join(config.getpath('server', 'binDir'), 'googleTTS.py')
-    file = os.path.join(config.getpath('audio', 'audioDir'), job['fileName'])
+    bus.emit('audio/clipsLoaded')
+    _logger.info('Audio clips loaded')
+        
+def _isAudioFile(name):
+    return os.path.isfile(os.path.join(config.getpath('audio', 'audioDir'), name))
+
+def _normalizeClipConfig(clipConfig):
+
+    if isinstance(clipConfig, str):
+        if _isAudioFile(clipConfig):
+            clipConfig = {
+                'clip': clipConfig
+            }
+        else:
+            clipConfig = {
+                'text': clipConfig
+            }
+            
+    elif not isinstance(clipConfig, dict):
+        _logger.warning('Invalid clip configuration: {}'.format(clipConfig))
+        return None
+
+    if 'text' in clipConfig or 'ssml' in clipConfig:
+        if 'tts' not in clipConfig:
+            clipConfig['tts'] = _audioConfig['tts']
+        else:
+            clipConfig['tts'] = {**_audioConfig['tts'], **clipConfig['tts']}
+        if 'effects' in clipConfig['tts']:
+            if 'effects' in clipConfig:
+                clipConfig['effects'] = clipConfig['effects'] + clipConfig['tts']['effects']
+            else:
+                clipConfig['effects'] = clipConfig['tts']['effects']
+            del(clipConfig['tts']['effects'])
+    
+    effects = []
+    if 'effects-pre' in clipConfig and isinstance(clipConfig['effects-pre'], list):
+        effects = effects + clipConfig['effects-pre']
+    
+    if 'effects' in clipConfig and isinstance(clipConfig['effects'], list):
+        effects = effects + clipConfig['effects']
+    else:
+        effects = effects + _audioConfig['effects']
+        
+    if 'effects-post' in clipConfig and isinstance(clipConfig['effects-post'], list):
+        effects = effects + clipConfig['effects-post']
+        
+    clipConfig['effects'] = effects
+    
+    return clipConfig
+
+def _generateClipFileName(clipName, clipConfig):
+    hash = hashlib.md5()
+
+    if 'clip' in clipConfig:
+        if _isAudioFile(clipConfig['clip']):
+            if clipConfig['effects']:
+                hash.update(clipConfig['clip'].encode())
+            else:
+                return clipConfig['clip']
+        else:
+            _logger.warning('Clip file {} not found!'.format(clipConfig['clip']))
+            return None
+            
+    elif 'text' in clipConfig or 'ssml' in clipConfig:
+        if 'text' in clipConfig:
+            hash.update(clipConfig['text'].encode())
+        elif 'ssml' in clipConfig:
+            hash.update(clipConfig['ssml'].encode())
+        for k in sorted(clipConfig['tts'].keys()):
+            if k == 'credentials': continue
+            hash.update((k + str(clipConfig['tts'][k])).encode())
+        
+    for e in clipConfig['effects']:
+        hash.update(e.encode())
+            
+    return '{}-{}.mp3'.format(clipName, hash.hexdigest())
+    
+def _generateClipFile(file, clipConfig):
+    if 'clip' in clipConfig:
+        srcFile = clipConfig['clip']
+        deleteSource = False
+        
+    elif 'text' in clipConfig or 'ssml' in clipConfig:
+        srcFile = _createTempFile(suffix = '.mp3')
+        deleteSource = True
+        if not _phraseToFile(clipConfig, srcFile):
+            try:
+                os.remove(srcFile)
+            except:
+                pass
+            return False
+    
+    for effect in clipConfig['effects']:
+        dstFile = _applyEffect(srcFile, effect)
+        if not dstFile: return False
+        if deleteSource:
+            try:
+                os.remove(srcFile)
+            except:
+                pass
+            deleteSource = False
+        srcFile = dstFile
+        
+    try:
+        os.rename(srcFile, os.path.join(config.getpath('audio', 'audioDir'), file))
+    except IOError as e:
+        _logger.exception(e)
+        return False
+        
+    return True
+    
+def _phraseToFile(clipConfig, file):
+    
+    cmd = os.path.join(config.getpath('server', 'binDir'), 'googleTTS.py')
+
+    cfg = {
+        'ttsConfig': clipConfig['tts'],
+        'file': file,
+    }
+    if 'text' in clipConfig:
+        cfg['text'] = clipConfig['text']
+    elif 'ssml' in clipConfig:
+        cfg['ssml'] = '<speak>' + clipConfig['ssml'] + '</speak>'
+    
+    _logger.debug('TTS config: {}'.format(cfg))
     
     if config.getboolean('audio', 'inProcessTTS'):
-        if not tts(job['phrase'], file):
-            return
-    
+        if not tts(**cfg):
+            return False
+
     else:
         try:
-            out = subprocess.run([bin, job['phrase'], file],
+            out = subprocess.run(cmd,
+                input = json.dumps(cfg),
                 stdout = subprocess.PIPE,
                 stderr = subprocess.STDOUT,
                 universal_newlines = True)
+            if out.stdout:
+                _logger.debug(out.stdout)
+            if out.returncode != 0:
+                _logger.error('Non-zero return status from TTS command "{}"!'.format(cmd))
+                return False
+            return True
         except IOError as e:
+            _logger.error('Error from TTS command "{}"!'.format(cmd))
             _logger.error(e)
-            return
-            
-        if out.returncode != 0:
-            _logger.error('TTS job {} failed'.format(job['fileName']))
-            _logger.error(out.stdout)
-            return
-            
-    if not _clipsConfig.has_section(job['clip']):
-        _clipsConfig.add_section(job['clip'])
-    _clipsConfig.set(job['clip'], job['fileName'], str(job['weight']))
-    _updateClips()
+            return False
     
-def tts(phrase, fileName):    
+def _applyEffect(srcFile, cmd):
+    dstFile = _createTempFile(suffix = '.mp3')
+    cmd = cmd.replace('{i}', srcFile)
+    cmd = cmd.replace('{o}', dstFile)
+    try:
+        out = subprocess.run(cmd,
+            shell = True,
+            stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT,
+            universal_newlines = True)
+        if out.stdout:
+            _logger.debug(out.stdout)
+        if out.returncode != 0:
+            _logger.error('Non-zero return status from effect command "{}"!'.format(cmd))
+            return False
+        return dstFile
+    except IOError as e:
+        _logger.error('Error from effect command "{}"!'.format(cmd))
+        _logger.error(e)
+        return False
+    
+def _createTempFile(suffix = None):
+    file = tempfile.NamedTemporaryFile(delete = False, suffix = suffix)
+    return file.name
+
+def tts(ttsConfig, file, text = None, ssml = None, ):
+    _logger.debug('Performing TTS {}'.format(file))
     try:
         from google.cloud import texttospeech
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config.getpath('googleTTS', 'googleApplicationCredentials')
+        if 'credentials' not in ttsConfig:
+            raise ValueError('Missing TTS credentials!')
+            
+        credsFile = ttsConfig['credentials']
+        credsFile = os.path.expanduser(credsFile)
+        if not os.path.isabs(credsFile):
+            credsFile = os.path.normpath(os.path.join(config.getpath('audio', 'audioDir'), credsFile))
+            
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credsFile
         client = texttospeech.TextToSpeechClient()
-        input = texttospeech.types.SynthesisInput(text = phrase)
-        voice = texttospeech.types.VoiceSelectionParams(
-            language_code = config.get('googleTTS', 'languageCode'),
-            name = config.get('googleTTS', 'name'),
-        )
-        audio_config = texttospeech.types.AudioConfig(
-            audio_encoding = texttospeech.enums.AudioEncoding.MP3,
-            pitch = config.getfloat('googleTTS', 'pitch'),
-            speaking_rate = config.getfloat('googleTTS', 'speakingRate'),
-        )
-        response = client.synthesize_speech(input, voice, audio_config)
-        with open(fileName, 'wb') as file:
-            file.write(response.audio_content)
-        _logger.info('TTS job saved to {}'.format(fileName))
-    except Error as e:
-        _logger.exception(e)
+        
+        if ssml:
+            input = texttospeech.types.SynthesisInput(ssml = ssml)
+        elif text:
+            input = texttospeech.types.SynthesisInput(text = text)
+        else:
+            raise ValueError('One of ssml or text argument must be supplied!')
+        
+        args = {k[6:]:v for k,v in ttsConfig.items() if k[:6] == 'voice.'}
+        voice = texttospeech.types.VoiceSelectionParams(**args)
+        
+        args = {k[6:]:v for k,v in ttsConfig.items() if k[:6] == 'audio.'}
+        args['audio_encoding'] = texttospeech.enums.AudioEncoding.MP3
+        audio = texttospeech.types.AudioConfig(**args)
+        
+        response = client.synthesize_speech(input, voice, audio)
+        with open(file, 'wb') as f:
+            f.write(response.audio_content)
+        _logger.info('TTS saved to {}'.format(file))
+    except Exception as e:
+        _logger.error(e)
+        raise e
     
