@@ -106,6 +106,7 @@
                     required
                     autofocus
                     :data-kbUCWords="true"
+                    tabindex="1"
                   ></v-text-field>
                 </v-flex>
                 
@@ -117,6 +118,7 @@
                     :rules="[v => !!v || 'Size is required']"
                     required
                     data-kbType="positiveInteger"
+                    tabindex="2"
                   ></v-text-field>
                 </v-flex>
                 
@@ -134,6 +136,7 @@
                     auto-grow
                     v-model="item.description"
                     :data-kbUCFirst="true"
+                    tabindex="3"
                   ></v-textarea>
                 </v-flex>
     

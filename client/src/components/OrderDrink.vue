@@ -21,6 +21,7 @@
                   v-model="order.name"
                   autofocus
                   :data-kbUCWords="true"
+                  tabindex="1"
                 ></v-text-field>
               </v-flex>
               
@@ -42,6 +43,7 @@
                   required
                   @click:append="showCode = !showCode"
                   :rules="[v => !!v || 'Code is required']"
+                  tabindex="2"
                 ></v-text-field>
               </v-flex>
               

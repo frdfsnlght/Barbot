@@ -27,10 +27,9 @@ export default new Vuex.Store({
         connected: false,
         options: {},
         error: false,
-        errorMsg: false,
-        snackbar: false,
-        snackbarColor: 'info',
-        snackbarText: '',
+        notification: false,
+        notificationColor: 'info',
+        notificationTimeout: 4000,
         isConsole: location.hostname === 'localhost',
         dispenserHold: false,
         dispenseState: {},
@@ -94,23 +93,27 @@ export default new Vuex.Store({
         
     
         setError(state, error) {
-            state.errorMsg = error
-            state.error = !!error
+            state.error = error
         },
         
         clearError(state) {
             state.error = false
-            state.errorMsg = false
         },
         
-        showSnackbar(state, options) {
-            state.snackbarText = options.text
-            state.snackbarColor = options.color ? options.color : 'info'
-            state.snackbar = true
+        notify(state, options) {
+            if (typeof(options) == 'string') {
+                state.notification = options
+                state.notificationColor = 'info'
+                state.notificationTimeout = 4000
+            } else if (options instanceof Object) {
+                state.notification = options.text
+                state.notificationColor = options.color ? options.color : 'info'
+                state.notificationTimeout = options.timeout ? options.timeout : 4000
+            }
         },
         
-        setSnackbar(state, val) {
-            state.snackbar = val
+        clearNotification(state) {
+            state.notification = false
         },
         
         setUser(state, user) {

@@ -38,7 +38,7 @@ export default {
                 let d = state.items.find((e) => { return e.id === item.id })
                 if (d) {
                     Object.assign(d, item)
-                    this.commit('showSnackbar', {text: 'Drink updated'}, {root: true})
+                    this.commit('notify', 'Drink updated', {root: true})
                     console.log('updated drink ' + item.id)
                 }
             }
@@ -51,7 +51,7 @@ export default {
                     let i = state.items.indexOf(d)
                     if (i != -1) {
                         state.items.splice(i, 1)
-                        this.commit('showSnackbar', {text: 'Drink deleted'}, {root: true})
+                        this.commit('notify', 'Drink deleted', {root: true})
                         console.log('deleted drink '  + item.id)
                     }
                 }
@@ -61,7 +61,7 @@ export default {
         socket_drinksMenuUpdated(state) {
             if (state.loadedAll) {
                 this.dispatch('loadAll')
-                this.commit('showSnackbar', {text: 'Drinks menu updated'}, {root: true})
+                this.commit('notify', 'Drinks menu updated', {root: true})
             }
         },
         

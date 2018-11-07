@@ -211,8 +211,8 @@ export default {
     
     inputElements(el) {
       if (! el) el = document
-      return el.querySelectorAll(
-        'input[type=text], input[type=password], input[type=email], input[type=number], textarea')
+      return Array.prototype.slice.call(el.querySelectorAll(
+        'input[type=text], input[type=password], input[type=email], input[type=number], textarea'))
     },
 
     inputFocus(e) {
@@ -306,12 +306,12 @@ export default {
     nextTabbable() {
       let ctx = this.tabContexts[this.tabContexts.length - 1]
       
-      let els = Array.prototype.slice.call(ctx.querySelectorAll('input, select, textarea'))
+      let els = this.inputElements(ctx)
       els = els.filter(e => { return (e != this.input) && (e.tabIndex >= this.input.tabIndex) })
       els.sort((a, b) => { return a.tabIndex - b.tabIndex })
       if (els.length) return els[0]
       
-      els = Array.prototype.slice.call(ctx.querySelectorAll('input, select, textarea'))
+      els = this.inputElements(ctx)
       els = els.filter(e => { return (e != this.input) && (e.tabIndex > 0) })
       els.sort((a, b) => { return a.tabIndex - b.tabIndex })
       if (els.length) return els[0]

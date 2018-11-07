@@ -44,11 +44,7 @@
           @click="selectNetwork(net)"
         >
           <v-list-tile-avatar>
-            <v-icon v-if="net.bars === 0">mdi-wifi-strength-outline</v-icon>
-            <v-icon v-else-if="net.bars === 1">mdi-wifi-strength-1</v-icon>
-            <v-icon v-else-if="net.bars === 2">mdi-wifi-strength-2</v-icon>
-            <v-icon v-else-if="net.bars === 3">mdi-wifi-strength-3</v-icon>
-            <v-icon v-else-if="net.bars === 4">mdi-wifi-strength-4</v-icon>
+            <wifi-signal-icon :wifiOn="true" :bars="net.bars"/>
           </v-list-tile-avatar>
           <v-list-tile-content>
             <v-list-tile-title>{{net.ssid}}</v-list-tile-title>
@@ -201,6 +197,7 @@ import Loading from '../../components/Loading'
 import Confirm from '../../components/Confirm'
 import store from '../../store/store'
 import bus from '../../bus'
+import WifiSignalIcon from '../../components/WifiSignalIcon'
 
 export default {
   name: 'Wifi',
@@ -223,6 +220,7 @@ export default {
   components: {
     Loading,
     Confirm,
+    WifiSignalIcon,
   },
   
   created() {

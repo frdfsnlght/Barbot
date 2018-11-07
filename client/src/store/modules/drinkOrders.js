@@ -66,7 +66,7 @@ export default {
                 } else {
                     if (item.startedDate) return
                     state.items.push(item)
-                    this.commit('showSnackbar', {text: 'Drink order submitted'}, {root: true})
+                    this.commit('notify', 'Drink order submitted', {root: true})
                 }
             }
             if (state.loadedOne && state.item.id === item.id) {
@@ -85,13 +85,13 @@ export default {
                     let i = state.items.indexOf(o)
                     if (i != -1) {
                         state.items.splice(i, 1)
-                        this.commit('showSnackbar', {text: 'Drink order cancelled'}, {root: true})
+                        this.commit('notify', 'Drink order cancelled', {root: true})
                     }
                 }
             }
             if (state.loadedOne && state.item.id === item.id) {
                 state.item = {}
-                this.commit('showSnackbar', {text: 'Drink order cancelled'}, {root: true})
+                this.commit('notify', 'Drink order cancelled', {root: true})
             }
         },
 
