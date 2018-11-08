@@ -192,7 +192,7 @@ def _normalizeClipConfig(clipConfig):
 
     if 'text' in clipConfig or 'ssml' in clipConfig:
         if 'tts' not in clipConfig:
-            clipConfig['tts'] = _audioConfig['tts']
+            clipConfig['tts'] = {**_audioConfig['tts']}
         else:
             clipConfig['tts'] = {**_audioConfig['tts'], **clipConfig['tts']}
         if 'effects' in clipConfig['tts']:
