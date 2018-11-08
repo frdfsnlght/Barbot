@@ -1,8 +1,36 @@
 
 
+#effects:
+#    - sox {i} {o} gain -l 3
+#
+#tts:
+#    credentials: ~/.google/appCredentials.json
+#    voice.language_code: en-AU
+#    voice.name: en-AU-Wavenet-A
+#    audio.pitch: 0
+#    audio.speaking_rate: 1.2
+#    effects:
+#        - sox {i} {o} remix 1 0
+#    
+#clips:
+#    startup: # Played on the console
+#        -   foo.mp3
+#        -   clip: foo.wav
+#            weight: 0.9
+#            effects:
+#                - increaseVolume.sh
+#                - sox {i} {o} bass 3
+#        -   text: Hello
+#            tts:
+#                audio.speaking_rate: 1
+#            # effects-pre:
+#            # effects:
+#            effects-post:
+#                - sox {i} {o} bass 3
+#        - Hello World!
+#        - I'm alive!
+#        - The bar is open.
 
-effects:
-    - sox {i} {o} gain -l 3
 
 tts:
     credentials: ~/.google/appCredentials.json
@@ -11,23 +39,63 @@ tts:
     audio.pitch: 0
     audio.speaking_rate: 1.2
     effects:
-        - sox {i} {o} remix 1 0
+        # add 3dB, make it stereo
+        - sox {i} {o} gain -l 6 remix 1 1
     
 clips:
+
     startup: # Played on the console
-#        -   foo.mp3
-        -   clip: foo.wav
-            weight: 0.9
-            effects:
-                - increaseVolume
-                - sox {i} {o} bass 3
-        -   text: Hello
-            tts:
-                audio.speaking_rate: 1
-            # effects-pre:
-            # effects:
-            effects-post:
-                - sox {i} {o} bass 3
         - Hello World!
         - I'm alive!
         - The bar is open.
+
+    restart: # Played on the console.
+        - I'll be back.
+        - Going on a short break.
+        - I'm just going to pop off for a bit.
+
+    shutdown: # Played on the console.
+        - Good-bye cruel world!
+        - Daisy, Daisy give me your heart to do
+
+    drinkOrderSubmitted: # Played on the client where the order was placed.
+        - Thank you for your order.
+        - I'll get right on that.
+
+    drinkOrderCancelled: # Played on the client where the order was placed.
+        - Just like it never happened.
+        - We all make mistakes.
+
+    drinkOrderOnHold: # Played on the client where the order was placed.
+        - Just let me know when you're ready.
+        - I'll just set that order aside for now.
+
+    drinkOrderOffHold: # Played on the client where the order was placed.
+        - I'll get right on that.
+
+    waitForDispense: # Played on the console.
+        - Ready to dispense.
+
+    cancelledDispense: # Played on the console.
+        - Full stop!
+        - Putting on the brakes.
+
+    startDispense: # Played on the console.
+        - Here we go!
+        - Starting to dispense.
+
+    glassRemovedDispense: # Played on the console.
+        - Please do not remove the glass while I'm dispensing a drink.
+        - Hey! You can't do that!
+
+    drinkOrderReady: # Played on the client where the order was placed.
+        - Your drink is ready.
+
+    endDispense: # Played on the console.
+        - Dispensing complete.
+
+    idle: # Played on the console.
+        - There must be something better to do around here.
+        - What, no one's drinking anymore?
+        - I guess I'll just check my fluids.
+                

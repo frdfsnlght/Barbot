@@ -5,6 +5,7 @@ __pycache__/
 
 var/*.log
 var/*.db*
+var/*.pid
 # TODO: remove glass
 var/glass
 var/parentalCode
