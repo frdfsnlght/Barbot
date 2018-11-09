@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-import eventlet
-eventlet.monkey_patch()
+#import eventlet
+#eventlet.monkey_patch()
+#eventlet.monkey_patch(socket = True, select = True)
 
 import sys, os, signal, logging, time
 from threading import Thread, Event
@@ -26,8 +27,7 @@ import barbot.wifi
 import barbot.lights
 import barbot.audio
 
-from barbot.db import db, models, ModelError
-import barbot.models
+from barbot.db import initializeDB
 import barbot.core
 from barbot.models.User import User
 
@@ -50,20 +50,20 @@ def webThreadLoop():
     host = config.get('server', 'listenAddress')
     port = config.get('server', 'listenPort')
     logger.info('Web thread started on ' + host + ':' + port)
-    socket.init_app(app)
+    socket.init_app(app, async_mode='eventlet')
     socket.run(
         app,
         host = host,
         port = port,
         debug = config.getboolean('server', 'socketIODebug'),
-        use_reloader  = False)
+        use_reloader  = False
+    )
     logger.info('Web thread stopped')
 
 def startServer():
-    db.connect()
-    db.create_tables(models)    
-    
     logger.info('Server starting')
+    
+    initializeDB()
 
     signal.signal(signal.SIGTERM, catchSIGTERM)
     signal.signal(signal.SIGINT, catchSIGINT)

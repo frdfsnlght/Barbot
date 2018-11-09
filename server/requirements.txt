@@ -8,3 +8,5 @@ passlib
 bcrypt
 google-cloud-texttospeech
 pyyaml
+psutil
+

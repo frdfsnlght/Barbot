@@ -1,5 +1,5 @@
 
-import os, os.path, yaml, logging, random, subprocess, hashlib, re, tempfile, json
+import os, os.path, yaml, logging, random, subprocess, hashlib, re, tempfile, json, time
 from threading import Thread, Event
 from queue import Queue, Empty
 
@@ -146,10 +146,11 @@ def _load():
             if _isAudioFile(file):
                 _logger.info('Found clip {} for {}'.format(file, clipName))
             else:
-                _logger.info('Generating clip {} for {}'.format(file, clipName))
+                _logger.debug('Generating clip {} for {}'.format(file, clipName))
+                startTime = time.time()
                 if not _generateClipFile(file, clipConfig):
                     continue
-                _logger.info('Generated clip {} for {}'.format(file, clipName))
+                _logger.info('Generated clip {} for {} in {:.2f} seconds'.format(file, clipName, time.time() - startTime))
                                 
             weight = 1 if 'weight' not in clipConfig else float(clipConfig['weight'])
             totalWeight = totalWeight + weight
@@ -164,12 +165,21 @@ def _load():
         if clip:
             _clips[clipName] = clip
 
+    if config.getboolean('audio', 'purgeClips'):
+        for file in [f for f in os.listdir(config.getpath('audio', 'audioDir')) if _isAudioFile(f) and f.lower().endswith(('.mp3', '.wav', '.ogg'))]:
+            purgeIt = True
+            for (clipName, clips) in _clips.items():
+                for clip in clips:
+                    if file == clip[0]:
+                        purgeIt = False
+                        break
+                if not purgeIt: break
+            if purgeIt:
+                _logger.info('Purged audio clip {}'.format(file))
+                os.remove(os.path.join(config.getpath('audio', 'audioDir'), file))
             
-    # TODO: generate map
-    # TODO: delete old files
-    
-    bus.emit('audio/clipsLoaded')
     _logger.info('Audio clips loaded')
+    bus.emit('audio/clipsLoaded')
         
 def _isAudioFile(name):
     return os.path.isfile(os.path.join(config.getpath('audio', 'audioDir'), name))
@@ -191,6 +201,10 @@ def _normalizeClipConfig(clipConfig):
         return None
 
     if 'text' in clipConfig or 'ssml' in clipConfig:
+        if 'text' in clipConfig:
+            clipConfig['text'] = re.sub(r"(\r\n|\r|\n)", ' ', clipConfig['text'])
+        elif 'ssml' in clipConfig:
+            clipConfig['ssml'] = re.sub(r"(\r\n|\r|\n)", ' ', clipConfig['ssml'])
         if 'tts' not in clipConfig:
             clipConfig['tts'] = {**_audioConfig['tts']}
         else:
@@ -243,7 +257,7 @@ def _generateClipFileName(clipName, clipConfig):
     for e in clipConfig['effects']:
         hash.update(e.encode())
             
-    return '{}-{}.mp3'.format(clipName, hash.hexdigest())
+    return '{}-{}.{}'.format(clipName, hash.hexdigest(), config.get('audio', 'clipFormat'))
     
 def _generateClipFile(file, clipConfig):
     if 'clip' in clipConfig:
@@ -251,7 +265,7 @@ def _generateClipFile(file, clipConfig):
         deleteSource = False
         
     elif 'text' in clipConfig or 'ssml' in clipConfig:
-        srcFile = _createTempFile(suffix = '.mp3')
+        srcFile = _createTempFile(suffix = '.' + config.get('audio', 'clipFormat'))
         deleteSource = True
         if not _phraseToFile(clipConfig, srcFile):
             try:
@@ -295,7 +309,11 @@ def _phraseToFile(clipConfig, file):
     _logger.debug('TTS config: {}'.format(cfg))
     
     if config.getboolean('audio', 'inProcessTTS'):
-        if not tts(**cfg):
+        try:
+            tts(**cfg)
+            return True
+        except Exception as e:
+            _logger.error(e)
             return False
 
     else:
@@ -317,7 +335,7 @@ def _phraseToFile(clipConfig, file):
             return False
     
 def _applyEffect(srcFile, cmd):
-    dstFile = _createTempFile(suffix = '.mp3')
+    dstFile = _createTempFile(suffix = '.' + config.get('audio', 'clipFormat'))
     cmd = cmd.replace('{i}', srcFile)
     cmd = cmd.replace('{o}', dstFile)
     try:
@@ -367,13 +385,22 @@ def tts(ttsConfig, file, text = None, ssml = None, ):
         voice = texttospeech.types.VoiceSelectionParams(**args)
         
         args = {k[6:]:v for k,v in ttsConfig.items() if k[:6] == 'audio.'}
-        args['audio_encoding'] = texttospeech.enums.AudioEncoding.MP3
+        fmt = config.get('audio', 'clipFormat')
+        if fmt == 'mp3':
+            args['audio_encoding'] = texttospeech.enums.AudioEncoding.MP3
+        elif fmt == 'ogg':
+            args['audio_encoding'] = texttospeech.enums.AudioEncoding.OGG_OPUS
+        elif fmt == 'wav':
+            args['audio_encoding'] = texttospeech.enums.AudioEncoding.LINEAR16
+        else:
+            raise ValueError('Unsupported clip format {}!'.format(fmt))
+            
         audio = texttospeech.types.AudioConfig(**args)
         
         response = client.synthesize_speech(input, voice, audio)
         with open(file, 'wb') as f:
             f.write(response.audio_content)
-        _logger.info('TTS saved to {}'.format(file))
+        _logger.debug('TTS saved to {}'.format(file))
     except Exception as e:
         _logger.error(e)
         raise e

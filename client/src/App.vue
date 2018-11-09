@@ -112,7 +112,7 @@
           <wifi-signal-icon :wifiOn="wifiState.ssid" :bars="wifiState.bars"/>
         </template>
 
-        <volume-control @changed="changeVolume"/>
+        <volume-control/>
         
       </template>
           
@@ -273,10 +273,6 @@ export default {
     showPage(pageTitle) {
       this.pageTitle = pageTitle
       this.showBack = !!pageTitle
-    },
-    
-    changeVolume(v) {
-      this.$refs.audioPlayer.setVolume(v)
     },
     
     checkAdmin(opt) {

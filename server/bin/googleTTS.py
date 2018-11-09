@@ -14,7 +14,10 @@ barbot.logging.configure()
 
 import barbot.audio
 
-for line in sys.stdin:
-    cfg = json.loads(line)
+cfg = json.loads(sys.stdin.read())
+try:
     barbot.audio.tts(**cfg)
+except Exception as e:
+    print(e)
+    sys.exit(1)
 

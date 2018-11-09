@@ -21,7 +21,9 @@
           max="1"
           step="0.05"
           prepend-icon="mdi-minus"              
+          @click:prepend="volumeDown"              
           append-icon="mdi-plus"
+          @click:append="volumeUp"              
           @end="changeVolume"
         ></v-slider>
       </v-list-tile>
@@ -33,19 +35,28 @@
 
 export default {
   name: 'VolumeControl',
-  
+
   computed: {
     volume: {
       get() {
         return this.$store.state.volume
       },
-      set() {}
+      set(v) {
+        this.$socket.emit('setVolume', v, (res) => {
+          if (res.error)
+            this.$store.commit('setError', res.error)
+        })
+      }
     },
   },
 
   methods: {
-    changeVolume(v) {
-      this.$emit('changed', v)
+    volumeDown() {
+      this.volume = this.volume - 0.05
+    },
+    
+    volumeUp() {
+      this.volume = this.volume + 0.05
     },
   },
   

@@ -12,9 +12,7 @@ var/parentalCode
 var/volume
 etc/config.ini
 content
-audio/*.yaml
-audio/*.ini
-audio/*.map
+audio/audio.yaml
 audio/*.mp3
 audio/*.wav
 audio/*.ogg

@@ -5,16 +5,12 @@ Barbot's server.
 * python3
 * sox (w/optional mp3 support if using mp3 audio, which is the default)
 * Google Cloud Text-To-Speech (free)
+* see requirements.txt
 
 ## TODO
-* add audio support for wav and ogg
-* remove old audio files
-
-* add PID check to daemon startup; if process isn't running, start it
-*   how to detect if crashed?
+* import data
+* estimate pump settings in default config
 
 * debug sporadic lights
 
 * script db export/import
-
-* different events for non/alcoholic?

@@ -11,6 +11,7 @@ export default {
   
   data() {
     return {
+      suppressVolumeBing: true,
       player: false,
       playing: false,
       queue: [],
@@ -22,7 +23,23 @@ export default {
       'volume',
     ]),
   },
-      
+  
+  watch: {
+    volume() {
+      if (this.suppressVolumeBing)
+        this.suppressVolumeBing = false
+      else {
+        let a = this.$refs.volumeEl
+        if (! a.ended) {
+          a.pause()
+          a.currentTime = 0
+        }
+        a.volume = this.volume
+        a.play()
+      }
+    },
+  },
+    
   methods: {
   
     playNext() {
@@ -36,21 +53,6 @@ export default {
       }
     },
     
-    setVolume(volume, play = true) {
-      this.$socket.emit('setVolume', volume, (res) => {
-        if (res.error) {
-          this.$store.commit('setError', res.error)
-        } else if (play) {
-          let a = this.$refs.volumeEl
-          if (! a.ended) {
-            a.pause()
-            a.currentTime = 0
-          }
-          a.volume = this.volume
-          a.play()
-        }
-      })
-    }
   },
   
   sockets: {
