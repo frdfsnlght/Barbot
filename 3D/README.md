@@ -22,15 +22,15 @@ Enclosure       | Dispenser Head Part C       | PLA       | 0.15        | 40% Gr
 Enclosure       | Dispenser Head Part D       | ABS       | 0.15        | 40% Grid          | 2         | 7/5       | 1
 Pump            | Sun Gear                    | PLA       | 0.15        | 100% Rectilinear  | 5         | 7/5       | 32    X
 Pump            | Sun Roller                  | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
-Pump            | Planet Gear                 | PLA       | 0.15        | 100% Rectilinear  | 5         | 7/5       | 64        5.5
-Pump            | Planet Roller               | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 32    X   9
+Pump            | Planet Gear                 | PLA       | 0.15        | 100% Rectilinear  | 5         | 7/5       | 64        5.5 (16)/7.75 (22)
+Pump            | Planet Roller               | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 32    X
 Pump            | Clamp Block Left            | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | Clamp Block Right           | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
-Pump            | Motor Plate                 | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    12  1.5/2.75
-Pump            | Ring Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    3   2
-Pump            | Ring Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16        2
-Pump            | Body Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    10  4.5
-Pump            | Body Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16        3
+Pump            | Motor Plate                 | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
+Pump            | Ring Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    4   2/7.25 (4)
+Pump            | Ring Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16        2/7.25 (4)
+Pump            | Body Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    10  4.5 (2)/9.25 (4)
+Pump            | Body Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16        3/6.5 (4)
 
 
 ## Hardware BOM
