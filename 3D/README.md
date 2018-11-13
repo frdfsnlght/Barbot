@@ -27,10 +27,10 @@ Pump            | Planet Roller               | PLA       | 0.15        | 50% Gr
 Pump            | Clamp Block Left            | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | Clamp Block Right           | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | Motor Plate                 | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
-Pump            | Ring Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    4   2/7.25 (4)
-Pump            | Ring Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16        2/7.25 (4)
-Pump            | Body Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    10  4.5 (2)/9.25 (4)
-Pump            | Body Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16        3/6.5 (4)
+Pump            | Ring Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
+Pump            | Ring Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    4    7 (4)
+Pump            | Body Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
+Pump            | Body Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
 
 
 ## Hardware BOM
@@ -38,11 +38,11 @@ Pump            | Body Plate B                | PLA       | 0.15        | 50% Gr
 Description                                 | Quantity  | URL                                   | Unit Quantity | Price/Unit
 ---                                         | ---       | ---                                   | ---           | ---
 #8 x 5/8" SS Phillips Round Head Screws     | 60        | https://www.mcmaster.com/92470A196    | 100           | $6.09
+#8 x 5/8" SS Phillips Oval Head Screws      | 60        | https://www.mcmaster.com/90315A467    | 100           | $6.03
 #8 x 1" SS Phillips Round Head Screws       | 2         | https://www.mcmaster.com/92470A199    | 100           | $8.13
 #8 x 5/8" SS Phillips Flat Head Screws      | 18        | https://www.mcmaster.com/90065A195    | 100           | $5.50
 #6 x 3/4" SS Phillips Flat Head Screws      | 10 or:    | https://www.mcmaster.com/90065A151    | 100           | $4.28
 #6 x 5/8" SS Phillips Flat Head Screws      | 10        | https://www.mcmaster.com/90065A149    | 100           | $3.89
-also need 2 #6 machine screws/nuts for hinge
 #4-40 x 5/8" Steel Phillips Flat Head Mach Screws| 22        | https://www.mcmaster.com/90273A112    | 100           | $2.74
 #4-40 Steel Hex Nuts                        | 22        | https://www.mcmaster.com/90480A005    | 100           | $0.89
 #8 x 1/4" x 1/4" Nylon Spacers              | 26        | https://www.mcmaster.com/94639A293    | 100           | $8.75
@@ -60,3 +60,10 @@ Pump hardware:
 Touchscreen bracket:
 3mm x ?                                     4
 
+Fan:
+#8 x 1 1/4" SS Phillips Oval Head Mach Screws   4
+#8 x 32 Hex Nuts                                4
+
+Power socket:
+M3 x 10 SS Phillips Oval Head Mach Screws       2
+M3 Hex Nuts                                     2
