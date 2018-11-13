@@ -22,9 +22,9 @@ Enclosure       | [Dispenser Head Part A](STLs/Dispenser Head Part A.stl)   | PL
 Enclosure       | [Dispenser Head Part B](STLs/Dispenser Head Part B.stl)   | PLA       | 20% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part C](STLs/Dispenser Head Part C.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part D](STLs/Dispenser Head Part D.stl)   | PETG      | 40% Grid          | 2         | 7/5       | 1
-Enclosure       | [Touch Screen Bracket](STLs/Touchscreen Bracket.stl)      | PETG      | 
-Enclosure       | [Speaker Grill](STLs/Speaker Grill.stl)                   | PETG      | 20% Honeycomb     | 8         | 0/0       | 2
-Enclosure       | [Drip Tray](STLs/Drip Tray.stl)                           | PETG      | 
+Enclosure       | [Touch Screen Bracket](STLs/Touchscreen Bracket.stl)      | PETG      | 50% Grid          | 2         | 7/5       | 2     0.75
+Enclosure       | [Speaker Grill](STLs/Speaker Grill.stl)                   | PETG      | 20% Honeycomb     | 8         | 0/0       | 2     1.5
+Enclosure       | [Drip Tray](STLs/Drip Tray.stl)                           | PETG      | 20% Grid          | 2         | 7/5       | 1     8.25
 Pump            | [Sun Gear](STLs/Sun Gear.stl)                             | PLA       | 100% Rectilinear  | 5         | 7/5       | 32    X
 Pump            | [Sun Roller](STLs/Sun Roller.stl)                         | PLA       | 50% Grid          | 5         | 7/5       | 16    X
 Pump            | [Planet Gear](STLs/Planet Gear.stl)                       | PLA       | 100% Rectilinear  | 5         | 7/5       | 64        5.5 (16)/7.75 (22)
@@ -45,7 +45,7 @@ I've included links and approximate pricing where I could. Some of the online qu
 
 ### Hardware
 
-Each item is linked to a McMaster-Carr product page and lists a price as of November 2018. I actually purcahsed much of this
+Each item is linked to a McMaster-Carr product page and lists a price as of November 2018. I actually purchased much of this
 from my local hardware store, but the larger quantity items were bought online.
 
 Description                                                                                 | Quantity | Price
@@ -89,13 +89,13 @@ Description                                                                     
  *Relays*                                                                                   |   8
  *LED Panel*                                                                                |   4
  *Amplifier*                                                                                |   4
- *Speakers*                                                                                 |   8
 [3mm x 30mm SS Socket Head Machine Screws](https://www.mcmaster.com/91292A022)              |  50 | $4.08
  *Dispenser Head*                                                                           |   4
 [3mm x 25mm SS Socket Head Machine Screws](https://www.mcmaster.com/91292A020)              | 100 | $6.87
  *Pumps*                                                                                    |  80
 [3mm x 20mm SS Socket Head Machine Screws](https://www.mcmaster.com/91292A123)              | 100 | $6.44
  *Dispenser Head*                                                                           |   1
+ *Speakers*                                                                                 |   8
 [3mm x 10mm SS Hex Drive Flat Head Machine Screws](https://www.mcmaster.com/92125A130)      | 100 | $5.81
  *Power Socket*                                                                             |   2
 [3mm x 8mm SS Phillips Pan Head Machine Screws](https://www.mcmaster.com/92000A118)         | 100 | $4.33
@@ -118,13 +118,6 @@ Description                                                                     
  *Dispenser Head*                                                                           |   1
 [3/4" x 9/16" Rubber Feet](https://www.mcmaster.com/8884T21)                                |  10 | $5.17
  *Bottom*                                                                                   |   4
-
-Touchscreen bracket:
-3mm x ?                                     4
-
-Speakers:
-M3 x ? SS Socket Head Machine Screws, 8
-x M3 SS Hex Nuts, 8
 
 ### Electronics
 
