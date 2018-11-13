@@ -7,6 +7,7 @@ export default {
         items: [],
         loading: false,
         loadedAll: false,
+        flushing: false,
     },
     
     getters: {
@@ -15,7 +16,13 @@ export default {
                 return a.id - b.id
             })
         },
+        sortedFlushablePumps(state) {
+            return state.items.filter(p => { return (! p.state) || (p.state == 'dirty') }).sort((a, b) => {
+                return a.id - b.id
+            })
+        },
         anyPumpRunning(state) {
+            if (state.flushing) return true
             let i = state.items.find((e) => { return e.running })
             return !!i
         },
@@ -45,6 +52,10 @@ export default {
                     Object.assign(i, item)
                 }
             }
+        },
+
+        socket_pumpsFlushing(state, flushing) {
+            state.flushing = flushing
         },
 
     },

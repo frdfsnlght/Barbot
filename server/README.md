@@ -8,6 +8,8 @@ Barbot's server.
 * see requirements.txt
 
 ## TODO
+* implement pump flush in firmware
+* move core.pumpSetup to Pump.setup
 * import data
 * estimate pump settings in default config
 

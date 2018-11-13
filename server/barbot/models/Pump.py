@@ -84,6 +84,8 @@ class Pump(BarbotModel):
     EMPTY = 'empty'
     DIRTY = 'dirty'
     
+    flushing = False
+    
     @staticmethod
     def getReadyPumps():
         return Pump.select().where(Pump.state == Pump.READY).execute()
@@ -131,6 +133,43 @@ class Pump(BarbotModel):
         p = Pump.get(Pump.id == int(params['id']))
         p.clean(float(params['amount']) if 'amount' in params else (p.volume * config.getfloat('pumps', 'cleanFactor')), *args, **kwargs)
         
+    @staticmethod
+    def startFlush(ids):
+        if Pump.flushing:
+            raise ModelError('Pumps are already flushing!')
+        pumps = []
+        for pump in Pump.select():
+            if pump.running:
+                raise ModelError('At least one pump is currently running!')
+            if pump.id in ids:
+                pumps.append(pump)
+                
+        try:
+            serial.write('PF{}'.format(','.join([str(pump.id - 1) for pump in pumps])))
+            for pump in pumps:
+                pump.running = True
+                pump.save()
+        except serial.SerialError as e:
+            _logger.error('Pump error: {}'.format(str(e)))
+                
+        _logger.info('Pumps {} started flush'.format(','.join([str(id) for id in ids])))
+        Pump.flushing = True
+        bus.emit('model/pump/flushing')
+    
+    @staticmethod
+    def stopFlush():
+        pumps = [pump for pump in Pump.select() if pump.running]
+        try:
+            serial.write('PF')
+            for pump in pumps:
+                pump.running = False
+                pump.save()
+        except serial.SerialError as e:
+            _logger.error('Pump error: {}'.format(str(e)))
+        
+        _logger.info('Pumps {} stopped flush'.format(','.join([str(pump.id) for pump in pumps])))
+        Pump.flushing = False
+        bus.emit('model/pump/flushing')
         
     # override
     def save(self, *args, **kwargs):

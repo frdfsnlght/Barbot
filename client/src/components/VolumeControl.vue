@@ -24,7 +24,6 @@
           @click:prepend="volumeDown"              
           append-icon="mdi-plus"
           @click:append="volumeUp"              
-          @end="changeVolume"
         ></v-slider>
       </v-list-tile>
     </v-list>

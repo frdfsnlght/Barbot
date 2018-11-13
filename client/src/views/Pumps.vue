@@ -7,6 +7,23 @@
     <template v-else>
     
       <v-list two-line>
+      
+        <v-list-tile
+          avatar
+          ripple
+          :disabled="anyPumpRunning && !flushing"
+          @click="openFlush()"
+        >
+          <v-list-tile-avatar>
+            <v-icon>mdi-spray-bottle</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>Flush Pumps</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        
+        <v-divider/>
+    
         <v-list-tile
           v-for="item in items"
           :key="item.id"
@@ -144,6 +161,7 @@
       </v-menu>
       
       <pump-wizard ref="pumpWizard" :pump="item"></pump-wizard>
+      <pump-flush-dialog ref="pumpFlushDialog"></pump-flush-dialog>
       
     </template>
     
@@ -158,6 +176,7 @@ import store from '../store/store'
 import bus from '../bus'
 import Loading from '../components/Loading'
 import PumpWizard from '../components/PumpWizard'
+import PumpFlushDialog from '../components/PumpFlushDialog'
 
 export default {
   name: 'Ingredients',
@@ -172,6 +191,7 @@ export default {
   components: {
     Loading,
     PumpWizard,
+    PumpFlushDialog,
   },
   
   created() {
@@ -190,12 +210,17 @@ export default {
     }),
     ...mapState({
       loading: state => state.pumps.loading,
+      flushing: state => state.pumps.flushing,
       isConsole: state => state.isConsole,
       pumpSetup: state => state.pumpSetup,
     })
   },
   
   methods: {
+  
+    openFlush() {
+      this.$refs.pumpFlushDialog.open()
+    },
   
     itemIngredient(item) {
       if (! item.ingredient) return '<no ingredient>'

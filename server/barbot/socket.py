@@ -92,6 +92,7 @@ def _socket_connect():
     emit('clientOptions', _buildClientOptions())
     emit('dispenserHold', core.dispenserHold)
     emit('pumpSetup', core.pumpSetup)
+    emit('pumpsFlushing', Pump.flushing)
     emit('glassReady', core.glassReady)
     emit('parentalLock', True if core.getParentalCode() else False)
     dispenseDrinkOrder = core.dispenseDrinkOrder
@@ -390,6 +391,22 @@ def socket_cleanPump(params):
     except ModelError as e:
         return error(e)
 
+@socket.on('startFlushingPumps')
+def socket_startFlushingPumps(ids):
+    try:
+        Pump.startFlush(ids)
+        return success()
+    except ModelError as e:
+        return error(e)
+        
+@socket.on('stopFlushingPumps')
+def socket_stopFlushingPumps():
+    try:
+        Pump.stopFlush()
+        return success()
+    except ModelError as e:
+        return error(e)
+        
 @socket.on('clearAlerts')
 def socket_clearAlerts():
     alerts.clear()
@@ -540,6 +557,10 @@ def _bus_modelDrinkOrderDeleted(o):
 @bus.on('model/pump/saved')
 def _bus_modelPumpSaved(p):
     socket.emit('pumpSaved', p.toDict(ingredient = True))
+
+@bus.on('model/pump/flushing')
+def _bus_modelPumpFlushing():
+    socket.emit('pumpsFlushing', Pump.flushing)
 
 
     
