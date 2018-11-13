@@ -28,7 +28,7 @@ Pump            | Clamp Block Left            | PLA       | 0.15        | 20% Gr
 Pump            | Clamp Block Right           | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | Motor Plate                 | PLA       | 0.15        | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | Ring Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
-Pump            | Ring Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    4    7 (4)
+Pump            | Ring Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    12    7 (4)
 Pump            | Body Plate A                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
 Pump            | Body Plate B                | PLA       | 0.15        | 50% Grid          | 5         | 7/5       | 16    X
 
@@ -37,7 +37,7 @@ Pump            | Body Plate B                | PLA       | 0.15        | 50% Gr
 
 Description                                 | Quantity  | URL                                   | Unit Quantity | Price/Unit
 ---                                         | ---       | ---                                   | ---           | ---
-#8 x 5/8" SS Phillips Round Head Screws     | 60        | https://www.mcmaster.com/92470A196    | 100           | $6.09
+X #8 x 5/8" SS Phillips Round Head Screws     | 60        | https://www.mcmaster.com/92470A196    | 100           | $6.09
 #8 x 5/8" SS Phillips Oval Head Screws      | 60        | https://www.mcmaster.com/90315A467    | 100           | $6.03
 #8 x 1" SS Phillips Round Head Screws       | 2         | https://www.mcmaster.com/92470A199    | 100           | $8.13
 #8 x 5/8" SS Phillips Flat Head Screws      | 18        | https://www.mcmaster.com/90065A195    | 100           | $5.50
