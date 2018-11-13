@@ -38,12 +38,12 @@ Pump            | Body Plate B                | PLA       | 0.15        | 50% Gr
 This is a mostly complete list of nuts/bolts/hardware that will be required. Each item is linked to a McMaster-Carr
 product page and lists a unit price as November 2018.
 
-Description |                                                                               | Quantity | Price
----         |                                                                               | ---      | ---
+Description                                                                                 | Quantity | Price
+---                                                                                         | ---      | ---
 [#8 x 5/8" SS Phillips Oval Head Metal Screws](https://www.mcmaster.com/90315A467)          | 100 | $6.03
- *Side Panels*
- *Dispenser Panels*
- *Controller*
+ *Side Panels*                                                                              | 10
+ *Dispenser Panels*                                                                         | 10
+ *Controller*                                                                               | 10
 [#8 x 1" SS Phillips Round Head Metal Screws](https://www.mcmaster.com/92470A199)           | 100 | $8.13
  *LED Panel*                                                                                |   2
 [#8 x 5/8" SS Phillips Flat Head Metal Screws](https://www.mcmaster.com/90065A195)          | 100 | $5.50
