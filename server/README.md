@@ -9,7 +9,8 @@ Barbot's server.
 
 ## TODO
 * implement pump flush in firmware
-* move core.pumpSetup to Pump.setup
+* implement checksums in firmware
+* implement checksums in server
 * import data
 * estimate pump settings in default config
 
