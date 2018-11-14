@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-#import eventlet
-#eventlet.monkey_patch()
+import eventlet
+eventlet.monkey_patch()
 
 import sys, os, signal, logging, time
 from threading import Thread, Event
