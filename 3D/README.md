@@ -25,6 +25,8 @@ Enclosure       | [Dispenser Head Part D](STLs/Dispenser%20Head%20Part%20D.stl) 
 Enclosure       | [Touch Screen Bracket](STLs/Touchscreen%20Bracket.stl)        | PETG      | 50% Grid          | 2         | 7/5       | 2     0.75
 Enclosure       | [Speaker Grill](STLs/Speaker%20Grill.stl)                     | PETG      | 20% Honeycomb     | 8         | 0/0       | 2     1.5
 Enclosure       | [Drip Tray](STLs/Drip%20Tray.stl)                             | PETG      | 20% Grid          | 2         | 7/5       | 1     8.25
+Enclosure       | [Fan Grill](STLs/Fan%20Grill.stl)                             | PETG      | 20% Honeycomb     | 8         | 0/0       | 1
+Enclosure       | [Raspberry Pi Offset Bracket](STLs/Raspberry%20Pi%20Offset%20Bracket.stl) | PLA      | 20% Grid     | 2         | 7/5       | 4
 Pump            | [Sun Gear](STLs/Sun%20Gear.stl)                               | PLA       | 100% Rectilinear  | 5         | 7/5       | 32    X
 Pump            | [Sun Roller](STLs/Sun%20Roller.stl)                           | PLA       | 50% Grid          | 5         | 7/5       | 16    X
 Pump            | [Planet Gear](STLs/Planet%20Gear.stl)                         | PLA       | 100% Rectilinear  | 5         | 7/5       | 64        5.5 (16)/7.75 (22)
