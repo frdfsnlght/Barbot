@@ -16,26 +16,26 @@ the stepper motor can be printed and all parts have been exported to the STLs di
 
 All these parts were sliced with Slic3r Prusa Edition for an Original Prusa MK3 with a layer height of 0.15mm.
 
-File            | Part                                                      | Material  | Infill            | Perimeters| Top/Bot   | Quantity
----             | ---                                                       | ---       | ---               | ---       | ---       | ---
-Enclosure       | [Dispenser Head Part A](STLs/Dispenser Head Part A.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
-Enclosure       | [Dispenser Head Part B](STLs/Dispenser Head Part B.stl)   | PLA       | 20% Grid          | 2         | 7/5       | 1
-Enclosure       | [Dispenser Head Part C](STLs/Dispenser Head Part C.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
-Enclosure       | [Dispenser Head Part D](STLs/Dispenser Head Part D.stl)   | PETG      | 40% Grid          | 2         | 7/5       | 1
-Enclosure       | [Touch Screen Bracket](STLs/Touchscreen Bracket.stl)      | PETG      | 50% Grid          | 2         | 7/5       | 2     0.75
-Enclosure       | [Speaker Grill](STLs/Speaker Grill.stl)                   | PETG      | 20% Honeycomb     | 8         | 0/0       | 2     1.5
-Enclosure       | [Drip Tray](STLs/Drip Tray.stl)                           | PETG      | 20% Grid          | 2         | 7/5       | 1     8.25
-Pump            | [Sun Gear](STLs/Sun Gear.stl)                             | PLA       | 100% Rectilinear  | 5         | 7/5       | 32    X
-Pump            | [Sun Roller](STLs/Sun Roller.stl)                         | PLA       | 50% Grid          | 5         | 7/5       | 16    X
-Pump            | [Planet Gear](STLs/Planet Gear.stl)                       | PLA       | 100% Rectilinear  | 5         | 7/5       | 64        5.5 (16)/7.75 (22)
-Pump            | [Planet Roller](STLs/Planet Roller.stl)                   | PLA       | 50% Grid          | 5         | 7/5       | 32    X
-Pump            | [Clamp Block Left](STLs/Clamp Block Left.stl)             | PLA       | 20% Grid          | 2         | 7/5       | 16    X
-Pump            | [Clamp Block Right](STLs/Clamp Block Right.stl)           | PLA       | 20% Grid          | 2         | 7/5       | 16    X
-Pump            | [Motor Plate](STLs/Motor Plate.stl)                       | PLA       | 20% Grid          | 2         | 7/5       | 16    X
-Pump            | [Ring Plate A](STLs/Ring Plate A.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
-Pump            | [Ring Plate B](STLs/Ring Plate B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    12    7 (4)
-Pump            | [Body Plate A](STLs/Body Plate A.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
-Pump            | [Body Plate B](STLs/Body Plate B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
+File            | Part                                                          | Material  | Infill            | Perimeters| Top/Bot   | Quantity
+---             | ---                                                           | ---       | ---               | ---       | ---       | ---
+Enclosure       | [Dispenser Head Part A](STLs/Dispenser%20Head%20Part%20A.stl) | PLA       | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | [Dispenser Head Part B](STLs/Dispenser%20Head%20Part%20B.stl) | PLA       | 20% Grid          | 2         | 7/5       | 1
+Enclosure       | [Dispenser Head Part C](STLs/Dispenser%20Head%20Part%20C.stl) | PLA       | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | [Dispenser Head Part D](STLs/Dispenser%20Head%20Part%20D.stl) | PETG      | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | [Touch Screen Bracket](STLs/Touchscreen%20Bracket.stl)        | PETG      | 50% Grid          | 2         | 7/5       | 2     0.75
+Enclosure       | [Speaker Grill](STLs/Speaker%20Grill.stl)                     | PETG      | 20% Honeycomb     | 8         | 0/0       | 2     1.5
+Enclosure       | [Drip Tray](STLs/Drip%20Tray.stl)                             | PETG      | 20% Grid          | 2         | 7/5       | 1     8.25
+Pump            | [Sun Gear](STLs/Sun%20Gear.stl)                               | PLA       | 100% Rectilinear  | 5         | 7/5       | 32    X
+Pump            | [Sun Roller](STLs/Sun%20Roller.stl)                           | PLA       | 50% Grid          | 5         | 7/5       | 16    X
+Pump            | [Planet Gear](STLs/Planet%20Gear.stl)                         | PLA       | 100% Rectilinear  | 5         | 7/5       | 64        5.5 (16)/7.75 (22)
+Pump            | [Planet Roller](STLs/Planet%20Roller.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 32    X
+Pump            | [Clamp Block Left](STLs/Clamp%20Block%20Left.stl)             | PLA       | 20% Grid          | 2         | 7/5       | 16    X
+Pump            | [Clamp Block Right](STLs/Clamp%20Block%20Right.stl)           | PLA       | 20% Grid          | 2         | 7/5       | 16    X
+Pump            | [Motor Plate](STLs/Motor%20Plate.stl)                         | PLA       | 20% Grid          | 2         | 7/5       | 16    X
+Pump            | [Ring Plate A](STLs/Ring%20Plate%20A.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
+Pump            | [Ring Plate B](STLs/Ring%20Plate%20B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
+Pump            | [Body Plate A](STLs/Body%20Plate%20A.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
+Pump            | [Body Plate B](STLs/Body%20Plate%20B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
 
 ## Bill of Materials
 
