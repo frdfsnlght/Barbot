@@ -19,7 +19,7 @@ All these parts were sliced with Slic3r Prusa Edition for an Original Prusa MK3 
 File            | Part                                                      | Material  | Infill            | Perimeters| Top/Bot   | Quantity
 ---             | ---                                                       | ---       | ---               | ---       | ---       | ---
 Enclosure       | [Dispenser Head Part A](./3D/STLs/Dispenser Head Part A.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
-Enclosure       | [Dispenser Head Part B](STLs/Dispenser Head Part B.stl)   | PLA       | 20% Grid          | 2         | 7/5       | 1
+Enclosure       | [Dispenser Head Part B](./STLs/Dispenser Head Part B.stl)   | PLA       | 20% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part C](STLs/Dispenser Head Part C.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part D](STLs/Dispenser Head Part D.stl)   | PETG      | 40% Grid          | 2         | 7/5       | 1
 Enclosure       | [Touch Screen Bracket](STLs/Touchscreen Bracket.stl)      | PETG      | 50% Grid          | 2         | 7/5       | 2     0.75
