@@ -91,7 +91,7 @@ def _socket_connect():
     _logger.info('Connection opened from ' + request.remote_addr)
     emit('clientOptions', _buildClientOptions())
     emit('dispenserHold', core.dispenserHold)
-    emit('pumpSetup', core.pumpSetup)
+    emit('pumpsSetup', Pump.setup)
     emit('pumpsFlushing', Pump.flushing)
     emit('glassReady', core.glassReady)
     emit('parentalLock', True if core.getParentalCode() else False)
@@ -460,10 +460,6 @@ def _bus_dispenseState(dispenseState, dispenseDrinkOrder):
         dispenseDrinkOrder = dispenseDrinkOrder.toDict(drink = True, glass = True)
     socket.emit('dispenseState', {'state': dispenseState, 'order': dispenseDrinkOrder})
     
-@bus.on('core/pumpSetup')
-def _bus_pumpSetup(pumpSetup):
-    socket.emit('pumpSetup', pumpSetup)
-
 @bus.on('core/glassReady')
 def _bus_glassReady(ready):
     socket.emit('glassReady', ready)
@@ -557,6 +553,10 @@ def _bus_modelDrinkOrderDeleted(o):
 @bus.on('model/pump/saved')
 def _bus_modelPumpSaved(p):
     socket.emit('pumpSaved', p.toDict(ingredient = True))
+
+@bus.on('model/pump/setup')
+def _bus_modelPumpSetup():
+    socket.emit('pumpsSetup', Pump.setup)
 
 @bus.on('model/pump/flushing')
 def _bus_modelPumpFlushing():

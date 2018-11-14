@@ -84,6 +84,7 @@ class Pump(BarbotModel):
     EMPTY = 'empty'
     DIRTY = 'dirty'
     
+    setup = False
     flushing = False
     
     @staticmethod
@@ -97,6 +98,24 @@ class Pump(BarbotModel):
     @staticmethod
     def getPumpWithIngredientId(id):
         return Pump.select().where((Pump.state == Pump.READY) & (Pump.ingredient_id == id)).first()
+    
+    @staticmethod
+    def startSetup():
+        if Pump.setup:
+            raise ModelError('Pumps are already in setup!')
+        if anyPumpsRunning():
+            raise ModelError('At least one pump is currently running!')
+        Pump.setup = True
+        bus.emit('model/pump/setup')
+    
+    @staticmethod
+    def stopSetup():
+        if not Pump.setup:
+            return
+        #if anyPumpsRunning():
+        #    raise ModelError('At least one pump is currently running!')
+        Pump.setup = False
+        bus.emit('model/pump/setup')
     
     @staticmethod
     def enablePump(id):
@@ -135,15 +154,21 @@ class Pump(BarbotModel):
         
     @staticmethod
     def startFlush(ids):
+        if not Pump.setup:
+            raise ModelError('Pumps are not in setup!')
         if Pump.flushing:
             raise ModelError('Pumps are already flushing!')
+        if anyPumpsRunning():
+            raise ModelError('At least one pump is currently running!')
+        
         pumps = []
         for pump in Pump.select():
-            if pump.running:
-                raise ModelError('At least one pump is currently running!')
             if pump.id in ids:
-                pumps.append(pump)
-                
+                if pump.state == Pump.DIRTY or pump.state == Pump.UNUSED:
+                    pumps.append(pump)
+                else:
+                    raise ModelError('Invalid pump state!')
+
         try:
             serial.write('PF{}'.format(','.join([str(pump.id - 1) for pump in pumps])))
             for pump in pumps:
@@ -163,6 +188,8 @@ class Pump(BarbotModel):
             serial.write('PF')
             for pump in pumps:
                 pump.running = False
+                if pump.state == Pump.DIRTY:
+                    pump.state == Pump.UNUSED
                 pump.save()
         except serial.SerialError as e:
             _logger.error('Pump error: {}'.format(str(e)))
@@ -207,6 +234,8 @@ class Pump(BarbotModel):
         return self.state == Pump.READY
         
     def load(self, params):
+        if not Pump.setup:
+            raise ModelError('Pumps are not in setup!')
         i = Ingredient.get_or_none(Ingredient.id == int(params['ingredientId']))
         if not i:
             raise ModelError('Ingredient not found!')
@@ -224,6 +253,8 @@ class Pump(BarbotModel):
             raise ModelError('Invalid pump state!')
     
     def unload(self):
+        if not Pump.setup:
+            raise ModelError('Pumps are not in setup!')
         if self.state == Pump.LOADED:
             self.state = Pump.UNUSED
             self.ingredient = None
@@ -235,6 +266,8 @@ class Pump(BarbotModel):
             raise ModelError('Invalid pump state!')
     
     def prime(self, amount, useThread = False):
+        if not Pump.setup:
+            raise ModelError('Pumps are not in setup!')
         if self.state == Pump.LOADED or self.state == Pump.READY:
             if useThread:
                 self.forwardAsync(amount)
@@ -247,6 +280,8 @@ class Pump(BarbotModel):
             raise ModelError('Invalid pump state!')
 
     def drain(self, amount, useThread = False):
+        if not Pump.setup:
+            raise ModelError('Pumps are not in setup!')
         if self.state == Pump.READY or self.state == Pump.EMPTY or self.state == Pump.UNUSED or self.state == Pump.DIRTY:
             if useThread:
                 self.reverseAsync(amount)
@@ -263,6 +298,8 @@ class Pump(BarbotModel):
             raise ModelError('Invalid pump state!')
 
     def clean(self, amount, useThread = False):
+        if not Pump.setup:
+            raise ModelError('Pumps are not in setup!')
         if self.state == Pump.DIRTY or self.state == Pump.UNUSED:
             if useThread:
                 self.forwardAsync(amount)

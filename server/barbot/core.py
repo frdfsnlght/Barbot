@@ -36,7 +36,6 @@ _lastDrinkOrderCheckTime = time.time()
 _lastIdleAudioCheckTime = time.time()
 
 dispenserHold = False
-pumpSetup = False
 glassReady = False
 dispenseState = None
 dispenseControl = None
@@ -135,11 +134,10 @@ def startPumpSetup():
     _requestPumpSetup = True
     
 def stopPumpSetup():
-    global _requestPumpSetup, pumpSetup
+    global _requestPumpSetup
     _requestPumpSetup = False
-    pumpSetup = False
+    Pump.stopSetup()
     _rebuildMenu()
-    bus.emit('core/pumpSetup', pumpSetup)
 
 def setParentalLock(code):
     if not code:
@@ -187,16 +185,15 @@ def setDispenseControl(ctl):
         
         
 def _threadLoop():
-    global _lastDrinkOrderCheckTime, _lastDrinkOrderCheckTime, _requestPumpSetup, pumpSetup
+    global _lastDrinkOrderCheckTime, _lastDrinkOrderCheckTime, _requestPumpSetup
     _logger.info('Core thread started')
     try:
         while not _exitEvent.is_set():
             if _requestPumpSetup:
                 _requestPumpSetup = False
-                pumpSetup = True
-                bus.emit('core/pumpSetup', pumpSetup)
+                Pump.startSetup()
                 
-            while pumpSetup or dispenserHold or anyPumpsRunning():
+            while Pump.setup or dispenserHold or anyPumpsRunning():
                 _checkIdle()
                 time.sleep(1)
             

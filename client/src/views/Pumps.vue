@@ -210,9 +210,9 @@ export default {
     }),
     ...mapState({
       loading: state => state.pumps.loading,
+      setup: state => state.pumps.setup,
       flushing: state => state.pumps.flushing,
       isConsole: state => state.isConsole,
-      pumpSetup: state => state.pumpSetup,
     })
   },
   
@@ -233,7 +233,7 @@ export default {
     },
     
     disableActions() {
-      return !(this.isConsole && this.pumpSetup) || this.anyPumpRunning
+      return !(this.isConsole && this.setup) || this.anyPumpRunning
     },
 
     showMenu(item, e) {

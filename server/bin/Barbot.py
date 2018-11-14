@@ -2,7 +2,6 @@
 
 #import eventlet
 #eventlet.monkey_patch()
-#eventlet.monkey_patch(socket = True, select = True)
 
 import sys, os, signal, logging, time
 from threading import Thread, Event

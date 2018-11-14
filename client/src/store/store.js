@@ -33,7 +33,6 @@ export default new Vuex.Store({
         isConsole: location.hostname === 'localhost',
         dispenserHold: false,
         dispenseState: {},
-        pumpSetup: false,
         glassReady: true,
         parentalLock: false,
         volume: 1,
@@ -71,10 +70,6 @@ export default new Vuex.Store({
             state.dispenseState = dispenseState
         },
     
-        socket_pumpSetup(state, pumpSetup) {
-            state.pumpSetup = pumpSetup
-        },
-
         socket_glassReady(state, glassReady) {
             state.glassReady = glassReady
         },

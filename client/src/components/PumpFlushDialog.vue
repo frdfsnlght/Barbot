@@ -104,7 +104,8 @@ export default {
     },
     
     close() {
-      this.dialog = false
+      if (! this.flushing)
+        this.dialog = false
     },
 
     toggleFlush() {

@@ -7,6 +7,7 @@ export default {
         items: [],
         loading: false,
         loadedAll: false,
+        setup: false,
         flushing: false,
     },
     
@@ -52,6 +53,10 @@ export default {
                     Object.assign(i, item)
                 }
             }
+        },
+
+        socket_pumpsSetup(state, setup) {
+            state.setup = setup
         },
 
         socket_pumpsFlushing(state, flushing) {
