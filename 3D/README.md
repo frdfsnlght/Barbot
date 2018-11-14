@@ -18,7 +18,7 @@ All these parts were sliced with Slic3r Prusa Edition for an Original Prusa MK3 
 
 File            | Part                                                      | Material  | Infill            | Perimeters| Top/Bot   | Quantity
 ---             | ---                                                       | ---       | ---               | ---       | ---       | ---
-Enclosure       | [Dispenser Head Part A](STLs/Dispenser Head Part A.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | [Dispenser Head Part A](../blob/master/3D/STLs/Dispenser Head Part A.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part B](STLs/Dispenser Head Part B.stl)   | PLA       | 20% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part C](STLs/Dispenser Head Part C.stl)   | PLA       | 40% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part D](STLs/Dispenser Head Part D.stl)   | PETG      | 40% Grid          | 2         | 7/5       | 1
@@ -33,7 +33,7 @@ Pump            | [Clamp Block Left](STLs/Clamp Block Left.stl)             | PL
 Pump            | [Clamp Block Right](STLs/Clamp Block Right.stl)           | PLA       | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | [Motor Plate](STLs/Motor Plate.stl)                       | PLA       | 20% Grid          | 2         | 7/5       | 16    X
 Pump            | [Ring Plate A](STLs/Ring Plate A.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
-Pump            | [Ring Plate B](STLs/Ring Plate B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    12    7 (4)
+Pump            | [Ring Plate B](STLs/Ring Plate B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
 Pump            | [Body Plate A](STLs/Body Plate A.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
 Pump            | [Body Plate B](STLs/Body Plate B.stl)                     | PLA       | 50% Grid          | 5         | 7/5       | 16    X
 
