@@ -140,16 +140,22 @@ def _socket_restart():
     if not checkAdmin('restartRequiresAdmin'):
         return error('Permission denied!')
     _logger.info('Client requested restart')
-    core.restart()
-    return success()
+    try:
+        core.restart()
+        return success()
+    except CoreError as e:
+        return error(e)
 
 @socket.on('shutdown')
 def _socket_shutdown():
     if not checkAdmin('shutdownRequiresAdmin'):
         return error('Permission denied!')
     _logger.info('Client requested shutdown')
-    core.shutdown()
-    return success()
+    try:
+        core.shutdown()
+        return success()
+    except CoreError as e:
+        return error(e)
 
 @socket.on('setVolume')
 def _socket_setVolume(volume):
