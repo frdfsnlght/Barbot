@@ -187,10 +187,9 @@ class Pump(BarbotModel):
         try:
             serial.write('PF')
             for pump in pumps:
-                pump.running = False
                 if pump.state == Pump.DIRTY:
                     pump.state == Pump.UNUSED
-                pump.save()
+                    pump.save()
         except serial.SerialError as e:
             _logger.error('Pump error: {}'.format(str(e)))
         

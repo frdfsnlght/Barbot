@@ -103,35 +103,29 @@ def write(cmd, timeout = 5):
         if not _port:
             raise SerialError('Serial port is not open!')
             
-        retries = 0
-        while True:
-            _responseLines = []
-            _responseError = None
-            _responseReceived.clear()
-            _port.write((cmd + '\r\n').encode('ascii'))
-            if timeout:
-                if not _responseReceived.wait(timeout):
-                    _responseError = 'timeout'
-                    break
-            else:
-                _responseReceived.wait()
+        _responseLines = []
+        _responseError = None
+        _responseReceived.clear()
+        buf = cmd.encode('ascii')
+        
+        if cmd[0].isupper():
+            cs = 0
+            for c in buf:
+                cs = cs ^ c
+            buf = buf + b'~' + '{:02X}'.format(cs).encode('ascii')
+
+        _logger.debug('Writing {}'.format(buf))
+        
+        _port.write(buf + b'\r\n')
+        
+        if timeout:
+            if not _responseReceived.wait(timeout):
+                _responseError = 'timeout'
+        else:
+            _responseReceived.wait()
                 
-            if _responseError:
-                raise SerialError(_responseError)
-            if not _responseLines:
-                raise SerialError('Expected echoed command but got nothing!')
-            if _responseLines[0] != cmd:
-                _logger.warning('Command mismatch: wanted "{}", got "{}"'.format(cmd, _responseLines[0]))
-                retries = retries + 1
-                if retries >= config.getint('serial', 'retries'):
-                    _logger.error('Retries exceeded, command failed!')
-                    alerts.add('Serial port command failed!')
-                    raise SerialError('command failed')
-                _logger.warning('Retry {}...'.format(retries))
-                time.sleep(0.1)
-            else:
-                _responseLines.pop(0)
-                break
+        if _responseError:
+            raise SerialError(_responseError)
             
         return _responseLines
    

@@ -7,8 +7,6 @@ var/*.log
 var/*.log.*
 var/*.db*
 var/*.pid
-# TODO: remove glass
-var/glass
 var/parentalCode
 var/volume
 etc/config.ini

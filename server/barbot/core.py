@@ -95,6 +95,9 @@ def _bus_consoleConnect():
 #---------------------
 
 def restart():
+    if Pump.setup or Pump.flushing or Pump.anyPumpsRunning:
+        raise CoreError('Unable to restart while in pump setup or any pumps are running!')
+
     bus.emit('lights/play', 'restart')
     bus.emit('audio/play', 'restart', console = True)
     time.sleep(2)
@@ -108,6 +111,9 @@ def restart():
         _logger.error('Error trying to restart: {}'.format(out.stdout))
         
 def shutdown():
+    if Pump.setup or Pump.flushing or Pump.anyPumpsRunning:
+        raise CoreError('Unable to restart while in pump setup or any pumps are running!')
+        
     bus.emit('lights/play', 'shutdown')
     bus.emit('audio/play', 'shutdown', console = True)
     try:
