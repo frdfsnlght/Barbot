@@ -22,6 +22,7 @@ IN THE SOFTWARE.
 
 /*
     https://github.com/luni64/TeensyStep
+    NOTE: You must set the MaxMotors constant to 17 (PUMPS + 1), line 8 in StepControl.h!
 */
 
 #include <Arduino.h>
@@ -59,6 +60,8 @@ constexpr int SERIAL_SPEEDS[]           = {115200, 58824, 38400, 19200, 9600};
 constexpr int NUM_SERIAL_SPEEDS         = sizeof(SERIAL_SPEEDS) / sizeof(int);
 constexpr int PING_TIMEOUT              = 3000;
 
+constexpr int CHECKSUM_RETRIES          = 3;
+
 
 typedef struct {
     char data[INPUT_BUFFER_LENGTH + 1];
@@ -87,8 +90,6 @@ Stepper pump15(2, PIN_DIR);
 
 Stepper* allPumps[] = {&pump0, &pump1, &pump2, &pump3, &pump4, &pump5, &pump6, &pump7,
                        &pump8, &pump9, &pump10, &pump11, &pump12, &pump13, &pump14, &pump15};
-Stepper* pumpsBank0[] = {&pump0, &pump1, &pump2, &pump3, &pump4, &pump5, &pump6, &pump7};
-Stepper* pumpsBank1[] = {&pump8, &pump9, &pump10, &pump11, &pump12, &pump13, &pump14, &pump15};
 
 StepControl<> pumpCtrl0;
 StepControl<> pumpCtrl1;
@@ -101,11 +102,15 @@ int pumpDir = 0;
 int pumpSpeed = PUMP_DEF_SPEED;
 unsigned pumpAccel = PUMP_DEF_ACCEL;
 bool pumpsEnabled = false;
+bool pumpsFlushing = false;
 
 int serialSpeed = 0;
 
 bool ledOn = false;
 uint32_t lastLEDToggle = 0;
+
+uint8_t checksumRetries = 0;
+char lastSerial1Command[INPUT_BUFFER_LENGTH + 1];
 
 
 
@@ -134,8 +139,6 @@ void loopSerial() {
         ch = Serial.read();
         if ((ch == '\r') || (ch == '\n')) {
             if (inputBuffers[BUF_SERIAL].length) {
-                send(inputBuffers[BUF_SERIAL].data);
-                sendChar('\n');
                 processCommand();
             }
             resetInputBuffer(BUF_SERIAL);
@@ -160,12 +163,19 @@ void loopSerial() {
 }
 
 void loopSerial1() {
-    while (Serial1.available()) {
+
+    while (serialSpeed && Serial1.available()) {
         ch = Serial1.read();
         if ((ch == '\r') || (ch == '\n')) {
             if (inputBuffers[BUF_SERIAL1].length) {
-                send(inputBuffers[BUF_SERIAL1].data);
-                sendChar('\n');
+                if ((strcmp(inputBuffers[BUF_SERIAL1].data, "!CHK") == 0) && (checksumRetries < CHECKSUM_RETRIES)) {
+                    checksumRetries++;
+                    sendMessage("retry");
+                    Serial1.println(lastSerial1Command);
+                } else {
+                    send(inputBuffers[BUF_SERIAL1].data);
+                    sendChar('\n');
+                }
             }
             resetInputBuffer(BUF_SERIAL1);
         } else {
@@ -188,9 +198,13 @@ void loopPumps() {
     }
     if (running) {
         delay(1);
-    } else if (pumpsEnabled) {
-        disablePumps();
-        pumpDir = 0;
+    } else {
+        if (pumpsFlushing)
+            pumpsFlushing = false;
+        if (pumpsEnabled) {
+            disablePumps();
+            pumpDir = 0;
+        }
     }
 }
 
@@ -296,28 +310,46 @@ void setPumpSpeed(int speed) {
 
 void processCommand() {
     char* cmd = inputBuffers[BUF_SERIAL].data;
+    int len = inputBuffers[BUF_SERIAL].length;
+    
     switch (cmd[0]) {
         case 'C':
+            if (! processChecksum(cmd, len)) break;
         case 'c':
             processCommCommand(cmd + 1);
             break;
         case 'P':
+            if (! processChecksum(cmd, len)) break;
         case 'p':
             processPumpCommand(cmd + 1);
             break;
-        case 'R':
-        case 'r':
-            Serial1.println(inputBuffers[BUF_SERIAL].data);
-            processPowerCommand(cmd + 1);
-            break;
         default:
-            if (serialSpeed)
-                Serial1.println(inputBuffers[BUF_SERIAL].data);
+            if (serialSpeed) {
+                strcpy(lastSerial1Command, inputBuffers[BUF_SERIAL].data);
+                Serial1.println(lastSerial1Command);
+                checksumRetries = 0;
+            }
             break;
     }
 }
 
-
+bool processChecksum(char* cmd, int len) {
+    if ((len <= 3) || (cmd[len - 3] != '~')) {
+        sendError("CHK");
+        return false;
+    }
+    char* hex = cmd + len - 2;
+    uint8_t sentCS = readHex(&hex);
+    uint8_t calcCS = 0;
+    for (int i = 0; i < len; i++)
+        calcCS ^= cmd[i];
+    if (sentCS != calcCS) {
+        sendError("CHK");
+        return false;
+    }
+    cmd[len - 3] = 0;
+    return true;
+}
 
 // =========== Comm commands
 void processCommCommand(char* cmd) {
@@ -363,6 +395,10 @@ void processPumpCommand(char* cmd) {
         case 'H':
         case 'h':
             cmdPumpHalt(cmd + 1);
+            break;
+        case 'F':
+        case 'f':
+            cmdPumpFlush(cmd + 1);
             break;
         case 'S':
         case 's':
@@ -471,6 +507,50 @@ void cmdPumpHalt(char* str) {
     sendOK();
 }
 
+void cmdPumpFlush(char* str) {
+    if (str[0] == 0) {
+        // stop flushing
+        if (pumpsFlushing) {
+            pumpCtrl0.stopAsync();
+        }
+        sendOK();
+            
+    } else {
+        // start flushing
+        if (pumpsFlushing) {
+            sendError("pumps are already flushing");
+            return;
+        }
+        if (pumpsAreRunning()) {
+            sendError("pumps are running");
+            return;
+        }
+        
+        Stepper* pumps[PUMPS] = {NULL};
+        
+        for (int i = 0; i < PUMPS; i++) {
+            unsigned p = readUInt(&str);
+            if (p >= PUMPS) {
+                sendError("invalid pump");
+                return;
+            }
+            pumps[i] = allPumps[p];
+            pumps[i]->setAcceleration(pumpAccel);
+            pumps[i]->setMaxSpeed(pumpSpeed);
+            pumpControllers[p] = &pumpCtrl0;
+            sendPumpRunning(p);
+            
+            if (! readDelim(&str)) break;
+        }
+        
+        enablePumps();
+        pumpCtrl0.rotateAsync(pumps);
+        
+        pumpsFlushing = true;
+        sendOK();
+    }
+}
+
 void cmdPumpSpeed(char* str) {
     int speed = readInt(&str);
     if ((speed < PUMP_MIN_SPEED) || (speed > PUMP_MAX_SPEED)) {
@@ -521,28 +601,6 @@ void cmdPumpStatus() {
     sendOK();
 }
 
-// =========== Power commands
-
-// We only want to intercept relay commands to ensure the pumps are
-// not running during shutdown.
-
-void processPowerCommand(char* cmd) {
-    switch (cmd[0]) {
-        case 'T':
-        case 't':
-            // stop and disable the pumps if they're running
-            for (int i = 0; i < PUMPS; i++) {
-                if (pumpControllers[i]) {
-                    pumpControllers[i]->stopAsync();
-                }
-            }
-            break;
-        case 'S':
-        case 's':
-            break;
-    }
-}
-
 // =========== Other stuff
 
 int readInt(char** strPtr) {
@@ -567,6 +625,26 @@ unsigned readUInt(char** strPtr) {
     while ((*str >= '0') && (*str <= '9')) {
         i = (i * 10) + (*str - '0');
         str++;
+    }
+    *strPtr = str;
+    return i;
+}
+
+unsigned readHex(char** strPtr) {
+    unsigned i = 0;
+    char* str = *strPtr;
+    while (1) {
+        if ((*str >= '0') && (*str <= '9')) {
+            i = (i << 4) + (*str - '0');
+            str++;
+        } else if ((*str >= 'a') && (*str <= 'f')) {
+            i = (i << 4) + (*str - 'a');
+            str++;
+        } else if ((*str >= 'A') && (*str <= 'F')) {
+            i = (i << 4) + (*str - 'A');
+            str++;
+        } else
+            break;
     }
     *strPtr = str;
     return i;

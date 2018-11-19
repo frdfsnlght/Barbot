@@ -196,8 +196,6 @@ void loopSerial() {
                 if (strcmp(inputBuffer.data, "PING") == 0)
                     send("PONG\n");
                 else {
-                    send(inputBuffer.data);
-                    sendChar('\n');
                     processCommand();
                 }
             }
@@ -357,20 +355,26 @@ void loopLED() {
 
 void processCommand() {
     char* cmd = inputBuffer.data;
+    int len = inputBuffer.length;
+    
     switch (cmd[0]) {
         case 'L':
+            if (! processChecksum(cmd, len)) break;
         case 'l':
             processLightCommand(cmd + 1);
             break;
         case 'S':
+            if (! processChecksum(cmd, len)) break;
         case 's':
             processSensorCommand(cmd + 1);
             break;
         case 'R':
+            if (! processChecksum(cmd, len)) break;
         case 'r':
             processPowerCommand(cmd + 1);
             break;
         case 'E':
+            if (! processChecksum(cmd, len)) break;
         case 'e':
             processEEPROMCommand(cmd + 1);
             break;
@@ -380,6 +384,23 @@ void processCommand() {
     }
 }
 
+bool processChecksum(char* cmd, int len) {
+    if ((len <= 3) || (cmd[len - 3] != '~')) {
+        sendError(F("CHK"));
+        return false;
+    }
+    char* hex = cmd + len - 2;
+    uint8_t sentCS = readHex(&hex);
+    uint8_t calcCS = 0;
+    for (int i = 0; i < len; i++)
+        calcCS ^= cmd[i];
+    if (sentCS != calcCS) {
+        sendError(F("CHK"));
+        return false;
+    }
+    cmd[len - 3] = 0;
+    return true;
+}
 
 // =========== Light commands
 
@@ -634,6 +655,26 @@ unsigned readUInt(char** strPtr) {
     while ((*str >= '0') && (*str <= '9')) {
         i = (i * 10) + (*str - '0');
         str++;
+    }
+    *strPtr = str;
+    return i;
+}
+
+unsigned readHex(char** strPtr) {
+    unsigned i = 0;
+    char* str = *strPtr;
+    while (1) {
+        if ((*str >= '0') && (*str <= '9')) {
+            i = (i << 4) + (*str - '0');
+            str++;
+        } else if ((*str >= 'a') && (*str <= 'f')) {
+            i = (i << 4) + (*str - 'a');
+            str++;
+        } else if ((*str >= 'A') && (*str <= 'F')) {
+            i = (i << 4) + (*str - 'A');
+            str++;
+        } else
+            break;
     }
     *strPtr = str;
     return i;
