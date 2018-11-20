@@ -14,6 +14,7 @@ class Glass(BarbotModel):
     size = IntegerField()
     units = CharField()
     description = TextField(null = True)
+    source = CharField(default = 'local')
     
     @staticmethod
     def saveFromDict(item):
@@ -32,8 +33,7 @@ class Glass(BarbotModel):
     # override
     def save(self, *args, **kwargs):
     
-        g = Glass.select().where(Glass.type == self.type, Glass.size == self.size, Glass.units == self.units).first()
-        if g and self.id != g.id:
+        if self.alreadyExists():
             raise ModelError('The same glass already exists!')
     
         if super().save(*args, **kwargs):
@@ -48,6 +48,10 @@ class Glass(BarbotModel):
         super().delete_instance(*args, **kwargs)
         bus.emit('model/glass/deleted', self)
             
+    def alreadyExists(self):
+        g = Glass.select().where(Glass.type == self.type, Glass.size == self.size, Glass.units == self.units).first()
+        return g if g and self.id != g.id else None
+    
     def set(self, dict):
         if 'type' in dict:
             self.type = str(dict['type'])
@@ -73,6 +77,15 @@ class Glass(BarbotModel):
         if drinks:
             out['drinks'] = [d.toDict() for d in self.drinks]
         return out
+        
+    def export(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'size': self.size,
+            'units': self.units,
+            'description': self.description,
+        }
         
     class Meta:
         database = db

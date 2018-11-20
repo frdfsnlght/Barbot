@@ -16,7 +16,7 @@ def _bus_serverStart():
     DrinkOrder.clearSessionIds()
     
 class DrinkOrder(BarbotModel):
-    drink = ForeignKeyField(Drink, backref = 'orders')
+    drink = ForeignKeyField(Drink, backref = 'orders', on_delete = 'CASCADE', on_update = 'CASCADE')
     name = CharField(null = True)
     createdDate = DateTimeField(default = datetime.datetime.now)
     startedDate = DateTimeField(null = True)

@@ -49,23 +49,23 @@ class User(BarbotModel):
     @staticmethod
     def deleteUser(name):
         if not name:
-            raise ModelError('user name is required')
+            raise ModelError('User name is required!')
         user = User.get_or_none(User.name == name)
         if user:
             user.delete_instance()
         else:
-            raise ModelError('user not found')
+            raise ModelError('User not found!')
             
     @staticmethod
     def setUserPassword(name, password):
         if not name:
-            raise ModelError('user name is required')
+            raise ModelError('User name is required!')
         user = User.get_or_none(User.name == name)
         if user:
             user.setPassword(password)
             user.save()
         else:
-            raise ModelError('user not found')
+            raise ModelError('User not found!')
             
     @staticmethod
     def authenticate(name, password):
@@ -76,6 +76,10 @@ class User(BarbotModel):
         
     # override
     def save(self, *args, **kwargs):
+    
+        if self.alreadyExists():
+            raise ModelError('The user already exists!')
+            
         if super().save(*args, **kwargs):
             bus.emit('model/user/saved', self)
     
@@ -83,6 +87,10 @@ class User(BarbotModel):
     def delete_instance(self, *args, **kwargs):
         super().delete_instance(*args, **kwargs)
         bus.emit('model/user/deleted', self)
+    
+    def alreadyExists(self):
+        u = User.select().where(User.name == self.name).first()
+        return u if u and self.id != u.id else None
     
     def setPassword(self, password):
         if password:
