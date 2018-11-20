@@ -21,13 +21,14 @@ File            | Part                                                          
 Enclosure       | [Dispenser Head Part A](STLs/Dispenser%20Head%20Part%20A.stl) | PLA       | 40% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part B](STLs/Dispenser%20Head%20Part%20B.stl) | PLA       | 20% Grid          | 2         | 7/5       | 1
 Enclosure       | [Dispenser Head Part C](STLs/Dispenser%20Head%20Part%20C.stl) | PLA       | 40% Grid          | 2         | 7/5       | 1
-Enclosure       | [Raspberry Pi Offset Bracket](STLs/Raspberry%20Pi%20Offset%20Bracket.stl) | PLA      | 20% Grid     | 2         | 7/5       | 4
 Enclosure       | [Dispenser Head Part D](STLs/Dispenser%20Head%20Part%20D.stl) | PETG      | 40% Grid          | 2         | 7/5       | 1
+Enclosure       | [Raspberry Pi Offset Bracket](STLs/Raspberry%20Pi%20Offset%20Bracket.stl) | PLA      | 20% Grid     | 2         | 7/5       | 4
 Enclosure       | [Touch Screen Bracket](STLs/Touchscreen%20Bracket.stl)        | PETG      | 50% Grid          | 2         | 7/5       | 2
 Enclosure       | [Drip Tray](STLs/Drip%20Tray.stl)                             | PETG      | 20% Grid          | 2         | 7/5       | 1
 Enclosure       | [Drip Tray Cover](STLs/Drip%20Tray%20Cover.stl)               | PETG      | 15% Honeycomb     | 10        | 0/0       | 1
 Enclosure       | [Speaker Grill](STLs/Speaker%20Grill.stl)                     | PETG      | 20% Honeycomb     | 8         | 0/0       | 2
 Enclosure       | [Fan Grill](STLs/Fan%20Grill.stl)                             | PETG      | 15% Honeycomb     | 14        | 0/0       | 1
+Enclosure       | [Tubing Bender](STLs/Tubing%20Bender.stl)                     | PETG      | 20% Grid          | 5         | 7/5       | 2
 Pump            | [Sun Gear](STLs/Sun%20Gear.stl)                               | PLA       | 100% Rectilinear  | 5         | 7/5       | 32
 Pump            | [Sun Roller](STLs/Sun%20Roller.stl)                           | PLA       | 50% Grid          | 5         | 7/5       | 16
 Pump            | [Planet Gear](STLs/Planet%20Gear.stl)                         | PLA       | 100% Rectilinear  | 5         | 7/5       | 64
@@ -92,9 +93,8 @@ Description                                                                     
  *Fan*                                                                                      |   4
 [4mm SS Hex Nuts](https://www.mcmaster.com/91828A231)                                       | 100 | $6.45
  *Fan*                                                                                      |   4
-[3mm x 30mm SS Socket Head Machine Screws](https://www.mcmaster.com/91292A022)              |  50 | $4.08
- *Dispenser Head*                                                                           |   4
 [3mm x 25mm SS Socket Head Machine Screws](https://www.mcmaster.com/91292A020)              | 100 | $6.87
+ *Dispenser Head*                                                                           |   4
  *Pumps*                                                                                    |  80
 [3mm x 20mm SS Socket Head Machine Screws](https://www.mcmaster.com/91292A123)              | 100 | $6.44
  *Dispenser Head*                                                                           |   1
