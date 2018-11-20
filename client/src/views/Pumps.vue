@@ -35,7 +35,7 @@
             <v-icon v-else-if="!item.state">mdi-power-off</v-icon>
             <v-icon v-else-if="item.state=='loaded'">mdi-plus</v-icon>
             <v-icon v-else-if="item.state=='ready'">mdi-check</v-icon>
-            <v-icon v-else-if="item.state=='empty'">mdi-battery-outline</v-icon>
+            <v-icon v-else-if="item.state=='empty'" class="red--text">mdi-battery-outline</v-icon>
             <v-icon v-else-if="item.state=='dirty'">mdi-spray-bottle</v-icon>
           </v-list-tile-avatar>
           
