@@ -1,0 +1,117 @@
+drinks:
+- glass_id: 3
+  id: 1
+  ingredients:
+  - amount: 1.0
+    ingredient_id: 2
+    step: 1
+    units: oz
+  - amount: 4.0
+    ingredient_id: 11
+    step: 2
+    units: oz
+  instructions: ''
+  primaryName: Rum and Coke
+  secondaryName: Traditional
+- glass_id: 2
+  id: 2
+  ingredients:
+  - amount: 2.0
+    ingredient_id: 1
+    step: 1
+    units: oz
+  - amount: 6.0
+    ingredient_id: 11
+    step: 2
+    units: oz
+  instructions: ''
+  primaryName: Rum and Coke
+  secondaryName: High Octane
+- glass_id: 3
+  id: 3
+  ingredients:
+  - amount: 8.0
+    ingredient_id: 17
+    step: 1
+    units: oz
+  instructions: ''
+  primaryName: Water
+  secondaryName: null
+glasses:
+- description: Your basic coffee mug.
+  id: 1
+  size: 16
+  type: Coffee mug
+  units: oz
+- description: Classic highball glass.
+  id: 2
+  size: 16
+  type: Highball
+  units: oz
+- description: Classic highball glass.
+  id: 3
+  size: 8
+  type: Highball
+  units: oz
+- description: Classic cocktail glass.
+  id: 4
+  size: 8
+  type: Cocktail
+  units: oz
+- description: Standard shot glass.
+  id: 5
+  size: 1
+  type: Shot glass
+  units: oz
+ingredients:
+- id: 1
+  isAlcoholic: true
+  name: Spiced Rum
+- id: 2
+  isAlcoholic: true
+  name: Light Rum
+- id: 3
+  isAlcoholic: true
+  name: Dark Rum
+- id: 4
+  isAlcoholic: true
+  name: Gin
+- id: 5
+  isAlcoholic: true
+  name: Vodka
+- id: 6
+  isAlcoholic: true
+  name: Scotch
+- id: 7
+  isAlcoholic: true
+  name: Bourbon
+- id: 8
+  isAlcoholic: true
+  name: Tequila
+- id: 9
+  isAlcoholic: true
+  name: Grenadine
+- id: 10
+  isAlcoholic: true
+  name: Cachaca
+- id: 11
+  isAlcoholic: false
+  name: Coca Cola
+- id: 12
+  isAlcoholic: false
+  name: Sprite
+- id: 13
+  isAlcoholic: false
+  name: Lime Juice
+- id: 14
+  isAlcoholic: false
+  name: Lemon Juice
+- id: 15
+  isAlcoholic: false
+  name: Cranberry Juice
+- id: 16
+  isAlcoholic: false
+  name: Sugar Syrup
+- id: 17
+  isAlcoholic: false
+  name: Water

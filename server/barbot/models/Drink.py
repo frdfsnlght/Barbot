@@ -24,7 +24,8 @@ class Drink(BarbotModel):
     timesDispensed = IntegerField(default = 0)
     createdDate = DateTimeField(default = datetime.datetime.now)
     updatedDate = DateTimeField(default = datetime.datetime.now)
-
+    source = CharField(default = 'local')
+    
     @staticmethod
     def getMenuDrinks():
         return Drink.select().where(Drink.isOnMenu == True).execute()
@@ -56,8 +57,7 @@ class Drink(BarbotModel):
     # override
     def save(self, emitEvent = True, *args, **kwargs):
     
-        d = Drink.select().where(Drink.primaryName == self.primaryName, Drink.secondaryName == self.secondaryName).first()
-        if d and self.id != d.id:
+        if self.alreadyExists():
             raise ModelError('A drink with the same name already exists!')
     
         if self.is_dirty():
@@ -75,6 +75,10 @@ class Drink(BarbotModel):
     
         super().delete_instance(*args, **kwargs)
         bus.emit('model/drink/deleted', self)
+
+    def alreadyExists(self):
+        d = Drink.select().where(Drink.primaryName == self.primaryName, Drink.secondaryName == self.secondaryName).first()
+        return d if d and self.id != d.id else None
     
     def set(self, dict):
         if 'primaryName' in dict:
@@ -153,6 +157,22 @@ class Drink(BarbotModel):
             out['glass'] = self.glass.toDict()
         if ingredients:
             out['ingredients'] = [di.toDict(ingredient = True) for di in self.ingredients]
+        return out
+    
+    def export(self, stats = False):
+        out = {
+            'id': self.id,
+            'primaryName': self.primaryName,
+            'secondaryName': self.secondaryName,
+            'glass_id': self.glass_id,
+            'instructions': self.instructions,
+            'ingredients': []
+        }
+        if stats:
+            out['isFavorite'] = self.isFavorite
+            out['timesDispensed'] = self.timesDispensed
+        for di in self.ingredients:
+            out['ingredients'].append(di.export())
         return out
     
     class Meta:

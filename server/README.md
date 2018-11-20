@@ -8,12 +8,7 @@ Barbot's server.
 * see requirements.txt
 
 ## TODO
-* implement pump flush in firmware
-* implement checksums in firmware
-* implement checksums in server
 * import data
 * estimate pump settings in default config
 
 * debug sporadic lights
-
-* script db export/import

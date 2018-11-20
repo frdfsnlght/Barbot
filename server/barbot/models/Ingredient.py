@@ -14,6 +14,7 @@ class Ingredient(BarbotModel):
     isAlcoholic = BooleanField(default = False)
     timesDispensed = IntegerField(default = 0)
     amountDispensed = FloatField(default = 0)
+    source = CharField(default = 'local')
     
     @staticmethod
     def saveFromDict(item):
@@ -32,8 +33,7 @@ class Ingredient(BarbotModel):
     # override
     def save(self, emitEvent = False, *args, **kwargs):
     
-        i = Ingredient.select().where(Ingredient.name == self.name).first()
-        if i and self.id != i.id:
+        if self.alreadyExists():
             raise ModelError('An ingredient with the same name already exists!')
     
         if super().save(*args, **kwargs) or emitEvent == 'force':
@@ -47,6 +47,10 @@ class Ingredient(BarbotModel):
     
         super().delete_instance(*args, **kwargs)
         bus.emit('model/ingredient/deleted', self)
+
+    def alreadyExists(self):
+        i = Ingredient.select().where(Ingredient.name == self.name).first()
+        return i if i and self.id != i.id else None
     
     def set(self, dict):
         if 'name' in dict:
@@ -68,6 +72,16 @@ class Ingredient(BarbotModel):
             out['drinks'] = [di.toDict(drink = True) for di in self.drinks]
         return out
         
+    def export(self, stats = False):
+        out = {
+            'id': self.id,
+            'name': self.name,
+            'isAlcoholic': self.isAlcoholic,
+        }
+        if stats:
+            out['timesDispensed'] = self.timesDispensed
+            out['amountDispensed'] = self.amountDispensed
+        return out
     
     class Meta:
         database = db

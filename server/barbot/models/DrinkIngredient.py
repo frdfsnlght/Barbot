@@ -12,8 +12,8 @@ logger = logging.getLogger('Models.DrinkIngredient')
 
 
 class DrinkIngredient(BarbotModel):
-    drink = ForeignKeyField(Drink, backref = 'ingredients')
-    ingredient = ForeignKeyField(Ingredient, backref = 'drinks')
+    drink = ForeignKeyField(Drink, backref = 'ingredients', on_delete = 'CASCADE', on_update = 'CASCADE')
+    ingredient = ForeignKeyField(Ingredient, backref = 'drinks', on_delete = 'CASCADE', on_update = 'CASCADE')
     amount = FloatField()
     units = CharField()
     step = IntegerField(default = 0)
@@ -47,6 +47,14 @@ class DrinkIngredient(BarbotModel):
         if ingredient:
             out['ingredient'] = self.ingredient.toDict()
         return out
+        
+    def export(self):
+        return {
+            'ingredient_id': self.ingredient_id,
+            'amount': self.amount,
+            'units': self.units,
+            'step': self.step,
+        }
         
     class Meta:
         database = db
