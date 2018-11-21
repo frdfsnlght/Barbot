@@ -8,7 +8,7 @@ import barbot.config
 
 config = barbot.config.load()
 
-from barbot.db import db, initializeDB
+from barbot.db import db, initializeDB, ModelError
 from barbot.models.Glass import Glass
 from barbot.models.Ingredient import Ingredient
 from barbot.models.DrinkIngredient import DrinkIngredient
@@ -17,7 +17,10 @@ from barbot.models.Drink import Drink
 
 args = None
 
+class DBAdminError(Exception):
+    pass
 
+    
 def doExport(args):
     
     glasses = Glass.select().where(Glass.source == args.source)
@@ -73,10 +76,14 @@ def doImport(args):
         print('Deleting all glasses, ingredients, and drinks...')
         deleteAll()
         
-    glassesCount = importGlasses(data['glasses'])
-    ingredientsCount = importIngredients(data['ingredients'])
-    drinksCount = importDrinks(data['drinks'], data['glasses'], data['ingredients'])
-    
+    try:
+        glassesCount = importGlasses(data['glasses'])
+        ingredientsCount = importIngredients(data['ingredients'])
+        drinksCount = importDrinks(data['drinks'], data['glasses'], data['ingredients'])
+    except DBAdminError as e:
+        print(str(e))
+        sys.exit(1)
+        
     print('Saved {} glasses'.format(glassesCount))
     print('Saved {} ingredients'.format(ingredientsCount))
     print('Saved {} drinks'.format(drinksCount))
@@ -92,78 +99,96 @@ def deleteAll():
 def importGlasses(glasses):
     count = 0
     for glass in glasses:
-        g = Glass()
-        g.type = glass['type']
-        g.size = glass['size']
-        g.units = glass['units']
-        g.description = glass['description']
-        g.source = args.source
-        og = g.alreadyExists()
-        if og:
-            g = og
-            print('Glass "{}" already exists'.format(g.name()))
-        else:
-            g.save()
-            count = count + 1
-        glass['local_id'] = g.id
+        try:
+            g = Glass()
+            g.type = glass['type']
+            g.size = glass['size']
+            g.units = glass['units']
+            if 'description' in glass:
+                g.description = glass['description']
+            g.source = args.source
+            og = g.alreadyExists()
+            if og:
+                g = og
+                print('Glass "{}" already exists'.format(g.name()))
+            else:
+                g.save()
+                count = count + 1
+            glass['local_id'] = g.id
+        except ModelError as e:
+            raise DBAdminError('Glass "{}": {}'.format(glass['type'], str(e)))
     return count
 
 def importIngredients(ingredients):
     count = 0
     for ingredient in ingredients:
-        i = Ingredient()
-        i.name = ingredient['name']
-        i.isAlcoholic = ingredient['isAlcoholic']
-        if args.stats:
-            if 'timesDispensed' in ingredient:
-                i.timesDispensed = ingredient['timesDispensed']
-            if 'amountDispensed' in ingredient:
-                i.amountDispensed = ingredient['amountDispensed']
-        i.source = args.source
-        oi = i.alreadyExists()
-        if oi:
-            i = oi
-            print('Ingreditent "{}" already exists'.format(i.name))
-        else:
-            i.save()
-            count = count + 1
-        ingredient['local_id'] = i.id
+        try:
+            i = Ingredient()
+            i.name = ingredient['name']
+            if 'isAlcoholic' in ingredient:
+                i.isAlcoholic = ingredient['isAlcoholic']
+            if args.stats:
+                if 'timesDispensed' in ingredient:
+                    i.timesDispensed = ingredient['timesDispensed']
+                if 'amountDispensed' in ingredient:
+                    i.amountDispensed = ingredient['amountDispensed']
+            i.source = args.source
+            oi = i.alreadyExists()
+            if oi:
+                i = oi
+                print('Ingredient "{}" already exists'.format(i.name))
+            else:
+                i.save()
+                count = count + 1
+            ingredient['local_id'] = i.id
+        except ModelError as e:
+            raise DBAdminError('Ingredient "{}": {}'.format(ingredient['name'], str(e)))
     return count
     
 def importDrinks(drinks, glasses, ingredients):
     count = 0
     for drink in drinks:
-        d = Drink()
-        d.primaryName = drink['primaryName']
-        d.secondaryName = drink['secondaryName']
-        d.instructions = drink['instructions']
-    
-        glass = [glass for glass in glasses if glass['id'] == drink['glass_id']][0]
-        d.glass_id = glass['local_id']
+        try:
+            d = Drink()
+            d.primaryName = drink['primaryName']
+            if 'secondaryName' in drink:
+                d.secondaryName = drink['secondaryName']
+            if 'instructions' in drink:
+                d.instructions = drink['instructions']
         
-        if args.stats:
-            if 'isFavorite' in drink:
-                d.isFavorite = drink['isFavorite']
-            if 'timesDispensed' in drink:
-                d.timesDispensed = drink['timesDispensed']
-        d.source = args.source
-        od = d.alreadyExists()
-        if d.alreadyExists():
-            print('Drink "{}" already exists'.format(d.name()))
-            continue
-        d.save()
-        count = count + 1
-        
-        for drinkIngredient in drink['ingredients']:
-            di = DrinkIngredient()
-            di.drink_id = d.id
-            di.amount = drinkIngredient['amount']
-            di.units = drinkIngredient['units']
-            di.step = drinkIngredient['step']
+            glass = [glass for glass in glasses if glass['id'] == drink['glass_id']][0]
+            d.glass_id = glass['local_id']
             
-            ingredient = [ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']][0]
-            di.ingredient_id = ingredient['local_id']
-            di.save()
+            if args.stats:
+                if 'isFavorite' in drink:
+                    d.isFavorite = drink['isFavorite']
+                if 'timesDispensed' in drink:
+                    d.timesDispensed = drink['timesDispensed']
+            d.source = args.source
+            od = d.alreadyExists()
+            if d.alreadyExists():
+                print('Drink "{}" already exists'.format(d.name()))
+                continue
+
+            d.save()
+                
+            for drinkIngredient in drink['ingredients']:
+                if 'ingredient' in drinkIngredient:
+                    ingredient = Ingredient.get_or_none(Ingredient.name == drinkIngredient['ingredient'])
+                    if not ingredient:
+                        raise DBAdminError('Drink "{}": ingredient "{}" not found!'.format(drink['primaryName'], drinkIngredient['ingredient']))
+                    drinkIngredient['ingredientId'] = ingredient.id
+                else:
+                    ingredient = [ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']][0]
+                    drinkIngredient['ingredientId'] = ingredient['local_id']
+                
+            d.setIngredients(drink['ingredients'])
+            
+            d.save()
+            count = count + 1
+            
+        except ModelError as e:
+            raise DBAdminError('Drink "{}": {}'.format(drink['primaryName'], str(e)))
         
     return count
     
