@@ -98,12 +98,16 @@ class Drink(BarbotModel):
     def setIngredients(self, ingredients):
         from .DrinkIngredient import DrinkIngredient
 
+        for i in ingredients:
+            if 'step' not in i:
+                i['step'] = 1
+                
         # don't allow more than 4 ingredients in the same step
         if len(ingredients) >= 4:
             for step in {i['step'] for i in ingredients}:
                 stepIngs = [i for i in ingredients if i['step'] == step]
-                if len(stepIngs) >= 4:
-                    raise ModelError('There are already 4 ingredients in the same step!')
+                if len(stepIngs) > 4:
+                    raise ModelError('There can not be more than 4 ingredients in the same step!')
 
         # don't allow more ingredients than configured
         totalMLs = 0
@@ -161,7 +165,6 @@ class Drink(BarbotModel):
     
     def export(self, stats = False):
         out = {
-            'id': self.id,
             'primaryName': self.primaryName,
             'secondaryName': self.secondaryName,
             'glass_id': self.glass_id,

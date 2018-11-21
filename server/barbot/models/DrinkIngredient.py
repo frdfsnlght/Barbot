@@ -16,7 +16,7 @@ class DrinkIngredient(BarbotModel):
     ingredient = ForeignKeyField(Ingredient, backref = 'drinks', on_delete = 'CASCADE', on_update = 'CASCADE')
     amount = FloatField()
     units = CharField()
-    step = IntegerField(default = 0)
+    step = IntegerField(default = 1)
 
     def set(self, dict):
         if 'drinkId' in dict:

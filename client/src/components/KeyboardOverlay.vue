@@ -6,6 +6,7 @@
       color="secondary lighten-3"
       @mousedown.prevent=""
       style="z-index: 400"
+      fixed
     >
       <v-layout
         justify-center

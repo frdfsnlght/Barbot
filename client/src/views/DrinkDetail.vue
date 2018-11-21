@@ -52,6 +52,8 @@
         
       </v-list>
 
+      <p class="px-3 subheading">{{item.instructions}}</p>
+      
       <template v-if="item.isOnMenu">
       
         <order-drink ref="orderDrink"></order-drink>
