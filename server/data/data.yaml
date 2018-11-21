@@ -1,0 +1,462 @@
+glasses:
+- id: 1
+  size: 12
+  units: oz
+  type: Highball
+  description: >
+    Tall, chimney-shaped glasses are good for gin-and-tonics,
+    vodka and club sodas, and whiskey and gingers — but also
+    can be repurposed for tiki drinks made with crushed ice.
+- id: 2
+  size: 2
+  units: oz
+  type: Shot glass
+  description: Standard shot glass.
+- id: 3
+  size: 6
+  units: oz
+  type: Coupe glass
+  description: >
+    Good for cocktails served "up," meaning it’s been shaken or
+    stirred with ice and then served chilled, without ice — like
+    a Martini. The stem means you don’t heat up the cocktail
+    with your hand as you sip it.
+- id: 4
+  size: 8
+  units: oz
+  type: Single Rocks glass
+  description: >
+    Used for anything neat, any spirit on the rocks, though also
+    used for stirred, chilled, spirituous cocktails served "down,"
+    meaning it’s served chilled, but in a glass without a stem.
+- id: 5
+  size: 12
+  units: oz
+  type: Double Rocks glass
+  description: >
+    Same as a single rocks glass, but a little bigger.
+    
+# =======================================================
+    
+ingredients:
+
+# Alcoholic
+
+- name: Vodka
+  isAlcoholic: true
+- name: Gin
+  isAlcoholic: true
+- name: Spiced Rum
+  isAlcoholic: true
+- name: Light Rum
+  isAlcoholic: true
+- name: Dark Rum
+  isAlcoholic: true
+- name: Vanilla Rum
+  isAlcoholic: true
+- name: Coconut Rum
+  isAlcoholic: true
+- name: Cachaca
+  isAlcoholic: true
+- name: Scotch
+  isAlcoholic: true
+- name: Bourbon
+  isAlcoholic: true
+- name: Cognac
+  isAlcoholic: true
+- name: Tequila
+  isAlcoholic: true
+- name: Triple Sec
+  isAlcoholic: true
+- name: Rye Whiskey
+  isAlcoholic: true
+- name: Hpnotiq
+  isAlcoholic: true
+- name: Blue Curacao
+  isAlcoholic: true
+- name: Peppermint Schnapps
+  isAlcoholic: true
+- name: Peach Schnapps
+  isAlcoholic: true
+  
+# Non-alcholic
+- name: Water
+- name: Club Soda
+- name: Coca Cola
+- name: Sprite
+- name: Ginger Ale
+- name: Lime Juice
+- name: Lemon Juice
+- name: Cranberry Juice
+- name: Orange Juice
+- name: Pineapple Juice
+- name: Sugar Syrup
+- name: Grenadine
+- name: Sweet and Sour
+- name: Lemomade
+- name: Iced Tea
+
+# =======================================================
+
+drinks:
+
+- primaryName: Rum and Coke
+  secondaryName: Traditional
+  glass_id: 1
+  ingredients:
+  - amount: 2.0
+    units: oz
+    ingredient: Light Rum
+    step: 1
+  - amount: 4.0
+    units: oz
+    ingredient: Coca Cola
+    step: 2
+  instructions: Pour the rum into a highball glass filled with ice and top with cola.
+
+- primaryName: Spiced Rum and Coke
+  glass_id: 1
+  ingredients:
+  - amount: 3.0
+    units: oz
+    ingredient: Spiced Rum
+    step: 1
+  - amount: 6.0
+    units: oz
+    ingredient: Coca Cola
+    step: 2
+  instructions: Pour the rum into a highball glass filled with ice and top with cola.
+
+- primaryName: Swedish Lemonade
+  glass_id: 1
+  ingredients:
+  - amount: 2.0
+    units: oz
+    ingredient: Vodka
+    step: 1
+  - amount: 2.0
+    units: oz
+    ingredient: Sweet and Sour
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Cranberry Juice
+    step: 2
+  instructions: Half vodka, half sweet and sour, and a dash of cranberry juice for color. On the rocks is better.
+
+- primaryName: Kamikaze
+  glass_id: 4
+  ingredients:
+  - amount: 1.0
+    units: oz
+    ingredient: Vodka
+  - amount: 1.0
+    units: oz
+    ingredient: Lime Juice
+  - amount: 1.0
+    units: oz
+    ingredient: Triple Sec
+  instructions: >
+    Combine lime juice, triple sec, and vodka in a cocktail shaker.
+    Add ice, cover and shake until chilled.
+    Strain into chilled glass.
+  
+- primaryName: Caipirinha
+  glass_id: 4
+  ingredients:
+  - amount: 2.0
+    units: oz
+    ingredient: Cachaca
+  - amount: 2.0
+    units: oz
+    ingredient: Lime Juice
+  - amount: 1.0
+    units: oz
+    ingredient: Sugar Syrup
+
+- primaryName: Margarita
+  glass_id: 4
+  ingredients:
+  - amount: 1.0
+    units: oz
+    ingredient: Tequila
+  - amount: 0.67
+    units: oz
+    ingredient: Triple Sec
+  - amount: 1.0
+    units: oz
+    ingredient: Lime Juice
+
+- primaryName: Mai Tai
+  glass_id: 4
+  ingredients:
+  - amount: 1.0
+    units: oz
+    ingredient: Dark Rum
+    step: 1
+  - amount: 1.0
+    units: oz
+    ingredient: Light Rum
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Triple Sec
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Lime Juice
+    step: 2
+  - amount: 1.0
+    units: oz
+    ingredient: Orange Juice
+    step: 2
+  - amount: 0.1
+    units: oz
+    ingredient: Sugar Syrup
+    step: 2
+
+- primaryName: Whiskey and Coke
+  glass_id: 4
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Rye Whiskey
+  - amount: 5.0
+    units: oz
+    ingredient: Coca Cola
+
+- primaryName: Whiskey and Ginger Ale
+  glass_id: 4
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Rye Whiskey
+  - amount: 5.0
+    units: oz
+    ingredient: Ginger Ale
+
+- primaryName: Incredible Hulk
+  glass_id: 2
+  ingredients:
+  - amount: 0.5
+    units: oz
+    ingredient: Cognac
+  - amount: 0.5
+    units: oz
+    ingredient: Hpnotiq
+
+- primaryName: Blue Coco Mojito
+  glass_id: 4
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Coconut Rum
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Blue Curacao
+    step: 1
+  - amount: 0.375
+    units: oz
+    ingredient: Lime Juice
+    step: 2
+  - amount: 0.375
+    units: oz
+    ingredient: Lemon Juice
+    step: 2
+  - amount: 0.75
+    units: oz
+    ingredient: Sugar Syrup
+    step: 2
+  - amount: 1.5
+    units: oz
+    ingredient: Club Soda
+    step: 2
+
+- primaryName: Sunsicle
+  glass_id: 4
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Vanilla Rum
+    step: 1
+  - amount: 0.25
+    units: oz
+    ingredient: Lime Juice
+    step: 1
+  - amount: 0.25
+    units: oz
+    ingredient: Lemon Juice
+    step: 1
+  - amount: 2.0
+    units: oz
+    ingredient: Orange Juice
+    step: 2
+  - amount: 0.5
+    units: oz
+    ingredient: Sugar Syrup
+    step: 2
+  - amount: 1.0
+    units: oz
+    ingredient: Club Soda
+    step: 2
+
+- primaryName: Sunsicle
+  secondaryName: Simplified
+  glass_id: 4
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Vanilla Rum
+    step: 1
+  - amount: 2.0
+    units: oz
+    ingredient: Sprite
+    step: 2
+  - amount: 2.0
+    units: oz
+    ingredient: Orange Juice
+    step: 2
+
+- primaryName: Sex On The Beach
+  glass_id: 1
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Vodka
+    step: 1
+  - amount: 2.0
+    units: oz
+    ingredient: Orange Juice
+    step: 2
+  - amount: 2.0
+    units: oz
+    ingredient: Pineapple Juice
+    step: 2
+  - amount: 1.5
+    units: oz
+    ingredient: Peach Schnapps
+    step: 2
+  - amount: 2.0
+    units: oz
+    ingredient: Cranberry Juice
+    step: 2
+  instructions: >
+    Pour all ingredients into shaker.
+    Fill a Highball glass almost full of ice cubes, and dump ice into shaker.
+    Shake well and pour drink into Highball glass.
+
+- primaryName: Shirley Temple
+  glass_id: 1
+  ingredients:
+  - amount: 0.167
+    units: oz
+    ingredient: Grenadine
+  - amount: 3.0
+    units: oz
+    ingredient: Ginger Ale
+  - amount: 3.0
+    units: oz
+    ingredient: Sprite
+  instructions: >
+    Fill a Highball glass almost full of ice cubes.
+    Pour all ingredients into the Highball glass and stir well.
+    Garnish with a Lime Wedge and a Maraschino Cherry.
+
+- primaryName: Candy Cane Twist
+  glass_id: 4
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Vodka
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Grenadine
+    step: 1
+  - amount: 1.5
+    units: oz
+    ingredient: Peppermint Schnapps
+    step: 1
+  - amount: 0.25
+    units: oz
+    ingredient: Sprite
+    step: 2
+  - amount: 3.0
+    units: oz
+    ingredient: Cranberry Juice
+    step: 2
+  instructions: >
+    Rim cocktail glass with crushed candy cane.
+    Mix vodka, schnapps, cranberry juice, and grenadine
+    into shaker along with ice and shake.
+    Strain into glass. Top with lemon lime soda and
+    garnish with small peppermint candy cane.
+
+- primaryName: Rudolph the Red Nose Reindeer
+  glass_id: 4
+  ingredients:
+  - amount: 0.5
+    units: oz
+    ingredient: Grenadine
+    step: 1
+  - amount: 2.0
+    units: oz
+    ingredient: Light Rum
+    step: 1
+  - amount: 2.0
+    units: oz
+    ingredient: Lemon Juice
+    step: 2
+  - amount: 4.0
+    units: oz
+    ingredient: Cranberry Juice
+    step: 2
+  instructions: >
+    Mix ingredients together in glass with ice. Stir and serve.
+
+- primaryName: John Daly
+  glass_id: 1
+  ingredients:
+  - amount: 1.5
+    units: oz
+    ingredient: Vodka
+  - amount: 2.0
+    units: oz
+    ingredient: Lemomade
+  - amount: 2.0
+    units: oz
+    ingredient: Iced Tea
+  instructions: >
+    Fill a large highball glass with ice, add vodka, tea, and lemonade.
+    Gently stir and garnish with a lemon slice.
+
+- primaryName: Long Island Iced Tea
+  glass_id: 1
+  ingredients:
+  - amount: 1.0
+    units: oz
+    ingredient: Vodka
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Light Rum
+    step: 1
+  - amount: 0.5
+    units: oz
+    ingredient: Lemon Juice
+    step: 1
+  - amount: 1.0
+    units: oz
+    ingredient: Tequila
+    step: 2
+  - amount: 1.0
+    units: oz
+    ingredient: Gin
+    step: 2
+  instructions: >
+    Fill a shaker half full with ice cubes.
+    Pour all ingredients into shaker and shake well.
+    Fill a highball glass almost full of ice cubes, and strain drink into glass.
+    Garnish with a Lemon Wedge, and serve.
+    
