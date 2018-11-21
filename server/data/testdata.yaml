@@ -45,7 +45,7 @@ glasses:
   units: oz
 - description: Classic highball glass.
   id: 2
-  size: 16
+  size: 12
   type: Highball
   units: oz
 - description: Classic highball glass.
