@@ -30,7 +30,7 @@ F9 "M1" I R 4750 1350 50
 F10 "M2" I R 4750 1450 50 
 $EndSheet
 $Comp
-L Connector:Conn_01x15_Female CON1
+L pump-rescue:Conn_01x15_Female-Connector CON1
 U 1 1 5BCF8B18
 P 1750 4550
 F 0 "CON1" H 1650 5400 50  0000 C CNN
@@ -439,7 +439,7 @@ P6
 Text Label 2500 5050 0    50   ~ 0
 P7
 $Comp
-L power:PWR_FLAG #FLG0101
+L pump-rescue:PWR_FLAG-power #FLG0101
 U 1 1 5BD4DC20
 P 2900 3850
 F 0 "#FLG0101" H 2900 3925 50  0001 C CNN
@@ -453,7 +453,7 @@ Connection ~ 2900 3850
 Wire Wire Line
 	2900 3850 3800 3850
 $Comp
-L power:PWR_FLAG #FLG0102
+L pump-rescue:PWR_FLAG-power #FLG0102
 U 1 1 5BD4DC4D
 P 3100 3950
 F 0 "#FLG0102" H 3100 4025 50  0001 C CNN
@@ -575,7 +575,7 @@ Wire Wire Line
 	5100 7850 4750 7850
 Connection ~ 5100 6900
 $Comp
-L Device:Jumper_NC_Small JP1
+L pump-rescue:Jumper_NC_Small-Device JP1
 U 1 1 5BD89E80
 P 5550 1250
 F 0 "JP1" H 5550 1462 50  0000 C CNN
@@ -586,7 +586,7 @@ F 3 "~" H 5550 1250 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Jumper_NC_Small JP2
+L pump-rescue:Jumper_NC_Small-Device JP2
 U 1 1 5BD89EC9
 P 5850 1350
 F 0 "JP2" H 5850 1562 50  0000 C CNN
@@ -597,7 +597,7 @@ F 3 "~" H 5850 1350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Jumper_NC_Small JP3
+L pump-rescue:Jumper_NC_Small-Device JP3
 U 1 1 5BD89F12
 P 6150 1450
 F 0 "JP3" H 6150 1662 50  0000 C CNN

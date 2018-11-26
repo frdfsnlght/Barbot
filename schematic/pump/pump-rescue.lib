@@ -1,11 +1,11 @@
 EESchema-LIBRARY Version 2.4
 #encoding utf-8
 #
-# pump-rescue_CP1-Device
+# CP1-Device
 #
-DEF pump-rescue_CP1-Device C 0 10 N N 1 F N
+DEF CP1-Device C 0 10 N N 1 F N
 F0 "C" 25 100 50 H V L CNN
-F1 "pump-rescue_CP1-Device" 25 -100 50 H V L CNN
+F1 "CP1-Device" 25 -100 50 H V L CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 $FPLIST
@@ -21,11 +21,11 @@ X ~ 2 0 -150 130 U 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
-# pump-rescue_Conn_01x04_Male-Connector
+# Conn_01x04_Male-Connector
 #
-DEF pump-rescue_Conn_01x04_Male-Connector J 0 40 Y N 1 F N
+DEF Conn_01x04_Male-Connector J 0 40 Y N 1 F N
 F0 "J" 0 200 50 H V C CNN
-F1 "pump-rescue_Conn_01x04_Male-Connector" 0 -300 50 H V C CNN
+F1 "Conn_01x04_Male-Connector" 0 -300 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 $FPLIST
@@ -47,11 +47,11 @@ X Pin_4 4 200 -200 150 L 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
-# pump-rescue_Conn_01x15_Female-Connector
+# Conn_01x15_Female-Connector
 #
-DEF pump-rescue_Conn_01x15_Female-Connector J 0 40 Y N 1 F N
+DEF Conn_01x15_Female-Connector J 0 40 Y N 1 F N
 F0 "J" 0 800 50 H V C CNN
-F1 "pump-rescue_Conn_01x15_Female-Connector" 0 -800 50 H V C CNN
+F1 "Conn_01x15_Female-Connector" 0 -800 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 $FPLIST
@@ -106,11 +106,11 @@ X Pin_9 9 -200 -100 150 R 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
-# pump-rescue_Jumper_NC_Small-Device
+# Jumper_NC_Small-Device
 #
-DEF pump-rescue_Jumper_NC_Small-Device JP 0 30 N N 1 F N
+DEF Jumper_NC_Small-Device JP 0 30 N N 1 F N
 F0 "JP" 0 80 50 H V C CNN
-F1 "pump-rescue_Jumper_NC_Small-Device" 10 -60 50 H V C CNN
+F1 "Jumper_NC_Small-Device" 10 -60 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 DRAW
@@ -122,44 +122,16 @@ X 2 2 100 0 40 L 50 50 0 1 P
 ENDDRAW
 ENDDEF
 #
-# pump-rescue_PWR_FLAG-power
+# PWR_FLAG-power
 #
-DEF pump-rescue_PWR_FLAG-power #FLG 0 0 N N 1 F P
+DEF PWR_FLAG-power #FLG 0 0 N N 1 F P
 F0 "#FLG" 0 75 50 H I C CNN
-F1 "pump-rescue_PWR_FLAG-power" 0 150 50 H V C CNN
+F1 "PWR_FLAG-power" 0 150 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 DRAW
 P 6 0 1 0 0 0 0 50 -40 75 0 100 40 75 0 50 N
 X pwr 1 0 0 0 U 50 50 0 0 w
-ENDDRAW
-ENDDEF
-#
-# stepper_driver_DRV8825_Carrier
-#
-DEF stepper_driver_DRV8825_Carrier A 0 40 Y Y 1 F N
-F0 "A" -200 850 50 H V R CNN
-F1 "stepper_driver_DRV8825_Carrier" -200 750 50 H V R CNN
-F2 "Module:Polou_Breakout-16_15.2x20.3mm" 150 -750 50 H I L CNN
-F3 "" -200 850 50 H I C CNN
-DRAW
-S -400 700 400 -700 0 1 10 f
-X ~ENABLE 1 -500 400 100 R 50 50 1 1 I
-X ~FAULT 10 500 -100 100 L 50 50 1 1 O
-X A2 11 500 100 100 L 50 50 1 1 O
-X A1 12 500 200 100 L 50 50 1 1 O
-X B1 13 500 300 100 L 50 50 1 1 O
-X B2 14 500 400 100 L 50 50 1 1 O
-X GND 15 100 -800 100 U 50 50 1 1 W
-X VMOT 16 0 800 100 D 50 50 1 1 W
-X M0 2 -500 0 100 R 50 50 1 1 I
-X M1 3 -500 -100 100 R 50 50 1 1 I
-X M2 4 -500 -200 100 R 50 50 1 1 I
-X ~RESET 5 -500 300 100 R 50 50 1 1 I
-X ~SLEEP 6 -500 200 100 R 50 50 1 1 I
-X STEP 7 -500 -400 100 R 50 50 1 1 I
-X DIR 8 -500 -500 100 R 50 50 1 1 I
-X GND 9 -100 -800 100 U 50 50 1 1 W
 ENDDRAW
 ENDDEF
 #

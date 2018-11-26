@@ -1,0 +1,176 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# CP1-Device-main-rescue
+#
+DEF CP1-Device-main-rescue C 0 10 N N 1 F N
+F0 "C" 25 100 50 H V L CNN
+F1 "CP1-Device-main-rescue" 25 -100 50 H V L CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ CP_*
+$ENDFPLIST
+DRAW
+A 0 -150 128 1287 513 0 1 20 N -80 -50 80 -50
+P 2 0 1 20 -80 30 80 30 N
+P 2 0 1 0 -70 90 -30 90 N
+P 2 0 1 0 -50 70 -50 110 N
+X ~ 1 0 150 110 D 50 50 1 1 P
+X ~ 2 0 -150 130 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Conn_01x02_Male-Connector-main-rescue
+#
+DEF Conn_01x02_Male-Connector-main-rescue J 0 40 Y N 1 F N
+F0 "J" 0 100 50 H V C CNN
+F1 "Conn_01x02_Male-Connector-main-rescue" 0 -200 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Connector*:*_1x??_*
+$ENDFPLIST
+DRAW
+S 34 -95 0 -105 1 1 6 F
+S 34 5 0 -5 1 1 6 F
+P 2 1 1 6 50 -100 34 -100 N
+P 2 1 1 6 50 0 34 0 N
+X Pin_1 1 200 0 150 L 50 50 1 1 P
+X Pin_2 2 200 -100 150 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Conn_01x03_Male-Connector-main-rescue
+#
+DEF Conn_01x03_Male-Connector-main-rescue J 0 40 Y N 1 F N
+F0 "J" 0 200 50 H V C CNN
+F1 "Conn_01x03_Male-Connector-main-rescue" 0 -200 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Connector*:*_1x??_*
+$ENDFPLIST
+DRAW
+S 34 -95 0 -105 1 1 6 F
+S 34 5 0 -5 1 1 6 F
+S 34 105 0 95 1 1 6 F
+P 2 1 1 6 50 -100 34 -100 N
+P 2 1 1 6 50 0 34 0 N
+P 2 1 1 6 50 100 34 100 N
+X Pin_1 1 200 100 150 L 50 50 1 1 P
+X Pin_2 2 200 0 150 L 50 50 1 1 P
+X Pin_3 3 200 -100 150 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Conn_01x15_Male-Connector-main-rescue
+#
+DEF Conn_01x15_Male-Connector-main-rescue J 0 40 Y N 1 F N
+F0 "J" 0 800 50 H V C CNN
+F1 "Conn_01x15_Male-Connector-main-rescue" 0 -800 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Connector*:*_1x??_*
+$ENDFPLIST
+DRAW
+S 34 -695 0 -705 1 1 6 F
+S 34 -595 0 -605 1 1 6 F
+S 34 -495 0 -505 1 1 6 F
+S 34 -395 0 -405 1 1 6 F
+S 34 -295 0 -305 1 1 6 F
+S 34 -195 0 -205 1 1 6 F
+S 34 -95 0 -105 1 1 6 F
+S 34 5 0 -5 1 1 6 F
+S 34 105 0 95 1 1 6 F
+S 34 205 0 195 1 1 6 F
+S 34 305 0 295 1 1 6 F
+S 34 405 0 395 1 1 6 F
+S 34 505 0 495 1 1 6 F
+S 34 605 0 595 1 1 6 F
+S 34 705 0 695 1 1 6 F
+P 2 1 1 6 50 -700 34 -700 N
+P 2 1 1 6 50 -600 34 -600 N
+P 2 1 1 6 50 -500 34 -500 N
+P 2 1 1 6 50 -400 34 -400 N
+P 2 1 1 6 50 -300 34 -300 N
+P 2 1 1 6 50 -200 34 -200 N
+P 2 1 1 6 50 -100 34 -100 N
+P 2 1 1 6 50 0 34 0 N
+P 2 1 1 6 50 100 34 100 N
+P 2 1 1 6 50 200 34 200 N
+P 2 1 1 6 50 300 34 300 N
+P 2 1 1 6 50 400 34 400 N
+P 2 1 1 6 50 500 34 500 N
+P 2 1 1 6 50 600 34 600 N
+P 2 1 1 6 50 700 34 700 N
+X Pin_1 1 200 700 150 L 50 50 1 1 P
+X Pin_10 10 200 -200 150 L 50 50 1 1 P
+X Pin_11 11 200 -300 150 L 50 50 1 1 P
+X Pin_12 12 200 -400 150 L 50 50 1 1 P
+X Pin_13 13 200 -500 150 L 50 50 1 1 P
+X Pin_14 14 200 -600 150 L 50 50 1 1 P
+X Pin_15 15 200 -700 150 L 50 50 1 1 P
+X Pin_2 2 200 600 150 L 50 50 1 1 P
+X Pin_3 3 200 500 150 L 50 50 1 1 P
+X Pin_4 4 200 400 150 L 50 50 1 1 P
+X Pin_5 5 200 300 150 L 50 50 1 1 P
+X Pin_6 6 200 200 150 L 50 50 1 1 P
+X Pin_7 7 200 100 150 L 50 50 1 1 P
+X Pin_8 8 200 0 150 L 50 50 1 1 P
+X Pin_9 9 200 -100 150 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Jumper-Device-main-rescue
+#
+DEF Jumper-Device-main-rescue JP 0 30 Y N 1 F N
+F0 "JP" 0 150 50 H V C CNN
+F1 "Jumper-Device-main-rescue" 0 -80 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+A 0 -26 125 1426 373 0 1 0 N -98 50 99 50
+C -100 0 35 0 1 0 N
+C 100 0 35 0 1 0 N
+X 1 1 -300 0 165 R 50 50 0 1 P
+X 2 2 300 0 165 L 50 50 0 1 P
+ENDDRAW
+ENDDEF
+#
+# PWR_FLAG-power-main-rescue
+#
+DEF PWR_FLAG-power-main-rescue #FLG 0 0 N N 1 F P
+F0 "#FLG" 0 75 50 H I C CNN
+F1 "PWR_FLAG-power-main-rescue" 0 150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 6 0 1 0 0 0 0 50 -40 75 0 100 40 75 0 50 N
+X pwr 1 0 0 0 U 50 50 0 0 w
+ENDDRAW
+ENDDEF
+#
+# R_US-Device-main-rescue
+#
+DEF R_US-Device-main-rescue R 0 0 N Y 1 F N
+F0 "R" 100 0 50 V V C CNN
+F1 "R_US-Device-main-rescue" -100 0 50 V V C CNN
+F2 "" 40 -10 50 V I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ R_*
+$ENDFPLIST
+DRAW
+P 2 0 1 0 0 -90 0 -100 N
+P 2 0 1 0 0 90 0 100 N
+P 5 0 1 0 0 -30 40 -45 0 -60 -40 -75 0 -90 N
+P 5 0 1 0 0 30 40 15 0 0 -40 -15 0 -30 N
+P 5 0 1 0 0 90 40 75 0 60 -40 45 0 30 N
+X ~ 1 0 150 50 D 50 50 1 1 P
+X ~ 2 0 -150 50 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+#End Library

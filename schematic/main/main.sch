@@ -37,7 +37,7 @@ F 3 "https://store.arduino.cc/usa/arduino-pro-mini" H 3100 3650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x03_Male J3
+L main-rescue:Conn_01x03_Male-Connector-main-rescue J3
 U 1 1 5BCF834E
 P 1150 2650
 F 0 "J3" H 1256 2928 50  0000 C CNN
@@ -48,7 +48,7 @@ F 3 "~" H 1150 2650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x02_Male J7
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J7
 U 1 1 5BCF83FD
 P 1150 4500
 F 0 "J7" H 1256 4678 50  0000 C CNN
@@ -59,7 +59,7 @@ F 3 "~" H 1150 4500 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x03_Male J4
+L main-rescue:Conn_01x03_Male-Connector-main-rescue J4
 U 1 1 5BCF8720
 P 1150 3150
 F 0 "J4" H 1256 3428 50  0000 C CNN
@@ -70,7 +70,7 @@ F 3 "~" H 1150 3150 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x03_Male J5
+L main-rescue:Conn_01x03_Male-Connector-main-rescue J5
 U 1 1 5BCF8793
 P 1150 3600
 F 0 "J5" H 1256 3878 50  0000 C CNN
@@ -92,7 +92,7 @@ F 3 "" H 5000 2050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_US R1
+L main-rescue:R_US-Device-main-rescue R1
 U 1 1 5BCF9849
 P 2350 1900
 F 0 "R1" V 2550 1900 50  0000 C CNN
@@ -103,7 +103,7 @@ F 3 "~" H 2350 1900 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:CP1 C1
+L main-rescue:CP1-Device-main-rescue C1
 U 1 1 5BCF98F0
 P 4200 3000
 F 0 "C1" H 4315 3046 50  0000 L CNN
@@ -143,7 +143,7 @@ NoConn ~ 3800 2350
 NoConn ~ 3800 2250
 Connection ~ 3200 3800
 $Comp
-L Connector:Conn_01x03_Male J1
+L main-rescue:Conn_01x03_Male-Connector-main-rescue J1
 U 1 1 5BCFDB4F
 P 1150 1700
 F 0 "J1" H 1256 1978 50  0000 C CNN
@@ -220,7 +220,7 @@ NoConn ~ 8200 3300
 Wire Wire Line
 	5500 5100 5500 4400
 $Comp
-L power:PWR_FLAG #FLG0101
+L main-rescue:PWR_FLAG-power-main-rescue #FLG0101
 U 1 1 5BE4B784
 P 2850 7000
 F 0 "#FLG0101" H 2850 7075 50  0001 C CNN
@@ -234,7 +234,7 @@ Connection ~ 2850 7000
 Wire Wire Line
 	2850 7000 3200 7000
 $Comp
-L power:PWR_FLAG #FLG0102
+L main-rescue:PWR_FLAG-power-main-rescue #FLG0102
 U 1 1 5BE4B7FF
 P 2500 1200
 F 0 "#FLG0102" H 2500 1275 50  0001 C CNN
@@ -245,7 +245,7 @@ F 3 "~" H 2500 1200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:PWR_FLAG #FLG0103
+L main-rescue:PWR_FLAG-power-main-rescue #FLG0103
 U 1 1 5BE4B85A
 P 2500 900
 F 0 "#FLG0103" H 2500 975 50  0001 C CNN
@@ -335,7 +335,7 @@ Text Label 7200 3100 2    50   ~ 0
 Text Label 7000 3000 2    50   ~ 0
 DIR
 $Comp
-L Connector:Conn_01x02_Male J8
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J8
 U 1 1 5BE5E3EF
 P 1150 5500
 F 0 "J8" H 1256 5678 50  0000 C CNN
@@ -375,7 +375,7 @@ Wire Wire Line
 Wire Wire Line
 	5950 5350 6400 5350
 $Comp
-L Connector:Conn_01x15_Male CON2
+L main-rescue:Conn_01x15_Male-Connector-main-rescue CON2
 U 1 1 5BCFD97B
 P 5750 5550
 F 0 "CON2" H 5850 6400 50  0000 C CNN
@@ -386,7 +386,7 @@ F 3 "~" H 5750 5550 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 $Comp
-L Connector:Conn_01x15_Male CON1
+L main-rescue:Conn_01x15_Male-Connector-main-rescue CON1
 U 1 1 5BCFD9D4
 P 9550 5550
 F 0 "CON1" H 9650 6400 50  0000 C CNN
@@ -443,7 +443,7 @@ Connection ~ 6000 1500
 Wire Wire Line
 	6000 1500 7800 1500
 $Comp
-L Device:Jumper JP1
+L main-rescue:Jumper-Device-main-rescue JP1
 U 1 1 5BD13E35
 P 6200 1300
 F 0 "JP1" H 6200 1564 50  0000 C CNN
@@ -460,7 +460,7 @@ Wire Wire Line
 Wire Wire Line
 	5900 1300 4950 1300
 $Comp
-L power:PWR_FLAG #FLG0104
+L main-rescue:PWR_FLAG-power-main-rescue #FLG0104
 U 1 1 5BD2178B
 P 7350 1300
 F 0 "#FLG0104" H 7350 1375 50  0001 C CNN
@@ -567,7 +567,7 @@ Wire Wire Line
 Wire Wire Line
 	1350 5100 2300 5100
 $Comp
-L Connector:Conn_01x02_Male J9
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J9
 U 1 1 5BD40086
 P 1150 5900
 F 0 "J9" H 1256 6078 50  0000 C CNN
@@ -673,7 +673,7 @@ NoConn ~ 4600 2300
 NoConn ~ 5400 2200
 NoConn ~ 5400 2300
 $Comp
-L Connector:Conn_01x02_Male J10
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J10
 U 1 1 5BD7937E
 P 1150 6250
 F 0 "J10" H 1256 6428 50  0000 C CNN
@@ -694,7 +694,7 @@ Wire Wire Line
 	1650 6350 1650 6000
 Connection ~ 1650 6000
 $Comp
-L Connector:Conn_01x03_Male J2
+L main-rescue:Conn_01x03_Male-Connector-main-rescue J2
 U 1 1 5BD94D86
 P 1150 2200
 F 0 "J2" H 1256 2478 50  0000 C CNN
@@ -799,7 +799,7 @@ Wire Wire Line
 Wire Wire Line
 	1550 7000 2850 7000
 $Comp
-L Connector:Conn_01x03_Male J6
+L main-rescue:Conn_01x03_Male-Connector-main-rescue J6
 U 1 1 5BF25C51
 P 1150 4050
 F 0 "J6" H 1256 4328 50  0000 C CNN
@@ -828,7 +828,7 @@ Wire Wire Line
 Text Label 2550 2800 2    50   ~ 0
 D8
 $Comp
-L Connector:Conn_01x02_Male J11
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J11
 U 1 1 5BF738A8
 P 1150 6600
 F 0 "J11" H 1256 6778 50  0000 C CNN
@@ -849,7 +849,7 @@ Wire Wire Line
 	1650 6700 1650 6350
 Connection ~ 1650 6350
 $Comp
-L Connector:Conn_01x02_Male J12
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J12
 U 1 1 5BFFDCD1
 P 2150 5500
 F 0 "J12" H 2256 5678 50  0000 C CNN
@@ -860,7 +860,7 @@ F 3 "~" H 2150 5500 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x02_Male J13
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J13
 U 1 1 5C043D16
 P 2150 5900
 F 0 "J13" H 2256 6078 50  0000 C CNN
@@ -871,7 +871,7 @@ F 3 "~" H 2150 5900 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x02_Male J14
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J14
 U 1 1 5C043D64
 P 2150 6250
 F 0 "J14" H 2256 6428 50  0000 C CNN
@@ -903,7 +903,7 @@ Wire Wire Line
 	1750 6350 1950 6350
 Connection ~ 1750 6000
 $Comp
-L Connector:Conn_01x02_Male J15
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J15
 U 1 1 5C0A867B
 P 2650 6600
 F 0 "J15" H 2756 6778 50  0000 C CNN
@@ -923,7 +923,7 @@ Connection ~ 2300 5100
 Wire Wire Line
 	2300 5100 5500 5100
 $Comp
-L Connector:Conn_01x02_Male J16
+L main-rescue:Conn_01x02_Male-Connector-main-rescue J16
 U 1 1 5C0D0641
 P 2550 5500
 F 0 "J16" H 2656 5678 50  0000 C CNN

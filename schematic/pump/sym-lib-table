@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name stepper_driver)(type Legacy)(uri ${KIPRJMOD}/../lib/stepper_driver.lib)(options "")(descr ""))
+  (lib (name pump-rescue)(type Legacy)(uri ${KIPRJMOD}/pump-rescue.lib)(options "")(descr ""))
 )
