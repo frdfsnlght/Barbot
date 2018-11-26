@@ -39,7 +39,7 @@ constexpr int PUMPS                     = 16;
 
 constexpr int PUMP_MAX_SPEED            = 500000;
 constexpr int PUMP_MIN_SPEED            = 40;
-constexpr int PUMP_DEF_SPEED            = 15000;
+constexpr int PUMP_DEF_SPEED            = 12000;
 constexpr int PUMP_MAX_ACCEL            = 500000;
 constexpr int PUMP_MIN_ACCEL            = 1;
 constexpr int PUMP_DEF_ACCEL            = 7500;
@@ -47,7 +47,7 @@ constexpr int PUMP_DEF_ACCEL            = 7500;
 constexpr int PUMP_CONTROLLERS          = 4;
 
 constexpr int INPUT_BUFFERS             = 2;
-constexpr int INPUT_BUFFER_LENGTH       = 32;
+constexpr int INPUT_BUFFER_LENGTH       = 50;
 constexpr int BUF_SERIAL                = 0;
 constexpr int BUF_SERIAL1               = 1;
 
@@ -58,6 +58,7 @@ constexpr int ERR_PUMPS_ARE_RUNNING     = 1;
 
 constexpr int SERIAL_SPEEDS[]           = {115200, 58824, 38400, 19200, 9600};
 constexpr int NUM_SERIAL_SPEEDS         = sizeof(SERIAL_SPEEDS) / sizeof(int);
+constexpr unsigned long SERIAL_SPEED_CHECK_INTERVAL = 1000;
 constexpr int PING_TIMEOUT              = 3000;
 
 constexpr int CHECKSUM_RETRIES          = 3;
@@ -102,9 +103,12 @@ int pumpDir = 0;
 int pumpSpeed = PUMP_DEF_SPEED;
 unsigned pumpAccel = PUMP_DEF_ACCEL;
 bool pumpsEnabled = false;
+bool pumpsEnabledOverride = false;
 bool pumpsFlushing = false;
 
+uint32_t lastSerialSpeedCheck = 0;
 int serialSpeed = 0;
+bool commEnabled = true;
 
 bool ledOn = false;
 uint32_t lastLEDToggle = 0;
@@ -113,18 +117,15 @@ uint8_t checksumRetries = 0;
 char lastSerial1Command[INPUT_BUFFER_LENGTH + 1];
 
 
-
 void setup() {
     Serial.begin(115200); // speed is ignored
-    
-    detectSerial1Speed();
     
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_ENABLE, OUTPUT);
     turnOffLED();
     disablePumps();
     
-    sendMessage("Hello");
+    sendMessage("Barbot-Teensy ready");
 }
 
 void loop() {
@@ -164,6 +165,15 @@ void loopSerial() {
 
 void loopSerial1() {
 
+    if (! commEnabled) return;
+    
+    if (! serialSpeed) {
+        if ((millis() - lastSerialSpeedCheck) > SERIAL_SPEED_CHECK_INTERVAL) {
+            lastSerialSpeedCheck = millis();
+            detectSerial1Speed();
+        }
+    }
+    
     while (serialSpeed && Serial1.available()) {
         ch = Serial1.read();
         if ((ch == '\r') || (ch == '\n')) {
@@ -201,7 +211,7 @@ void loopPumps() {
     } else {
         if (pumpsFlushing)
             pumpsFlushing = false;
-        if (pumpsEnabled) {
+        if (pumpsEnabled and (! pumpsEnabledOverride)) {
             disablePumps();
             pumpDir = 0;
         }
@@ -235,6 +245,8 @@ void detectSerial1Speed() {
 }
 
 bool ping() {
+    while (Serial1.available())
+        Serial1.read();
     Serial1.println("PING");
     unsigned long time = millis();
     while ((millis() - time) < PING_TIMEOUT) {
@@ -324,11 +336,12 @@ void processCommand() {
             processPumpCommand(cmd + 1);
             break;
         default:
-            if (serialSpeed) {
+            if (commEnabled && serialSpeed) {
                 strcpy(lastSerial1Command, inputBuffers[BUF_SERIAL].data);
                 Serial1.println(lastSerial1Command);
                 checksumRetries = 0;
-            }
+            } else
+                sendError("invalid command");
             break;
     }
 }
@@ -354,11 +367,14 @@ bool processChecksum(char* cmd, int len) {
 // =========== Comm commands
 void processCommCommand(char* cmd) {
     switch (cmd[0]) {
+        case 'E':
+        case 'e':
+            cmdCommEnable();
+            return;
         case 'D':
         case 'd':
             detectSerial1Speed();
             cmdCommStatus();
-            sendOK();
             return;
         case 'P':
         case 'p':
@@ -376,7 +392,19 @@ void processCommCommand(char* cmd) {
     }
 }
 
+void cmdCommEnable() {
+    if (commEnabled)
+        commEnabled = false;
+    else
+        commEnabled = true;
+    sendOK();
+}
+
 void cmdCommStatus() {
+    send("enabled: ");
+    sendInt(commEnabled);
+    sendChar('\n');
+    
     send("speed: ");
     sendInt(serialSpeed);
     sendChar('\n');
@@ -407,6 +435,10 @@ void processPumpCommand(char* cmd) {
         case 'A':
         case 'a':
             cmdPumpAcceleration(cmd + 1);
+            break;
+        case 'E':
+        case 'e':
+            cmdPumpToggleEnable(cmd + 1);
             break;
         case '?':
             cmdPumpStatus();
@@ -571,7 +603,23 @@ void cmdPumpAcceleration(char* str) {
     sendOK();
 }
 
+void cmdPumpToggleEnable(char* str) {
+    if (pumpsEnabled) {
+        pumpsEnabledOverride = false;
+        sendMessage("disabled");
+    } else {
+        enablePumps();
+        pumpsEnabledOverride = true;
+        sendMessage("enabled");
+    }
+    sendOK();
+}
+
 void cmdPumpStatus() {
+    send("enable override: ");
+    sendInt(pumpsEnabledOverride);
+    sendChar('\n');
+    
     send("speed: ");
     sendInt(pumpSpeed);
     sendChar('\n');

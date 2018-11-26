@@ -27,7 +27,6 @@ IN THE SOFTWARE.
 
 
 #include <Arduino.h>
-#include <Wire.h>
 #include <EEPROM.h>
 #include <NeoPixelController.h>
 #include <WipeNeoPixelPattern.h>
@@ -42,7 +41,7 @@ IN THE SOFTWARE.
 
 #define DEBUG_PATTERNS
 
-constexpr int SERIAL_SPEED              = 57600;
+constexpr unsigned long SERIAL_SPEED    = 115200;
 
 constexpr int PIN_SERIAL_RX             = 0;
 constexpr int PIN_SERIAL_TX             = 1;
@@ -165,14 +164,9 @@ void setup() {
     lights.setupSegment(0, 0, NUM_PIXELS);
     for (int i = 0; i < NUM_SUBSEGMENTS; i++) {
         lights.setupSegment(i + 1, i * NUM_PIXELS_PER_SUBSEGMENT, NUM_PIXELS_PER_SUBSEGMENT);
-        //lights.setupSegment(i + 1, i * NUM_PIXELS / (NUM_SEGMENTS - 1), NUM_PIXELS / (NUM_SEGMENTS - 1));
     }
     lights.begin();
     lights.setSegmentColor(COLOR_OFF, 0);
-
-    turnOffLights();
-    
-    randomSeed(analogRead(0));
     
     turnOffLED();
         
