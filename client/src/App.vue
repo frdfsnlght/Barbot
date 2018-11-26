@@ -121,7 +121,7 @@
           <v-icon>mdi-alert</v-icon>
         </v-btn>      
       
-        <v-icon v-if="glassReady">mdi-glass-cocktail</v-icon>
+        <v-icon v-if="dispenserGlassReady">mdi-glass-cocktail</v-icon>
 
         <template v-if="wifiState">
           <wifi-signal-icon :wifiOn="wifiState.ssid" :bars="wifiState.bars"/>
@@ -147,7 +147,7 @@
     <error-dialog/>
     <notifier/>
     <confirm ref="confirm"/>
-    <login ref="login"/>
+    <login-dialog ref="loginDialog"/>
     <audio-player ref="audioPlayer"/>
     <keyboard-overlay v-if="isConsole"/>
     
@@ -163,7 +163,7 @@ import Confirm from './components/Confirm'
 import ConnectingDialog from './components/ConnectingDialog'
 import ErrorDialog from './components/ErrorDialog'
 import Notifier from './components/Notifier'
-import Login from './components/Login'
+import LoginDialog from './components/LoginDialog'
 import AudioPlayer from './components/AudioPlayer'
 import KeyboardOverlay from './components/KeyboardOverlay'
 import WifiSignalIcon from './components/WifiSignalIcon'
@@ -185,7 +185,7 @@ export default {
     ConnectingDialog,
     ErrorDialog,
     Notifier,
-    Login,
+    LoginDialog,
     AudioPlayer,
     KeyboardOverlay,
     WifiSignalIcon,
@@ -200,11 +200,11 @@ export default {
       'options',
       'isConsole',
       'user',
-      'glassReady',
-      'alerts',
     ]),
     ...mapState({
-      wifiState: state => state.wifi.state
+      wifiState: state => state.wifi.state,
+      dispenserGlassReady: state => state.dispenser.glassReady,
+      alerts: state => state.alerts.alerts,
     }),
   },
   
@@ -297,7 +297,7 @@ export default {
     },
     
     logout() {
-      this.$refs.login.logout().then(() => {
+      this.$refs.loginDialog.logout().then(() => {
         bus.$emit('logout')
       })
     },
@@ -310,7 +310,7 @@ export default {
     checkAdmin(opt) {
       if ((! this.$store.state.options[opt]) || this.$store.state.user.isAdmin)
         return new Promise((res) => { res() })
-      return this.$refs.login.open()
+      return this.$refs.loginDialog.open()
     },
     
   },

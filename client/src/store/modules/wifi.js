@@ -48,7 +48,7 @@ export default {
         
         loadNetworks({commit}) {
             commit('networksLoading')
-            Vue.prototype.$socket.emit('getWifiNetworks', (res) => {
+            Vue.prototype.$socket.emit('wifi_getNetworks', (res) => {
                 if (res.error) {
                     commit('setError', res.error, {root: true})
                     commit('networksLoaded', [])
@@ -58,7 +58,7 @@ export default {
             })
         },
 
-        socket_wifiState({commit, dispatch, state}, wifi) {
+        socket_wifi_state({commit, dispatch, state}, wifi) {
             if (state.networks && state.state && (state.state.ssid != wifi.ssid)) {
                 dispatch('loadNetworks')
             }

@@ -1,6 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import core from './modules/core'
+import dispenser from './modules/dispenser'
+import alerts from './modules/alerts'
+import audio from './modules/audio'
 import wifi from './modules/wifi'
 import drinkOrders from './modules/drinkOrders'
 import glasses from './modules/glasses'
@@ -13,6 +17,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     modules: {
+        core: core,
+        dispenser: dispenser,
+        alerts: alerts,
+        audio: audio,
         wifi: wifi,
         drinkOrders: drinkOrders,
         ingredients: ingredients,
@@ -20,7 +28,6 @@ export default new Vuex.Store({
         drinks: drinks,
         drinksMenu: drinksMenu,
         pumps: pumps,
-        
     },
     
     state: {
@@ -31,13 +38,7 @@ export default new Vuex.Store({
         notificationColor: 'info',
         notificationTimeout: 4000,
         isConsole: location.hostname === 'localhost',
-        dispenserHold: false,
-        dispenseState: {},
-        glassReady: true,
-        parentalLock: false,
-        volume: 1,
         user: {},
-        alerts: [],
     },
     
     mutations: {
@@ -60,33 +61,6 @@ export default new Vuex.Store({
             }
         },
         
-        socket_dispenserHold(state, dispenserHold) {
-            state.dispenserHold = dispenserHold
-        },
-    
-        socket_dispenseState(state, dispenseState) {
-            //console.log('dispenseState:')
-            //console.dir(dispenseState)
-            state.dispenseState = dispenseState
-        },
-    
-        socket_glassReady(state, glassReady) {
-            state.glassReady = glassReady
-        },
-
-        socket_parentalLock(state, parentalLock) {
-            state.parentalLock = parentalLock
-        },
-
-        socket_volume(state, volume) {
-            state.volume = volume
-        },
-
-        socket_alerts(state, alerts) {
-            state.alerts = alerts
-        },
-        
-    
         setError(state, error) {
             state.error = error
         },

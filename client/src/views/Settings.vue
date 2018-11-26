@@ -29,24 +29,25 @@
       <v-list-tile
         avatar
         ripple
-        @click="setParentalLock()"
+        @click="setParentalCode()"
       >
         <v-list-tile-avatar>
-          <v-icon>mdi-lock</v-icon>
+          <v-icon v-if="parentalCode">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
         </v-list-tile-avatar>
         <v-list-tile-content>
           <v-list-tile-title>Parental lock</v-list-tile-title>
-          <v-list-tile-sub-title v-if="parentalLock">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-if="parentalCode">Active</v-list-tile-sub-title>
           <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
         </v-list-tile-content>
         <v-list-tile-action>
-          <v-switch v-model="parentalLock" readonly></v-switch>
+          <v-switch v-model="parentalCode" readonly></v-switch>
         </v-list-tile-action>
       </v-list-tile>
       
     </v-list>
 
-    <parental-code ref="parentalCode"></parental-code>
+    <parental-code-dialog ref="parentalCodeDialog"></parental-code-dialog>
     
   </v-card>
         
@@ -57,7 +58,7 @@
 import { mapState } from 'vuex'
 import store from '../store/store'
 import bus from '../bus'
-import ParentalCode from '../components/ParentalCode'
+import ParentalCodeDialog from '../components/ParentalCodeDialog'
 
 export default {
   name: 'Settings',
@@ -67,7 +68,7 @@ export default {
   },
   
   components: {
-    ParentalCode
+    ParentalCodeDialog
   },
   
   created() {
@@ -82,7 +83,7 @@ export default {
   computed: {
     ...mapState({
       wifiState: state => state.wifi.state,
-      parentalLock: state => state.parentalLock,
+      parentalCode: state => state.core.parentalCode,
     })
   },
   
@@ -92,14 +93,14 @@ export default {
       this.$router.push({name: 'settings/wifi'})
     },
   
-    setParentalLock() {
-      if (this.parentalLock) {
-        this.$socket.emit('setParentalLock', false, (res) => {
+    setParentalCode() {
+      if (this.parentalCode) {
+        this.$socket.emit('core_setParentalCode', false, (res) => {
           if (res.error)
             this.$store.commit('setError', res.error)          
         })
       } else {
-        this.$refs.parentalCode.open()
+        this.$refs.parentalCodeDialog.open()
       }
     },
   

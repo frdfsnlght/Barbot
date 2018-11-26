@@ -291,7 +291,7 @@ export default {
 
     forgetNetwork() {
       this.$refs.confirm.open(this.network.ssid, 'Forget this network?').then(() => {
-        this.$socket.emit('forgetWifiNetwork', this.network.ssid, (res) => {
+        this.$socket.emit('wifi_forgetNetwork', this.network.ssid, (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
           } else {
@@ -311,7 +311,7 @@ export default {
       }
       if (this.network.security != 'None')
         params['password'] = this.network.password
-      this.$socket.emit('connectToWifiNetwork', params, (res) => {
+      this.$socket.emit('wifi_connectToNetwork', params, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         } else {
@@ -326,7 +326,7 @@ export default {
       let params = {
         ssid: this.network.ssid,
       }
-      this.$socket.emit('connectToWifiNetwork', params, (res) => {
+      this.$socket.emit('wifi_connectToNetwork', params, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         } else {
@@ -337,7 +337,7 @@ export default {
     },
     
     disconnectFromNetwork() {
-      this.$socket.emit('disconnectFromWifiNetwork', this.network.ssid, (res) => {
+      this.$socket.emit('wifi_disconnectFromNetwork', this.network.ssid, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         } else {

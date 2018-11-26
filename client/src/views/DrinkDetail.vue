@@ -56,7 +56,7 @@
       
       <template v-if="item.isOnMenu">
       
-        <order-drink ref="orderDrink"></order-drink>
+        <order-drink-dialog ref="orderDrinkDialog"></order-drink-dialog>
 
         <v-btn
           fab
@@ -80,7 +80,7 @@
 
 import { mapState } from 'vuex'
 import Loading from '../components/Loading'
-import OrderDrink from '../components/OrderDrink'
+import OrderDrinkDialog from '../components/OrderDrinkDialog'
 
 export default {
   name: 'DrinkDetail',
@@ -97,7 +97,7 @@ export default {
   
   components: {
     Loading,
-    OrderDrink,
+    OrderDrinkDialog,
   },
   
   created() {
@@ -135,7 +135,7 @@ export default {
     },
     
     orderDrink() {
-      this.$refs.orderDrink.open(this.item).then(() => {
+      this.$refs.orderDrinkDialog.open(this.item).then(() => {
         if (this.locationHistory)
           this.$router.go(-2)
       })

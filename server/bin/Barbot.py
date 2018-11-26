@@ -25,6 +25,7 @@ import barbot.serial
 import barbot.wifi
 import barbot.lights
 import barbot.audio
+import barbot.dispenser
 
 from barbot.db import initializeDB
 import barbot.core

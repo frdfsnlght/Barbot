@@ -59,7 +59,7 @@
 import bus from '../bus'
 
 export default {
-  name: 'Login',
+  name: 'LoginDialog',
   data() {
     return {
       dialog: false,

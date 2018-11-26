@@ -44,13 +44,21 @@ export default {
     ]),
     ...mapState({
       pumpsSetup: state => state.pumps.setup,
+      dispenserState: state => state.dispenser.state,
     }),
   },
   
   beforeRouteEnter(to, from, next) {
     next(t => {
       if (t.isConsole && t.pumpsSetup) {
-        t.$socket.emit('stopPumpSetup', (res) => {
+        t.$socket.emit('core_stopPumpSetup', (res) => {
+          if (res.error) {
+            t.$store.commit('setError', res.error)
+          }
+        })
+      }
+      if (t.isConsole && t.dispenserState == 'dispense') {
+        t.$socket.emit('dispenser_stopDispense', (res) => {
           if (res.error) {
             t.$store.commit('setError', res.error)
           }
