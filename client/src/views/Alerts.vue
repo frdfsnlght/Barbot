@@ -58,16 +58,16 @@ export default {
   },
   
   computed: {
-    ...mapState([
-      'alerts',
-    ]),
+    ...mapState({
+      alerts: state => state.alerts.alerts,
+    }),
   },
   
   methods: {
   
     clearAlerts() {
       this.$refs.confirm.open('Clear', 'Are you sure you want to clear all the alerts?').then(() => {
-        this.$socket.emit('clearAlerts', (res) => {
+        this.$socket.emit('alerts_clear', (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           } else {

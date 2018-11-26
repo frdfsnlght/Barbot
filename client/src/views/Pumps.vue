@@ -160,7 +160,7 @@
         </v-list>
       </v-menu>
       
-      <pump-wizard ref="pumpWizard" :pump="item"></pump-wizard>
+      <pump-wizard-dialog ref="pumpWizardDialog" :pump="item"></pump-wizard-dialog>
       <pump-flush-dialog ref="pumpFlushDialog"></pump-flush-dialog>
       
     </template>
@@ -175,7 +175,7 @@ import { mapState, mapGetters } from 'vuex'
 import store from '../store/store'
 import bus from '../bus'
 import Loading from '../components/Loading'
-import PumpWizard from '../components/PumpWizard'
+import PumpWizardDialog from '../components/PumpWizardDialog'
 import PumpFlushDialog from '../components/PumpFlushDialog'
 
 export default {
@@ -190,7 +190,7 @@ export default {
   },
   components: {
     Loading,
-    PumpWizard,
+    PumpWizardDialog,
     PumpFlushDialog,
   },
   
@@ -244,7 +244,7 @@ export default {
     },
   
     openLoadPump() {
-      this.$refs.pumpWizard.openLoad()
+      this.$refs.pumpWizardDialog.openLoad()
     },
   
     unloadPump() {
@@ -256,7 +256,7 @@ export default {
     },
   
     openPrimePump() {
-      this.$refs.pumpWizard.openPrime()
+      this.$refs.pumpWizardDialog.openPrime()
     },
   
     drainPump() {
@@ -268,11 +268,11 @@ export default {
     },
   
     openCleanPump() {
-      this.$refs.pumpWizard.openClean()
+      this.$refs.pumpWizardDialog.openClean()
     },
   
     onLogout() {
-      if (! ((store.state.options.pumpSetupRequiresAdmin == false) || store.state.user.isAdmin))
+      if (! ((this.$store.state.options.pumpSetupRequiresAdmin == false) || this.$store.state.user.isAdmin))
         this.$router.replace({name: 'home'})
     },
     
@@ -284,7 +284,7 @@ export default {
     else
       next(t => {
         if (t.isConsole) {
-          t.$socket.emit('startPumpSetup', (res) => {
+          t.$socket.emit('core_startPumpSetup', (res) => {
             if (res.error) {
               t.$store.commit('setError', res.error)
             }

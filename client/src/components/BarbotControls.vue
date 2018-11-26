@@ -5,44 +5,59 @@
     <v-layout column justify-space-between fill-height>
       <v-layout column justify-center fill-height class="text-xs-center pa-3">
   
-        <div v-if="pumpsSetup">
+        <div v-if="pumpsSetup || dispenserState == 'pause' || dispenserState == 'dispense'">
           <p class="display-1">
             Please wait...
           </p>
         </div>
         
-        <div v-else-if="!dispenseState.state">
+        <div v-else-if="dispenserState == 'hold'">
           <p class="display-1">
-            Waiting for a drink order
+            Drink orders are on hold
           </p>
         </div>
         
-        <div v-if="dispenseState.order" class="mb-3">
+        <div v-else-if="dispenserState == 'wait'">
+          <p class="display-1">
+            Waiting for a drink order
+          </p>
+          <v-btn
+            v-if="isConsole && anyPumpReady"
+            color="primary"
+            large
+            class="px-5"
+            @click="gotoMakeMyOwn()"
+          >
+            make my own
+          </v-btn>
+        </div>
+        
+        <div v-if="dispenserDrinkOrder" class="mb-3">
           <p class="headline mb-0">
-            {{dispenseState.order.drink.primaryName}}
+            {{dispenserDrinkOrder.drink.primaryName}}
           </p>
-          <p v-if="dispenseState.order.drink.secondaryName" class="subheading mb-0">
-            {{dispenseState.order.drink.secondaryName}}
+          <p v-if="dispenserDrinkOrder.drink.secondaryName" class="subheading mb-0">
+            {{dispenserDrinkOrder.drink.secondaryName}}
           </p>
-          <p v-if="dispenseState.order.name" class="title mt-1 mb-0">
-            For {{dispenseState.order.name}}
+          <p v-if="dispenserDrinkOrder.name" class="title mt-1 mb-0">
+            For {{dispenserDrinkOrder.name}}
           </p>
         </div>
         
         <template v-if="isConsole">
         
-          <div v-if="dispenseState.state == 'start'">
-            <p :class="'subheading ' + (glassReady ? '' : 'red--text')">
-              Insert a {{dispenseState.order.drink.glass.name}} glass.
-              <v-icon v-if="glassReady" class="green--text">mdi-check</v-icon>
+          <div v-if="dispenserState == 'start'">
+            <p :class="'subheading ' + (dispenserGlassReady ? '' : 'red--text')">
+              Insert a {{dispenserDrinkOrder.drink.glass.name}} glass.
+              <v-icon v-if="dispenserGlassReady" class="green--text">mdi-check</v-icon>
             </p>
             <v-btn
               color="green"
               large
               class="px-5"
-              :loading="!glassReady"
-              :disabled="!glassReady || clicked"
-              @click="dispenseControl('start')"
+              :loading="!dispenserGlassReady"
+              :disabled="!dispenserGlassReady || clicked"
+              @click="dispenserControl('start')"
             >
               start
               <span slot="loader">Waiting...</span>
@@ -52,13 +67,13 @@
               large
               class="px-5"
               :disabled="clicked"
-              @click="dispenseControl('cancel')"
+              @click="dispenserControl('cancel')"
             >
               cancel
             </v-btn>
           </div>
 
-          <div v-if="dispenseState.state == 'dispense'">
+          <div v-if="dispenserState == 'run'">
             <p class="title">
               Dispensing...
             </p>
@@ -67,13 +82,13 @@
               large
               class="px-5"
               :disabled="clicked"
-              @click="dispenseControl('cancel')"
+              @click="dispenserControl('cancel')"
             >
               cancel
             </v-btn>
           </div>
           
-          <div v-if="dispenseState.state == 'glassClear'">
+          <div v-if="dispenserState == 'clear_glass'">
             <p class="title">
               The glass was removed.
             </p>
@@ -84,13 +99,13 @@
               color="primary"
               large
               class="px-5"
-              @click="dispenseControl('ok')"
+              @click="dispenserControl('ok')"
             >
               ok
             </v-btn>
           </div>
 
-          <div v-if="dispenseState.state == 'cancelClear'">
+          <div v-if="dispenserState == 'clear_cancel'">
             <p class="title">
               Dispensing was cancelled.
             </p>
@@ -102,7 +117,7 @@
             </p>
           </div>
 
-          <div v-if="dispenseState.state == 'pickup'">
+          <div v-if="dispenserState == 'pickup'">
             <p class="title">
               Drink is complete.
             </p>
@@ -115,22 +130,13 @@
         
         <template v-else>
 
-          <div v-if="dispenseState.state && dispenseState.state != 'pickup'">
+          <div v-if="dispenserState == 'run' || dispenserState == 'dispense'">
             <p class="title">
               Dispensing...
             </p>
-            <v-btn
-              color="red"
-              large
-              class="px-5"
-              :disabled="clicked"
-              @click="dispenseControl('cancel')"
-            >
-              cancel
-            </v-btn>
           </div>
         
-          <div v-if="dispenseState.state == 'pickup'">
+          <div v-if="dispenserState == 'pickup'">
             <p class="title">
               Drink is complete.
             </p>
@@ -182,19 +188,21 @@ export default {
   computed: {
     ...mapGetters({
       pumps: 'pumps/sortedItems',
+      anyPumpReady: 'pumps/anyPumpReady',
     }),
     ...mapState([
       'isConsole',
-      'dispenseState',
-      'glassReady',
     ]),
     ...mapState({
       pumpsSetup: state => state.pumps.setup,
+      dispenserState: state => state.dispenser.state,
+      dispenserDrinkOrder: state => state.dispenser.drinkOrder,
+      dispenserGlassReady: state => state.dispenser.glassReady,
     }),
   },
   
   watch: {
-    dispenseState: function() {
+    dispenserState: function() {
       this.clicked = false
     },
   },
@@ -203,7 +211,7 @@ export default {
   
     dispenseControl(ctl) {
       this.clicked = true
-      this.$socket.emit('dispenseControl', ctl, (res) => {
+      this.$socket.emit('dispenserControl', ctl, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
@@ -211,6 +219,10 @@ export default {
       })
     },
   
+    gotoMakeMyOwn() {
+      this.$router.push({name: 'makeMyOwn'})
+    },
+    
   },
 
 }

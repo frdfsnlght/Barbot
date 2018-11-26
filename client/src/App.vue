@@ -57,6 +57,21 @@
           </v-list-tile>
 
           <template v-if="isConsole">
+          
+            <v-list-tile @click="reloadClient()">
+              <v-list-tile-title>Reload Client</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-reload</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
+
+            <v-list-tile @click="checkRestartX()">
+              <v-list-tile-title>Restart X</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-window-close</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
+
             <v-list-tile @click="checkRestart()">
               <v-list-tile-title>Restart</v-list-tile-title>
               <v-list-tile-action>
@@ -106,7 +121,7 @@
           <v-icon>mdi-alert</v-icon>
         </v-btn>      
       
-        <v-icon v-if="glassReady">mdi-glass-cocktail</v-icon>
+        <v-icon v-if="dispenserGlassReady">mdi-glass-cocktail</v-icon>
 
         <template v-if="wifiState">
           <wifi-signal-icon :wifiOn="wifiState.ssid" :bars="wifiState.bars"/>
@@ -132,7 +147,7 @@
     <error-dialog/>
     <notifier/>
     <confirm ref="confirm"/>
-    <login ref="login"/>
+    <login-dialog ref="loginDialog"/>
     <audio-player ref="audioPlayer"/>
     <keyboard-overlay v-if="isConsole"/>
     
@@ -148,7 +163,7 @@ import Confirm from './components/Confirm'
 import ConnectingDialog from './components/ConnectingDialog'
 import ErrorDialog from './components/ErrorDialog'
 import Notifier from './components/Notifier'
-import Login from './components/Login'
+import LoginDialog from './components/LoginDialog'
 import AudioPlayer from './components/AudioPlayer'
 import KeyboardOverlay from './components/KeyboardOverlay'
 import WifiSignalIcon from './components/WifiSignalIcon'
@@ -170,7 +185,7 @@ export default {
     ConnectingDialog,
     ErrorDialog,
     Notifier,
-    Login,
+    LoginDialog,
     AudioPlayer,
     KeyboardOverlay,
     WifiSignalIcon,
@@ -185,11 +200,11 @@ export default {
       'options',
       'isConsole',
       'user',
-      'glassReady',
-      'alerts',
     ]),
     ...mapState({
-      wifiState: state => state.wifi.state
+      wifiState: state => state.wifi.state,
+      dispenserGlassReady: state => state.dispenser.glassReady,
+      alerts: state => state.alerts.alerts,
     }),
   },
   
@@ -234,6 +249,11 @@ export default {
       })
     },
 
+    checkRestartX() {
+      this.drawer = false
+      this.checkAdmin('restartXRequiresAdmin').then(this.restartX)
+    },
+
     checkRestart() {
       this.drawer = false
       this.checkAdmin('restartRequiresAdmin').then(this.restart)
@@ -244,6 +264,18 @@ export default {
       this.checkAdmin('shutdownRequiresAdmin').then(this.shutdown)
     },
 
+    reloadClient() {
+      window.location.reload(true);
+    },
+    
+    restartX() {
+      this.$socket.emit('restartX', (res) => {
+        if (res.error) {
+            this.$store.commit('setError', res.error)
+        }
+      })
+    },
+    
     restart() {
       this.$refs.confirm.open('Restart', 'Are you sure you want to restart the system?').then(() => {
         this.$socket.emit('restart', (res) => {
@@ -265,7 +297,7 @@ export default {
     },
     
     logout() {
-      this.$refs.login.logout().then(() => {
+      this.$refs.loginDialog.logout().then(() => {
         bus.$emit('logout')
       })
     },
@@ -278,7 +310,7 @@ export default {
     checkAdmin(opt) {
       if ((! this.$store.state.options[opt]) || this.$store.state.user.isAdmin)
         return new Promise((res) => { res() })
-      return this.$refs.login.open()
+      return this.$refs.loginDialog.open()
     },
     
   },

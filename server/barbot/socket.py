@@ -8,6 +8,7 @@ from .config import config
 from .bus import bus
 from .db import ModelError
 from . import core
+from . import dispenser
 from . import wifi
 from . import audio
 from . import alerts
@@ -90,22 +91,21 @@ def _socket_connect():
     global _consoleSessionId
     _logger.info('Connection opened from ' + request.remote_addr)
     emit('clientOptions', _buildClientOptions())
-    emit('dispenserHold', core.dispenserHold)
-    emit('pumpsSetup', Pump.setup)
-    emit('pumpsFlushing', Pump.flushing)
-    emit('glassReady', core.glassReady)
-    emit('parentalLock', True if core.getParentalCode() else False)
-    dispenseDrinkOrder = core.dispenseDrinkOrder
-    if dispenseDrinkOrder:
-        dispenseDrinkOrder = dispenseDrinkOrder.toDict(drink = True, glass = True)
-    emit('dispenseState', {'state': core.dispenseState, 'order': dispenseDrinkOrder})
-    emit('wifiState', wifi.state)
-    emit('alerts', alerts.getAll())
+    emit('pumps_setup', Pump.setup)
+    emit('pumps_flushing', Pump.flushing)
+    emit('dispenser_glassReady', dispenser.glassReady)
+    emit('core_parentalCode', True if core.getParentalCode() else False)
+    drinkOrder = dispenser.drinkOrder
+    if drinkOrder:
+        drinkOrder = drinkOrder.toDict(drink = True, glass = True)
+    emit('dispenser_state', {'state': dispenser.state, 'order': drinkOrder})
+    emit('wifi_state', wifi.state)
+    emit('alerts_changed', alerts.getAll())
     bus.emit('socket/connect', request)
     if request.remote_addr == '127.0.0.1':
         newConnect = _consoleSessionId != request.sid
         _consoleSessionId = request.sid
-        emit('volume', audio.getVolume())
+        emit('audio_volume', audio.getVolume())
         if newConnect:
             bus.emit('socket/consoleConnect')
 
@@ -135,7 +135,18 @@ def _socket_logout():
         del session['user']
     return success()
 
-@socket.on('restart')
+@socket.on('core_restartX')
+def _socket_restartX():
+    if not checkAdmin('restartXRequiresAdmin'):
+        return error('Permission denied!')
+    _logger.info('Client requested restart X')
+    try:
+        core.restartX()
+        return success()
+    except core.CoreError as e:
+        return error(e)
+
+@socket.on('core_restart')
 def _socket_restart():
     if not checkAdmin('restartRequiresAdmin'):
         return error('Permission denied!')
@@ -143,10 +154,10 @@ def _socket_restart():
     try:
         core.restart()
         return success()
-    except CoreError as e:
+    except core.CoreError as e:
         return error(e)
 
-@socket.on('shutdown')
+@socket.on('core_shutdown')
 def _socket_shutdown():
     if not checkAdmin('shutdownRequiresAdmin'):
         return error('Permission denied!')
@@ -154,38 +165,33 @@ def _socket_shutdown():
     try:
         core.shutdown()
         return success()
-    except CoreError as e:
+    except core.CoreError as e:
         return error(e)
 
-@socket.on('setVolume')
-def _socket_setVolume(volume):
+@socket.on('audio_setVolume')
+def _socket_audio_setVolume(volume):
     audio.setVolume(float(volume))
     return success()
 
-@socket.on('setParentalLock')
-def _socket_setParentalLock(code):
-    core.setParentalLock(code)
+@socket.on('core_setParentalCode')
+def _socket_core_setParentalCode(code):
+    core.setParentalCode(code)
     return success()
     
-@socket.on('toggleDispenserHold')
-def _socket_toggleDispenserHold():
-    core.toggleDispenserHold()
-    return success()
-
-@socket.on('startPumpSetup')
-def _socket_startPumpSetup():
+@socket.on('core_startPumpSetup')
+def _socket_core_startPumpSetup():
     if not checkAdmin('pumpSetupRequiresAdmin'):
         return error('Permission denied!')
     core.startPumpSetup()
     return success()
     
-@socket.on('stopPumpSetup')
+@socket.on('core_stopPumpSetup')
 def _socket_stopPumpSetup():
     core.stopPumpSetup()
     return success()
 
-@socket.on('submitDrinkOrder')
-def _socket_submitDrinkOrder(item):
+@socket.on('core_submitDrinkOrder')
+def _socket_core_submitDrinkOrder(item):
     item['sessionId'] = request.sid
     try:
         core.submitDrinkOrder(item)
@@ -195,43 +201,92 @@ def _socket_submitDrinkOrder(item):
     except core.CoreError as e:
         return error(e)
 
-@socket.on('cancelDrinkOrder')
-def _socket_cancelDrinkOrder(id):
+@socket.on('core_cancelDrinkOrder')
+def _socket_core_cancelDrinkOrder(id):
     try:
         core.cancelDrinkOrder(id)
         return success()
     except DoesNotExist:
         return error('Drink order not found!')
         
-@socket.on('toggleDrinkOrderHold')
-def _socket_toggleDrinkOrderHold(id):
+@socket.on('core_toggleDrinkOrderHold')
+def _socket_core_toggleDrinkOrderHold(id):
     try:
         core.toggleDrinkOrderHold(id)
         return success()
     except DoesNotExist:
         return error('Drink order not found!')
 
-@socket.on('dispenseControl')
-def _socket_dispenseControl(ctl):
-    core.setDispenseControl(ctl)
-    return success()
+        
+@socket.on('dispenser_startHold')
+def _socket_dispenser_startHold():
+    try:
+        dispenser.startHold()
+        return success()
+    except dispenser.DispenserError as e:
+        return error(e)
 
-@socket.on('getWifiNetworks')
-def _socket_getWifiNetworks():
+@socket.on('dispenser_stopHold')
+def _socket_dispenser_stopHold():
+    try:
+        dispenser.stopHold()
+        return success()
+    except dispenser.DispenserError as e:
+        return error(e)
+
+@socket.on('dispenser_startDispense')
+def _socket_dispenser_startDispense():
+    try:
+        dispenser.startDispense()
+        return success()
+    except dispenser.DispenserError as e:
+        return error(e)
+
+@socket.on('dispenser_stopDispense')
+def _socket_dispenser_stopDispense():
+    try:
+        dispenser.stopDispense()
+        return success()
+    except dispenser.DispenserError as e:
+        return error(e)
+        
+@socket.on('dispenser_setControl')
+def _socket_dispenser_setControl(ctl):
+    dispenser.setControl(ctl)
+    return success()
+    
+@socket.on('dispenser_startPump')
+def _socket_dispenser_startPump(pumpId):
+    try:
+        dispenser.startPump(pumpId)
+        return success()
+    except dispenser.DispenserError as e:
+        return error(e)
+    
+@socket.on('dispenser_stopPump')
+def _socket_dispenser_stopPump():
+    try:
+        dispenser.stopPump()
+        return success()
+    except dispenser.DispenserError as e:
+        return error(e)
+
+@socket.on('wifi_getNetworks')
+def _socket_wifi_getNetworks():
     return success(networks = wifi.getNetworks())
     
-@socket.on('connectToWifiNetwork')
-def _socket_connectToWifiNetwork(params):
+@socket.on('wifi_connectToNetwork')
+def _socket_wifi_connectToNetwork(params):
     wifi.connectToNetwork(params)
     return success()
     
-@socket.on('disconnectFromWifiNetwork')
-def _socket_disconnectFromWifiNetwork(ssid):
+@socket.on('wifi_disconnectFromNetwork')
+def _socket_wifi_disconnectFromNetwork(ssid):
     wifi.disconnectFromNetwork(ssid)
     return success()
     
-@socket.on('forgetWifiNetwork')
-def _socket_forgetWifiNetwork(ssid):
+@socket.on('wifi_forgetNetwork')
+def _socket_wifi_forgetNetwork(ssid):
     wifi.forgetNetwork(ssid)
     return success()
     
@@ -413,8 +468,8 @@ def socket_stopFlushingPumps():
     except ModelError as e:
         return error(e)
         
-@socket.on('clearAlerts')
-def socket_clearAlerts():
+@socket.on('alerts_clear')
+def socket_alerts_clear():
     alerts.clear()
     return success()
     
@@ -429,11 +484,11 @@ def socket_clearAlerts():
 #
     
 @bus.on('config/reloaded')
-def _but_configReloaded():
+def _but_config_reloaded():
     socket.emit('clientOptions', _buildClientOptions())
     
 @bus.on('serial/event')
-def _bus_serialEvent(e):
+def _bus_serial_event(e):
     if _consoleSessionId:
         m = _shutdownEventPattern.match(e)
         if m:
@@ -446,9 +501,9 @@ def _bus_serialEvent(e):
     
 @bus.on('alerts/add')
 @bus.on('alerts/clear')
-def _bus_alert():
+def _bus_alerts():
     try:
-        socket.emit('alerts', alerts.getAll())
+        socket.emit('alerts_changed', alerts.getAll())
     except:
         pass
     
@@ -456,53 +511,53 @@ def _bus_alert():
 # core
 #
     
-@bus.on('core/dispenserHold')
-def _bus_dispenserHold(dispenserHold):
-    socket.emit('dispenserHold', dispenserHold)
+@bus.on('core/parentalCode')
+def _bus_core_parentalCode(locked):
+    socket.emit('core_parentalCode', locked)
     
-@bus.on('core/dispenseState')
-def _bus_dispenseState(dispenseState, dispenseDrinkOrder):
-    if dispenseDrinkOrder:
-        dispenseDrinkOrder = dispenseDrinkOrder.toDict(drink = True, glass = True)
-    socket.emit('dispenseState', {'state': dispenseState, 'order': dispenseDrinkOrder})
+#-------------------------------
+# dispenser
+#
+
+@bus.on('dispenser/state')
+def _bus_dispenser_state(state, drinkOrder):
+    if drinkOrder:
+        drinkOrder = drinkOrder.toDict(drink = True, glass = True)
+    socket.emit('dispenser_state', {'state': state, 'order': drinkOrder})
     
-@bus.on('core/glassReady')
-def _bus_glassReady(ready):
-    socket.emit('glassReady', ready)
-    
-@bus.on('core/parentalLock')
-def _bus_parentalLock(locked):
-    socket.emit('parentalLock', locked)
+@bus.on('dispenser/glassReady')
+def _bus_dispenser_glassReady(ready):
+    socket.emit('dispenser_glassReady', ready)
 
 #-------------------------------
 # wifi
 #
 
 @bus.on('wifi/state')
-def _bus_wifiState(state):
-    socket.emit('wifiState', state)
+def _bus_wifi_state(state):
+    socket.emit('wifi_state', state)
     
 #-------------------------------
 # audio
 #
     
 @bus.on('audio/playFile')
-def _bus_playFile(file, console, sessionId, broadcast):
+def _bus_audio_playFile(file, console, sessionId, broadcast):
     if broadcast:
         _logger.debug('Play {} everywhere'.format(file))
-        socket.emit('playAudio', file)
+        socket.emit('audio_playFile', file)
     else:
         if sessionId:
             _logger.debug('Play {} on client {}'.format(file, sessionId))
-            socket.emit('playAudio', file, room = sessionId)
+            socket.emit('audio_playFile', file, room = sessionId)
         elif console and _consoleSessionId:
             _logger.debug('Play {} on console'.format(file))
-            socket.emit('playAudio', file, room = _consoleSessionId)
+            socket.emit('audio_playFile', file, room = _consoleSessionId)
 
 @bus.on('audio/volume')
-def _bus_volume(volume):
+def _bus_audio_volume(volume):
     if _consoleSessionId:
-        socket.emit('volume', volume, room = _consoleSessionId)
+        socket.emit('audio_volume', volume, room = _consoleSessionId)
         
 #-------------------------------
 # glass
@@ -562,11 +617,11 @@ def _bus_modelPumpSaved(p):
 
 @bus.on('model/pump/setup')
 def _bus_modelPumpSetup():
-    socket.emit('pumpsSetup', Pump.setup)
+    socket.emit('pumps_setup', Pump.setup)
 
 @bus.on('model/pump/flushing')
 def _bus_modelPumpFlushing():
-    socket.emit('pumpsFlushing', Pump.flushing)
+    socket.emit('pumps_flushing', Pump.flushing)
 
 
     

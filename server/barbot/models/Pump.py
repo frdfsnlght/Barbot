@@ -11,7 +11,7 @@ from .. import serial
 from .Ingredient import Ingredient
 
 
-_pumpStopEventPattern = re.compile(r"(?i)PS(\d+)")
+_pumpStopEventPattern = re.compile(r"(?i)PS(\d+),(-?\d+)")
 
 _logger = logging.getLogger('Models.Pump')
 
@@ -37,8 +37,9 @@ def _bus_serialEvent(e):
         if pump:
             with pump.lock:
                 pump.running = False
+                pump.lastAmount = float(m.group(2)) / config.getfloat('pumps', 'stepsPerML')
                 pump.save()
-                _logger.info('Pump {} stopped'.format(pump.name()))
+                _logger.info('Pump {} stopped, {:.2f} mL'.format(pump.name(), pump.lastAmount))
 
 def anyPumpsRunning():
     for i, p in _pumpExtras.items():
@@ -47,8 +48,8 @@ def anyPumpsRunning():
     return False
     
 class PumpExtra(object):
-    allAttributes = ['volume', 'running', 'previousState', 'lock']
-    dirtyAttributes = ['running']
+    allAttributes = ['volume', 'running', 'previousState', 'lock', 'lastAmount']
+    dirtyAttributes = ['running', 'lastAmount']
     
     def __init__(self, pump):
         self.id = pump.id
@@ -63,6 +64,7 @@ class PumpExtra(object):
         self.running = False
         self.previousState = pump.state
         self.lock = Lock()
+        self.lastAmount = 0
         self.isDirty = False
         
     def __setattr__(self, attr, value):
@@ -392,6 +394,7 @@ class Pump(BarbotModel):
             'units': self.units,
             'state': self.state,
             'running': self.running,
+            'lastAmount': self.lastAmount,
         }
         if ingredient:
             if self.ingredient:

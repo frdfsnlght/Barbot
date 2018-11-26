@@ -64,5 +64,9 @@ export default new Router({
     path: '/settings/wifi',
     name: 'settings/wifi',
     component: () => import(/* webpackChunkName: "settingsWifi" */ './views/settings/Wifi.vue'),
+  }, {
+    path: '/makeMyOwn',
+    name: 'makeMyOwn',
+    component: () => import(/* webpackChunkName: "makeMyOwn" */ './views/MakeMyOwn.vue'),
   }]
 })

@@ -45,7 +45,7 @@
         </v-list-tile>
       </v-list>
 
-      <order-drink ref="orderDrink"></order-drink>
+      <order-drink-dialog ref="orderDrinkDialog"></order-drink-dialog>
 
     </template>
     
@@ -57,7 +57,7 @@
 
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
-import OrderDrink from '../components/OrderDrink'
+import OrderDrinkDialog from '../components/OrderDrinkDialog'
 
 export default {
   name: 'DrinksMenu',
@@ -71,7 +71,7 @@ export default {
   
   components: {
     Loading,
-    OrderDrink,
+    OrderDrinkDialog,
   },
   
   created() {
@@ -94,7 +94,7 @@ export default {
     },
   
     orderDrink(item) {
-      this.$refs.orderDrink.open(item).then(() => {
+      this.$refs.orderDrinkDialog.open(item).then(() => {
         window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
       })
     },

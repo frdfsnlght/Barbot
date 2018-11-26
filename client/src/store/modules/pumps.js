@@ -22,9 +22,18 @@ export default {
                 return a.id - b.id
             })
         },
+        sortedReadyPumps(state) {
+            return state.items.filter(p => { return (p.state == 'ready') }).sort((a, b) => {
+                return a.id - b.id
+            })
+        },
         anyPumpRunning(state) {
             if (state.flushing) return true
             let i = state.items.find((e) => { return e.running })
+            return !!i
+        },
+        anyPumpReady(state) {
+            let i = state.items.find((e) => { return e.state == 'ready' })
             return !!i
         },
     },
@@ -55,11 +64,11 @@ export default {
             }
         },
 
-        socket_pumpsSetup(state, setup) {
+        socket_pumps_setup(state, setup) {
             state.setup = setup
         },
 
-        socket_pumpsFlushing(state, flushing) {
+        socket_pumps_flushing(state, flushing) {
             state.flushing = flushing
         },
 

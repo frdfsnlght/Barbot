@@ -71,7 +71,7 @@ import { mapState } from 'vuex'
 import bus from '../bus'
 
 export default {
-  name: 'OrderDrink',
+  name: 'OrderDrinkDialog',
   data() {
     return {
       valid: true,
@@ -114,7 +114,7 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('submitDrinkOrder', this.order, (res) => {
+      this.$socket.emit('core_submitDrinkOrder', this.order, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {

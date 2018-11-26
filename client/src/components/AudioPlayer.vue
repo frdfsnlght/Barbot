@@ -19,9 +19,9 @@ export default {
   },
   
   computed: {
-    ...mapState([
-      'volume',
-    ]),
+    ...mapState({
+      volume: state => state.audio.volume,
+    }),
   },
   
   watch: {
@@ -57,7 +57,7 @@ export default {
   
   sockets: {
   
-    playAudio(file) {
+    audio_playFile(file) {
       this.queue.push(file)
       if (! this.player) {
         this.player = new Audio()

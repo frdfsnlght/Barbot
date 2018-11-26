@@ -91,7 +91,7 @@
         
               <v-flex class="text-xs-center mb-3">
                 <p v-if="isFullPrime">Insert the pump tube into the ingredient container.</p>
-                <p v-if="!glassReady" class="red--text">Place a glass in the dispensing area.</p>
+                <p v-if="!dispenserGlassReady" class="red--text">Place a glass in the dispensing area.</p>
               </v-flex>
               
               <v-flex v-if="isFullPrime" class="text-xs-center">
@@ -99,8 +99,8 @@
                   color="primary"
                   large
                   class="px-5"
-                  :loading="!glassReady || pump.running"
-                  :disabled="!glassReady || pump.running"
+                  :loading="!dispenserGlassReady || pump.running"
+                  :disabled="!dispenserGlassReady || pump.running"
                   @click="primePump()"
                 >
                   prime
@@ -115,8 +115,8 @@
               <v-flex class="text-xs-center">
                 <v-btn
                   :color="isFullPrime ? 'secondary' : 'primary'"
-                  :loading="!glassReady || pump.running"
-                  :disabled="!glassReady || pump.running"
+                  :loading="!dispenserGlassReady || pump.running"
+                  :disabled="!dispenserGlassReady || pump.running"
                   @click="primePump(microPrimeSmall)"
                 >
                   {{microPrimeSmall}} ml
@@ -124,8 +124,8 @@
                 </v-btn>
                 <v-btn
                   :color="isFullPrime ? 'secondary' : 'primary'"
-                  :loading="!glassReady || pump.running"
-                  :disabled="!glassReady || pump.running"
+                  :loading="!dispenserGlassReady || pump.running"
+                  :disabled="!dispenserGlassReady || pump.running"
                   @click="primePump(microPrimeLarge)"
                 >
                   {{microPrimeLarge}} ml
@@ -159,14 +159,14 @@
         
               <v-flex class="text-xs-center mb-3">
                 <p>Insert the pump tube into a container of clean water.</p>
-                <p v-if="!glassReady" class="red--text">Place a glass in the dispensing area.</p>
+                <p v-if="!dispenserGlassReady" class="red--text">Place a glass in the dispensing area.</p>
               </v-flex>
               
               <v-flex class="text-xs-center">
                 <v-btn
                   color="primary"
-                  :loading="!glassReady || pump.running"
-                  :disabled="!glassReady || pump.running"
+                  :loading="!dispenserGlassReady || pump.running"
+                  :disabled="!dispenserGlassReady || pump.running"
                   @click="cleanPump()"
                 >
                   clean
@@ -174,8 +174,8 @@
                 </v-btn>
                 <v-btn
                   color="primary"
-                  :loading="!glassReady || pump.running"
-                  :disabled="!glassReady || pump.running"
+                  :loading="!dispenserGlassReady || pump.running"
+                  :disabled="!dispenserGlassReady || pump.running"
                   @click="drainPump()"
                 >
                   drain
@@ -207,7 +207,7 @@ import SelectUnits from '../components/SelectUnits'
 import bus from '../bus'
 
 export default {
-  name: 'PumpWizard',
+  name: 'PumpWizardDialog',
   props: ['pump'],
   
   data() {
@@ -233,7 +233,7 @@ export default {
   computed: {
     ...mapState({
       defaultUnits: state => state.options.defaultUnits,
-      glassReady: state => state.glassReady,
+      dispenserGlassReady: state => state.dispenser.glassReady,
       microPrimeSmall: state => state.options.microPrimeSmall,
       microPrimeLarge: state => state.options.microPrimeLarge,
     }),

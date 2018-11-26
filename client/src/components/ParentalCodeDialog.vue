@@ -50,7 +50,7 @@
 import bus from '../bus'
 
 export default {
-  name: 'ParentalCode',
+  name: 'ParentalCodeDialog',
   data() {
     return {
       dialog: false,
@@ -82,7 +82,7 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('setParentalLock', this.code, (res) => {
+      this.$socket.emit('core_setParentalCode', this.code, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)          
         } else {

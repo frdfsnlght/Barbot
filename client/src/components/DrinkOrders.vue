@@ -10,8 +10,8 @@
       <v-toolbar-title>Orders</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="toggleDispenserHold()">
-        <v-icon v-if="dispenserHold">mdi-pause</v-icon>
-        <v-icon v-else>mdi-play</v-icon>
+        <v-icon v-if="dispenserState == 'hold'">mdi-play</v-icon>
+        <v-icon v-else>mdi-pause</v-icon>
       </v-btn>
     </v-toolbar>
       
@@ -138,7 +138,7 @@ export default {
     }),
     ...mapState({
       loading: state => state.drinkOrders.loading,
-      dispenserHold: state => state.dispenserHold,
+      dispenserState: state => state.dispenser.state,
     })
   },
   
@@ -157,11 +157,19 @@ export default {
     },
 
     toggleDispenserHold() {
-      this.$socket.emit('toggleDispenserHold', (res) => {
-          if (res.error) {
-              this.$store.commit('setError', res.error)
-          }
-      })
+      if (this.dispenserState == 'hold') {
+        this.$socket.emit('dispenser_stopHold', (res) => {
+            if (res.error) {
+                this.$store.commit('setError', res.error)
+            }
+        })
+      } else {
+        this.$socket.emit('dispenser_startHold', (res) => {
+            if (res.error) {
+                this.$store.commit('setError', res.error)
+            }
+        })
+      }
     },
     
     showMenu(item, e) {
@@ -176,7 +184,7 @@ export default {
     },
   
     toggleHoldItem() {
-      this.$socket.emit('toggleDrinkOrderHold', this.item.id, (res) => {
+      this.$socket.emit('core_toggleDrinkOrderHold', this.item.id, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         }
@@ -185,7 +193,7 @@ export default {
     
     cancelItem() {
       this.$refs.confirm.open('Cancel', 'Are you sure you want to cancel this order?', {rejectText: 'No'}).then(() => {
-        this.$socket.emit('cancelDrinkOrder', this.item.id, (res) => {
+        this.$socket.emit('core_cancelDrinkOrder', this.item.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           }
