@@ -21,8 +21,7 @@ IN THE SOFTWARE.
 */
 
 /*
-    https://github.com/luni64/TeensyStep
-    NOTE: You must set the MaxMotors constant to 17 (PUMPS + 1), line 8 in StepControl.h!
+    https://github.com/frdfsnlght/TeensyStep
 */
 
 #include <Arduino.h>
@@ -567,6 +566,7 @@ void cmdPumpFlush(char* str) {
                 return;
             }
             pumps[i] = allPumps[p];
+            pumps[i]->setPosition(0);
             pumps[i]->setAcceleration(pumpAccel);
             pumps[i]->setMaxSpeed(pumpSpeed);
             pumpControllers[p] = &pumpCtrl0;
@@ -721,7 +721,7 @@ void sendChar(char ch) {
     Serial.print(ch);
 }
 
-void sendInt(int i) {
+void sendInt(int32_t i) {
     Serial.print(i);
 }
 
@@ -750,6 +750,8 @@ void sendPumpRunning(byte pumpNum) {
 void sendPumpStopped(byte pumpNum) {
     send("*PS");
     sendInt(pumpNum);
+    sendChar(',');
+    sendInt(allPumps[i]->getPosition());
     sendChar('\n');
 }
 
