@@ -135,6 +135,17 @@ def _socket_logout():
         del session['user']
     return success()
 
+@socket.on('restartX')
+def _socket_restartX():
+    if not checkAdmin('restartXRequiresAdmin'):
+        return error('Permission denied!')
+    _logger.info('Client requested restart X')
+    try:
+        core.restartX()
+        return success()
+    except CoreError as e:
+        return error(e)
+
 @socket.on('restart')
 def _socket_restart():
     if not checkAdmin('restartRequiresAdmin'):

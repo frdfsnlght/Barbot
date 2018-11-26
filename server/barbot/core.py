@@ -94,6 +94,15 @@ def _bus_consoleConnect():
 # end of temp code
 #---------------------
 
+def restartX():
+    cmd = config.get('core', 'restartXCommand').split(' ')
+    out = subprocess.run(cmd,
+            stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT,
+            universal_newlines = True)
+    if out.returncode != 0:
+        _logger.error('Error trying to restart X: {}'.format(out.stdout))
+        
 def restart():
     if Pump.setup or Pump.flushing or Pump.anyPumpsRunning:
         raise CoreError('Unable to restart while in pump setup or any pumps are running!')

@@ -57,6 +57,21 @@
           </v-list-tile>
 
           <template v-if="isConsole">
+          
+            <v-list-tile @click="reloadClient()">
+              <v-list-tile-title>Reload Client</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-reload</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
+
+            <v-list-tile @click="checkRestartX()">
+              <v-list-tile-title>Restart X</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-window-close</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
+
             <v-list-tile @click="checkRestart()">
               <v-list-tile-title>Restart</v-list-tile-title>
               <v-list-tile-action>
@@ -234,6 +249,11 @@ export default {
       })
     },
 
+    checkRestartX() {
+      this.drawer = false
+      this.checkAdmin('restartXRequiresAdmin').then(this.restartX)
+    },
+
     checkRestart() {
       this.drawer = false
       this.checkAdmin('restartRequiresAdmin').then(this.restart)
@@ -244,6 +264,18 @@ export default {
       this.checkAdmin('shutdownRequiresAdmin').then(this.shutdown)
     },
 
+    reloadClient() {
+      window.location.reload(true);
+    },
+    
+    restartX() {
+      this.$socket.emit('restartX', (res) => {
+        if (res.error) {
+            this.$store.commit('setError', res.error)
+        }
+      })
+    },
+    
     restart() {
       this.$refs.confirm.open('Restart', 'Are you sure you want to restart the system?').then(() => {
         this.$socket.emit('restart', (res) => {
