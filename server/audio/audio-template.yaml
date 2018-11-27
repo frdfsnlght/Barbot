@@ -87,6 +87,7 @@ clips:
     glassRemovedDispense: # Played on the console.
         - Please do not remove the glass while I'm dispensing a drink.
         - Hey! You can't do that!
+        - Hands off the glass!
 
     drinkOrderReady: # Played on the client where the order was placed.
         - Your drink is ready.

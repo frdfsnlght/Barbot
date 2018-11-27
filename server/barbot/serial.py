@@ -112,7 +112,7 @@ def write(cmd, timeout = 5):
             cs = 0
             for c in buf:
                 cs = cs ^ c
-            buf = buf + b'~' + '{:02X}'.format(cs).encode('ascii')
+            buf = buf + '~{:02X}'.format(cs).encode('ascii')
 
         _logger.debug('Writing {}'.format(buf))
         
