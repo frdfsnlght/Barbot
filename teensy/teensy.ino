@@ -452,6 +452,12 @@ void processPumpCommand(char* cmd) {
 PP<#>,<[-]steps>,<speed>,<accel>
 */
 void cmdPumpPump(char* str) {
+    
+    if (pumpsFlushing) {
+        sendError("pumps are flushing");
+        return;
+    }
+    
     byte pumpNum;
     if (str[0] == '?') {
         // debugging stuff to allow ? as pump num to mean next unused pump
@@ -525,6 +531,12 @@ void cmdPumpPump(char* str) {
 }
 
 void cmdPumpHalt(char* str) {
+    
+    if (pumpsFlushing) {
+        sendError("pumps are flushing");
+        return;
+    }
+    
     byte pumpNum;
     pumpNum = readInt(&str);
     
