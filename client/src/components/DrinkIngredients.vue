@@ -15,11 +15,18 @@
       </v-btn>      
     </v-toolbar>
       
-    <v-list dense>
+    <v-list
+      avatar
+      dense
+    >
       <v-list-tile
         v-for="item in sortedItems"
         :key="item.id"
       >
+        <v-list-tile-avatar>
+          <v-icon>mdi-numeric-{{item.step}}-box-outline</v-icon>
+        </v-list-tile-avatar>
+        
         <v-list-tile-content>
           <v-list-tile-title>{{item.amount}} {{item.units}} {{item.ingredient.name}}</v-list-tile-title>
         </v-list-tile-content>

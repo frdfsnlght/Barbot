@@ -1,25 +1,26 @@
 <template>
 
-  <v-card flat>
+  <v-card
+    flat
+    class="ma-3"
+  >
     
-    <template v-if="!alerts.length">
-      <v-card flat>
-        <v-card-text>
-          <p class="text-xs-center">No alerts.</p>
-        </v-card-text>
-      </v-card>
-    </template>
+    <p
+      v-if="!alerts.length"
+      class="title text-xs-center"
+    >
+      No alerts.
+    </p>
     
-    <template v-else>
-
-      <div class="py-3">
-        <p
-          class="px-3 subheading"
-          v-for="alert in alerts"
-          :key="alert"
-        >{{alert}}</p>
-      </div>
-    </template>
+    <div
+      v-else
+    >
+      <p
+        class="subheading"
+        v-for="alert in alerts"
+        :key="alert"
+      >{{alert}}</p>
+    </div>
     
     <v-btn
       fab

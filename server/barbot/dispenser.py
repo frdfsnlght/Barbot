@@ -77,27 +77,6 @@ def _bus_serialEvent(e):
             bus.emit('dispenser/glassReady', glassReady)
             _dispenserEvent.set()
             
-#-----------------
-# TODO: remove this temp code someday
-glassThread = None
-import os.path
-@bus.on('server/start')
-def _bus_startGlassThread():
-    global glassThread
-    glassThread = Thread(target = _glassThreadLoop, name = 'BarbotGlassThread', daemon = True)
-    glassThread.start()
-def _glassThreadLoop():
-    global glassReady
-    while not _exitEvent.is_set():
-        newGlassReady = os.path.isfile(os.path.join(os.path.dirname(__file__), '..', 'var', 'glass'))
-        if newGlassReady != glassReady:
-            glassReady = newGlassReady
-            bus.emit('dispenser/glassReady', glassReady)
-            _dispenserEvent.set()
-        time.sleep(1)
-# end of temp code
-#---------------------
-    
 def startPause():
     global _requestPause
     _requestPause = True
@@ -136,14 +115,12 @@ def startPump(id):
     _pump = Pump.get_or_none(Pump.id == id)
     if not _pump:
         raise ValueError('Invalid pump Id!')
-    # TODO: call pump method to start pumping
-    _logger.debug('startPump {}'.format(id))
+    _pump.forward()
 
 def stopPump():
     global _pump
     if not _pump: return
-    # TODO: call pump method to stop pumping
-    _logger.debug('stopPump {}'.format(_pump.id))
+    _pump.stop()
     _pump = None
 
 def _threadLoop():
@@ -165,7 +142,12 @@ def _threadLoop():
                 state = ST_DISPENSE
                 bus.emit('dispenser/state', state, None)
                 while _requestDispense and not _exitEvent.is_set():
-                    time.sleep(1)
+                    time.sleep(0.1)
+                    if _pump and not glassReady:
+                        stopPump()
+                        _logger.warning('Glass removed while dispensing')
+                        bus.emit('audio/play', 'glassRemovedDispense', console = True)
+                        
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
                 

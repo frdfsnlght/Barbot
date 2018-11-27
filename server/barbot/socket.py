@@ -93,6 +93,7 @@ def _socket_connect():
     emit('clientOptions', _buildClientOptions())
     emit('pumps_setup', Pump.setup)
     emit('pumps_flushing', Pump.flushing)
+    emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])
     emit('dispenser_glassReady', dispenser.glassReady)
     emit('core_parentalCode', True if core.getParentalCode() else False)
     drinkOrder = dispenser.drinkOrder

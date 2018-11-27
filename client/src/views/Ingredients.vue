@@ -4,13 +4,12 @@
     
     <loading v-if="loading"></loading>
     
-    <template v-else-if="!items.length">
-      <v-card flat>
-        <v-card-text>
-          <p class="text-xs-center">No ingredients are currently available.</p>
-        </v-card-text>
-      </v-card>
-    </template>
+    <p
+      v-else-if="!items.length"
+      class="title text-xs-center ma-3"
+    >
+      No ingredients are currently available.
+    </p>
     
     <template v-else>
     

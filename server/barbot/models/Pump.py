@@ -37,9 +37,18 @@ def _bus_serialEvent(e):
         if pump:
             with pump.lock:
                 pump.running = False
-                pump.lastAmount = float(m.group(2)) / config.getfloat('pumps', 'stepsPerML')
+                steps = int(m.group(2))
+                pump.lastAmount = float(steps) / config.getfloat('pumps', 'stepsPerML')
+                
+                if pump.lastAmount > 0 and (pump.state == Pump.LOADED or pump.state == Pump.READY):
+                    pump.amount = utils.convertUnits(utils.toML(pump.amount, pump.units) - pump.lastAmount, 'ml', pump.units)
+                    if pump.amount < 0:
+                        pump.amount = 0
+                    if utils.toML(pump.amount, pump.units) < config.getint('pumps', 'ingredientEmptyAmount'):
+                        pump.state = Pump.EMPTY
+
                 pump.save()
-                _logger.info('Pump {} stopped, {:.2f} mL'.format(pump.name(), pump.lastAmount))
+                _logger.info('Pump {} stopped, {:.2f} mL ({} steps)'.format(pump.name(), pump.lastAmount, steps))
 
 def anyPumpsRunning():
     for i, p in _pumpExtras.items():
@@ -89,6 +98,10 @@ class Pump(BarbotModel):
     setup = False
     flushing = False
     
+    @staticmethod
+    def getAllPumps():
+        return Pump.select()
+
     @staticmethod
     def getReadyPumps():
         return Pump.select().where(Pump.state == Pump.READY).execute()
@@ -317,38 +330,44 @@ class Pump(BarbotModel):
     def reverseAsync(self, amount):
         threading.Thread(target = self.reverse, name = 'PumpThread-{}'.format(self.id), args = [amount], daemon = True).start()
     
-    # amount is ml!
-    def forward(self, amount):
-        amount = float(amount)
-        _logger.info('Pump {} forward {} ml'.format(self.name(), amount))
+    # amount is ml, or 0 for continuous
+    def forward(self, amount = 0):
+        if amount:
+            amount = float(amount)
+            steps = int(amount * config.getfloat('pumps', 'stepsPerML'))
+            _logger.info('Pump {} forward {} ml ({} steps)'.format(self.name(), amount, steps))
+        else:
+            steps = 1
+            _logger.info('Pump {} forward'.format(self.name()))
         
         with self.lock:
             try:
                 serial.write('PP{},{},{},{}'.format(
                     self.id - 1,
-                    int(amount * config.getfloat('pumps', 'stepsPerML')),
+                    steps,
                     config.getint('pumps', 'speed'),
                     config.getint('pumps', 'acceleration')
                 ))
                 self.running = True
-                if self.state == Pump.LOADED or self.state == Pump.READY:
-                    self.amount = utils.convertUnits(utils.toML(self.amount, self.units) - amount, 'ml', self.units)
-                    if utils.toML(self.amount, self.units) < config.getint('pumps', 'ingredientEmptyAmount'):
-                        self.state = Pump.EMPTY
                 self.save()
             except serial.SerialError as e:
                 _logger.error('Pump error: {}'.format(str(e)))
         
     # amount is ml!
-    def reverse(self, amount):
-        amount = float(amount)
-        _logger.info('Pump {} reverse {} ml'.format(self.name(), amount))
+    def reverse(self, amount = 0):
+        if amount:
+            amount = float(amount)
+            steps = -int(amount * config.getfloat('pumps', 'stepsPerML'))
+            _logger.info('Pump {} reverse {} ml ({} steps)'.format(self.name(), amount, steps))
+        else:
+            steps = -1
+            _logger.info('Pump {} reverse'.format(self.name()))
 
         with self.lock:
             try:
                 serial.write('PP{},{},{},{}'.format(
                     self.id - 1,
-                    -int(amount * config.getfloat('pumps', 'stepsPerML')),
+                    steps,
                     config.getint('pumps', 'speed'),
                     config.getint('pumps', 'acceleration')
                 ))

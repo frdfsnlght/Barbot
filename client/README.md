@@ -29,3 +29,7 @@ npm run lint
     * copyright notice
     
 * change fonts to fonts-awesome svg?
+* Browser changes:
+    * Allow autoplay: chrome://flags/#autoplay-policy
+    * Disable autofill form fields
+    * Disable saving passwords

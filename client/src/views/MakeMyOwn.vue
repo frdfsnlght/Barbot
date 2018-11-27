@@ -1,19 +1,35 @@
 <template>
 
-  <v-card flat>
+  <v-card
+    flat
+    class="pa-3"
+  >
 
-    <p v-if="!dispenserGlassReady" class="headline red--text text-xs-center ma-3">
+    <p
+      v-if="!dispenserGlassReady"
+      class="headline red--text text-xs-center mb-3"
+    >
       Place a glass in the dispensing area.
     </p>
     
-    <div class="text-xs-center pa-3">
+    <p
+      v-if="!pumps.length"
+      class="headline text-xs-center mb-3"
+    >
+      There are no pumps ready.
+    </p>
+    
+    <div
+      class="text-xs-center"
+    >
       <v-btn
         v-for="pump in pumps"
         :key="pump.id"
         ripple
         large
         block
-        :disabled="!dispenserGlassReady"
+        class="mb-3"
+        :disabled="!dispenserGlassReady || (anyPumpRunning && dispensingId != pump.id)"
         @mousedown="startPump(pump.id)"
         @mouseup="stopPump()"
       >
@@ -34,6 +50,7 @@ export default {
   data() {
     return {
       dispensingId: null,
+      captureId: null,
     }
   },
   
@@ -48,11 +65,27 @@ export default {
     ...mapGetters({
       pumps: 'pumps/sortedReadyPumps',
       anyPumpReady: 'pumps/anyPumpReady',
+      anyPumpRunning: 'pumps/anyPumpRunning',
     }),
     ...mapState({
       isConsole: state => state.isConsole,
       dispenserGlassReady: state => state.dispenser.glassReady,
     })
+  },
+  
+  watch: {
+  
+    dispenserGlassReady(v) {
+      if (v && this.dispensingId) {
+        this.$socket.emit('dispenser_stopPump', (res) => {
+          if (res.error) {
+              this.$store.commit('setError', res.error)
+          } else
+            this.dispensingId = null
+        })
+      }
+    },
+    
   },
   
   methods: {
@@ -61,7 +94,6 @@ export default {
       if (this.dispensingId != id) {
         if (this.dispensingId != null)
           this.stopDispense(this.dispensingId)
-        console.log('start pump: ' + id)
         this.$socket.emit('dispenser_startPump', id, (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
@@ -73,7 +105,7 @@ export default {
     
     stopPump() {
       if (this.dispensingId != null) {
-        console.log('stop pump: ' + this.dispensingId)
+        this.captureId = this.dispensingId
         this.$socket.emit('dispenser_stopPump', (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
@@ -99,7 +131,10 @@ export default {
   
   sockets: {
     pumpSaved(pump) {
-      console.dir(pump);
+      if (this.captureId && (this.captureId == pump.id)) {
+        console.log('dispensed ' + pump.lastAmount + ' mL of ' + pump.ingredient.name)
+        this.captureId = null
+      }
     }
   },  
   

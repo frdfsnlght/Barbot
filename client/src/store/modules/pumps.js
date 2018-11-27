@@ -64,6 +64,12 @@ export default {
             }
         },
 
+        socket_pumps(state, pumps) {
+            state.items = pumps
+            state.loading = false
+            state.loadedAll = true
+        },
+        
         socket_pumps_setup(state, setup) {
             state.setup = setup
         },

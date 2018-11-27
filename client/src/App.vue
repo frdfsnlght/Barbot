@@ -329,9 +329,5 @@ export default {
       console.log('Client is running as remote.')
   },
   
-  mounted() {
-    this.$store.dispatch('pumps/loadAll')
-  },
-  
 }
 </script>
