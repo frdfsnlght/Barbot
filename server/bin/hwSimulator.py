@@ -16,8 +16,8 @@ pumpAccel = 7500
 loopDelta = 0.25
 pumpDir = 0
 pumpsFlushing = False
-glassReady = False
-
+glass = False
+button = False
 
 class Pump():
     def __init__(self, id):
@@ -61,6 +61,7 @@ def run():
                     buffer = buffer + ch
             loopPumps()
             loopSensors()
+            loopButton()
         except KeyboardInterrupt:
             break
         
@@ -85,11 +86,19 @@ def loopPumps():
         pumpsFlushing = False
         
 def loopSensors():
-    global glassReady
-    newGlassReady = os.path.isfile(os.path.join(os.path.dirname(__file__), '..', 'var', 'glass'))
-    if newGlassReady != glassReady:
-        glassReady = newGlassReady
-        send('*S{}{}'.format(0, 1 if glassReady else 0))
+    global glass
+    newGlass = os.path.isfile(os.path.join(os.path.dirname(__file__), '..', 'var', 'glass'))
+    if newGlass != glass:
+        glass = newGlass
+        send('*S{}{}'.format(0, 1 if glass else 0))
+
+def loopButton():
+    global button
+    newButton = os.path.isfile(os.path.join(os.path.dirname(__file__), '..', 'var', 'button'))
+    if newButton != button:
+        button = newButton
+        if button:
+            send('*POWER-REQUEST')
 
 def processCommand(cmd):
     print('<- {}'.format(cmd))
