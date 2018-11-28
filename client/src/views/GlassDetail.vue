@@ -27,8 +27,7 @@
         >
           <v-list-tile-avatar>
             <v-icon v-if="drink.isFavorite">mdi-heart</v-icon>
-            <v-icon v-if="drink.isAlcoholic">mdi-flash</v-icon>
-            <v-icon v-else>mdi-baby-buggy</v-icon>
+            <alcoholic-icon :alcoholic="drink.isAlcoholic"/>
           </v-list-tile-avatar>
 
           <v-list-tile-content>
@@ -49,6 +48,7 @@
 
 import { mapState } from 'vuex'
 import Loading from '../components/Loading'
+import AlcoholicIcon from '../components/AlcoholicIcon'
 
 export default {
   name: 'GlassDetail',
@@ -59,6 +59,7 @@ export default {
   
   components: {
     Loading,
+    AlcoholicIcon,
   },
   
   created() {

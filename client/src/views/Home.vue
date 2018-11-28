@@ -1,10 +1,10 @@
 <template>
 
   <v-container fluid fill-height pa-0>
-    <v-layout column justify-start fill-height color="pink">
+    <v-layout column justify-start fill-height>
     
       <v-flex>
-        <barbot-controls ref="barbotControls"></barbot-controls>
+        <dispenser-controls ref="dispenserControls"></dispenser-controls>
       </v-flex>
       
       <v-flex fill-height>
@@ -14,13 +14,14 @@
     </v-layout>
       
   </v-container>
+  
 </template>
 
 <script>
 
 import { mapState } from 'vuex'
 
-import BarbotControls from '../components/BarbotControls'
+import DispenserControls from '../components/DispenserControls'
 import DrinkOrders from '../components/DrinkOrders'
 
 export default {
@@ -30,7 +31,7 @@ export default {
   },
   
   components: {
-    BarbotControls,
+    DispenserControls,
     DrinkOrders
   },
   
@@ -43,15 +44,14 @@ export default {
         'isConsole',
     ]),
     ...mapState({
-      pumpsSetup: state => state.pumps.setup,
       dispenserState: state => state.dispenser.state,
     }),
   },
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      if (t.isConsole && t.pumpsSetup) {
-        t.$socket.emit('core_stopPumpSetup', (res) => {
+      if (t.isConsole && t.dispenserState == 'setup') {
+        t.$socket.emit('dispenser_stopSetup', (res) => {
           if (res.error) {
             t.$store.commit('setError', res.error)
           }

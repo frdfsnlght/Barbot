@@ -47,7 +47,7 @@
       
     </v-list>
 
-    <parental-code-dialog ref="parentalCodeDialog"></parental-code-dialog>
+    <parental-code-dialog ref="parentalCodeDialog"/>
     
   </v-card>
         
@@ -83,7 +83,7 @@ export default {
   computed: {
     ...mapState({
       wifiState: state => state.wifi.state,
-      parentalCode: state => state.core.parentalCode,
+      parentalCode: state => state.dispenser.parentalCode,
     })
   },
   
@@ -95,7 +95,7 @@ export default {
   
     setParentalCode() {
       if (this.parentalCode) {
-        this.$socket.emit('core_setParentalCode', false, (res) => {
+        this.$socket.emit('dispenser_setParentalCode', false, (res) => {
           if (res.error)
             this.$store.commit('setError', res.error)          
         })

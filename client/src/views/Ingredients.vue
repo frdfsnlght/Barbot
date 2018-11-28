@@ -22,8 +22,7 @@
           @click="itemDetail(item)"
         >
           <v-list-tile-avatar>
-            <v-icon v-if="item.isAlcoholic">mdi-flash</v-icon>
-            <v-icon v-else>mdi-baby-buggy</v-icon>
+            <alcoholic-icon :alcoholic="item.isAlcoholic"/>
             <v-icon v-if="item.isAvailable">mdi-gas-station</v-icon>
           </v-list-tile-avatar>
           
@@ -152,6 +151,7 @@
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
+import AlcoholicIcon from '../components/AlcoholicIcon'
 import bus from '../bus'
 
 export default {
@@ -169,7 +169,8 @@ export default {
   },
   components: {
     Loading,
-    Confirm
+    Confirm,
+    AlcoholicIcon,
   },
   created() {
     this.$emit('show-page', 'Ingredients')

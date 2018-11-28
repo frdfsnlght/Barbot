@@ -18,6 +18,13 @@
           <v-list-tile-title>Drinks</v-list-tile-title>
         </v-list-tile>
       
+        <v-list-tile v-if="isConsole && anyPumpReady" @click="gotoMakeMyOwn()">
+          <v-list-tile-action>
+            <v-icon>mdi-account</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title>Make My Own</v-list-tile-title>
+        </v-list-tile>
+      
         <v-list-tile @click="gotoIngredients()">
           <v-list-tile-action>
             <v-icon>mdi-cart</v-icon>
@@ -121,7 +128,7 @@
           <v-icon>mdi-alert</v-icon>
         </v-btn>      
       
-        <v-icon v-if="dispenserGlassReady">mdi-glass-cocktail</v-icon>
+        <v-icon v-if="dispenserGlass">mdi-glass-cocktail</v-icon>
 
         <template v-if="wifiState">
           <wifi-signal-icon :wifiOn="wifiState.ssid" :bars="wifiState.bars"/>
@@ -156,7 +163,7 @@
 
 <script>
 
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import bus from './bus'
 import HTMLTitle from './components/HTMLTitle'
 import Confirm from './components/Confirm'
@@ -196,6 +203,9 @@ export default {
     title () {
       return this.options.appTitle + (this.pageTitle ? (": " + this.pageTitle) : "");
     },
+    ...mapGetters({
+      anyPumpReady: 'pumps/anyPumpReady',
+    }),
     ...mapState([
       'options',
       'isConsole',
@@ -203,7 +213,7 @@ export default {
     ]),
     ...mapState({
       wifiState: state => state.wifi.state,
-      dispenserGlassReady: state => state.dispenser.glassReady,
+      dispenserGlass: state => state.dispenser.glass,
       alerts: state => state.alerts.alerts,
     }),
   },
@@ -225,6 +235,11 @@ export default {
       this.$router.push({name: 'drinks'})
     },
     
+    gotoMakeMyOwn() {
+      this.drawer = false
+      this.$router.push({name: 'makeMyOwn'})
+    },
+    
     gotoIngredients() {
       this.drawer = false
       this.$router.push({name: 'ingredients'})
@@ -237,7 +252,7 @@ export default {
     
     gotoPumps() {
       this.drawer = false
-      this.checkAdmin('pumpSetupRequiresAdmin').then(() => {
+      this.checkAdmin('dispenserSetupRequiresAdmin').then(() => {
         this.$router.push({name: 'pumps'})
       })
     },
@@ -308,6 +323,9 @@ export default {
     },
     
     checkAdmin(opt) {
+      console.log('check ' + opt)
+      console.dir(this.$store.state.options)
+      console.dir(this.$store.state.user)
       if ((! this.$store.state.options[opt]) || this.$store.state.user.isAdmin)
         return new Promise((res) => { res() })
       return this.$refs.loginDialog.open()

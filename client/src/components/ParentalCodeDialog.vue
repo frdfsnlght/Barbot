@@ -3,7 +3,8 @@
   <v-dialog v-model="dialog" persistent scrollable max-width="400px" @keydown.esc="cancel" @keydown.enter.prevent="submit">
     <v-card>
       <v-card-title>
-        <span class="headline">Set Parental Code</span>
+        <span v-if="validate" class="headline">Parental Code</span>
+        <span v-else class="headline">Set Parental Code</span>
       </v-card-title>
       
       <v-card-text>
@@ -40,7 +41,6 @@
       </v-card-actions>
     </v-card>
     
-    
   </v-dialog>
   
 </template>
@@ -51,6 +51,11 @@ import bus from '../bus'
 
 export default {
   name: 'ParentalCodeDialog',
+  
+  props: {
+    validate: Boolean,
+  },
+  
   data() {
     return {
       dialog: false,
@@ -82,7 +87,7 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('core_setParentalCode', this.code, (res) => {
+      this.$socket.emit(this.validate ? 'dispenser_validateParentalCode' : 'dispenser_setParentalCode', this.code, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)          
         } else {

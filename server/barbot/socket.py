@@ -91,15 +91,14 @@ def _socket_connect():
     global _consoleSessionId
     _logger.info('Connection opened from ' + request.remote_addr)
     emit('clientOptions', _buildClientOptions())
-    emit('pumps_setup', Pump.setup)
-    emit('pumps_flushing', Pump.flushing)
-    emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])
-    emit('dispenser_glassReady', dispenser.glassReady)
-    emit('core_parentalCode', True if core.getParentalCode() else False)
     drinkOrder = dispenser.drinkOrder
     if drinkOrder:
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
     emit('dispenser_state', {'state': dispenser.state, 'order': drinkOrder})
+    emit('dispenser_glass', dispenser.glass)
+    emit('dispenser_parentalCode', True if dispenser.getParentalCode() else False)
+    emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])
+    emit('pumps_flushing', Pump.flushing)
     emit('wifi_state', wifi.state)
     emit('alerts_changed', alerts.getAll())
     bus.emit('socket/connect', request)
@@ -174,50 +173,18 @@ def _socket_audio_setVolume(volume):
     audio.setVolume(float(volume))
     return success()
 
-@socket.on('core_setParentalCode')
-def _socket_core_setParentalCode(code):
-    core.setParentalCode(code)
-    return success()
-    
-@socket.on('core_startPumpSetup')
-def _socket_core_startPumpSetup():
-    if not checkAdmin('pumpSetupRequiresAdmin'):
+
+@socket.on('dispenser_startSetup')
+def _socket_dispenser_startSetup():
+    if not checkAdmin('dispenserSetupRequiresAdmin'):
         return error('Permission denied!')
-    core.startPumpSetup()
+    dispenser.startSetup()
     return success()
     
-@socket.on('core_stopPumpSetup')
-def _socket_stopPumpSetup():
-    core.stopPumpSetup()
+@socket.on('dispenser_stopSetup')
+def _socket_dispenser_stopSetup():
+    dispenser.stopSetup()
     return success()
-
-@socket.on('core_submitDrinkOrder')
-def _socket_core_submitDrinkOrder(item):
-    item['sessionId'] = request.sid
-    try:
-        core.submitDrinkOrder(item)
-        return success()
-    except DoesNotExist:
-        return error('Drink not found!')
-    except core.CoreError as e:
-        return error(e)
-
-@socket.on('core_cancelDrinkOrder')
-def _socket_core_cancelDrinkOrder(id):
-    try:
-        core.cancelDrinkOrder(id)
-        return success()
-    except DoesNotExist:
-        return error('Drink order not found!')
-        
-@socket.on('core_toggleDrinkOrderHold')
-def _socket_core_toggleDrinkOrderHold(id):
-    try:
-        core.toggleDrinkOrderHold(id)
-        return success()
-    except DoesNotExist:
-        return error('Drink order not found!')
-
         
 @socket.on('dispenser_startHold')
 def _socket_dispenser_startHold():
@@ -257,9 +224,9 @@ def _socket_dispenser_setControl(ctl):
     return success()
     
 @socket.on('dispenser_startPump')
-def _socket_dispenser_startPump(pumpId):
+def _socket_dispenser_startPump(params):
     try:
-        dispenser.startPump(pumpId)
+        dispenser.startPump(params)
         return success()
     except dispenser.DispenserError as e:
         return error(e)
@@ -272,6 +239,45 @@ def _socket_dispenser_stopPump():
     except dispenser.DispenserError as e:
         return error(e)
 
+@socket.on('dispenser_setParentalCode')
+def _socket_dispenser_setParentalCode(code):
+    dispenser.setParentalCode(code)
+    return success()
+    
+@socket.on('dispenser_validateParentalCode')
+def _socket_dispenser_validateParentalCode(code):
+    if dispenser.validateParentalCode(code):
+        return success()
+    else:
+        return error('Invalid Parental Code')
+    
+@socket.on('dispenser_submitDrinkOrder')
+def _socket_dispenser_submitDrinkOrder(item):
+    item['sessionId'] = request.sid
+    try:
+        dispenser.submitDrinkOrder(item)
+        return success()
+    except DoesNotExist:
+        return error('Drink not found!')
+    except dispenser.DispenserError as e:
+        return error(e)
+
+@socket.on('dispenser_cancelDrinkOrder')
+def _socket_dispenser_cancelDrinkOrder(id):
+    try:
+        dispenser.cancelDrinkOrder(id)
+        return success()
+    except DoesNotExist:
+        return error('Drink order not found!')
+        
+@socket.on('dispenser_toggleDrinkOrderHold')
+def _socket_dispenser_toggleDrinkOrderHold(id):
+    try:
+        dispenser.toggleDrinkOrderHold(id)
+        return success()
+    except DoesNotExist:
+        return error('Drink order not found!')
+        
 @socket.on('wifi_getNetworks')
 def _socket_wifi_getNetworks():
     return success(networks = wifi.getNetworks())
@@ -509,14 +515,6 @@ def _bus_alerts():
         pass
     
 #-------------------------------
-# core
-#
-    
-@bus.on('core/parentalCode')
-def _bus_core_parentalCode(locked):
-    socket.emit('core_parentalCode', locked)
-    
-#-------------------------------
 # dispenser
 #
 
@@ -524,12 +522,16 @@ def _bus_core_parentalCode(locked):
 def _bus_dispenser_state(state, drinkOrder):
     if drinkOrder:
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
-    socket.emit('dispenser_state', {'state': state, 'order': drinkOrder})
+    socket.emit('dispenser_state', {'state': state, 'drinkOrder': drinkOrder})
     
-@bus.on('dispenser/glassReady')
-def _bus_dispenser_glassReady(ready):
-    socket.emit('dispenser_glassReady', ready)
+@bus.on('dispenser/glass')
+def _bus_dispenser_glass(ready):
+    socket.emit('dispenser_glass', ready)
 
+@bus.on('dispenser/parentalCode')
+def _bus_dispenser_parentalCode(locked):
+    socket.emit('dispenser_parentalCode', locked)
+    
 #-------------------------------
 # wifi
 #

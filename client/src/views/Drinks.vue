@@ -24,8 +24,7 @@
           <v-list-tile-avatar>
             <v-icon v-if="item.isOnMenu">mdi-cup-water</v-icon>
             <v-icon v-if="item.isFavorite">mdi-heart</v-icon>
-            <v-icon v-if="item.isAlcoholic">mdi-flash</v-icon>
-            <v-icon v-else>mdi-baby-buggy</v-icon>
+            <alcoholic-icon :alcoholic="item.isAlcoholic"/>
           </v-list-tile-avatar>
 
           <v-list-tile-content>
@@ -89,103 +88,9 @@
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
-      <v-card>
-        <v-card-title>
-          <span
-            v-if="edit"
-            class="headline"
-          >Edit Drink</span>
-          <span
-            v-else
-            class="headline"
-          >Add Drink</span>
-        </v-card-title>
-        
-        <v-card-text>
-          <v-form ref="form" v-model="valid" lazy-validation>
-            <v-container grid-list-md>
-              <v-layout wrap>
-              
-                <v-flex xs12>
-                  <v-text-field
-                    label="Primary name"
-                    v-model="item.primaryName"
-                    :rules="[v => !!v || 'Primary name is required']"
-                    required
-                    autofocus
-                    :data-kbUCWords="true"
-                    tabindex="1"
-                  ></v-text-field>
-                </v-flex>
-                
-                <v-flex xs12>
-                  <v-text-field
-                    label="Secondary name"
-                    v-model="item.secondaryName"
-                    hint="This is not required but can help distinguish similar drinks"
-                    :data-kbUCWords="true"
-                    tabindex="2"
-                    ></v-text-field>
-                </v-flex>
-                
-                <v-flex xs12>
-                  <v-checkbox
-                    label="Is this drink a favorite?"
-                    v-model="item.isFavorite"
-                    required
-                    tabindex="3"
-                  ></v-checkbox>
-                </v-flex>
-                
-                <v-flex xs12>
-                  <v-select
-                    :items="glasses"
-                    item-text="name"
-                    item-value="id"
-                    label="Glass"
-                    v-model="item.glassId"
-                    :rules="[v => !!v || 'Glass is required']"
-                    required
-                    tabindex="4"
-                  ></v-select>
-                </v-flex>
-
-                <v-flex xs12>
-                  <drink-ingredients
-                    title="Ingredients"
-                    v-model="item.ingredients"></drink-ingredients>
-                </v-flex>
-                
-                <v-flex xs12>
-                  <v-textarea
-                    label="Instructions"
-                    auto-grow
-                    v-model="item.instructions"
-                    :data-kbUCFirst="true"
-                    tabindex="5"
-                  ></v-textarea>
-                </v-flex>
-    
-              </v-layout>
-            </v-container>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            flat
-            @click="closeDialog()">close</v-btn>
-          <v-btn
-            :disabled="!valid"
-            flat
-            @click="saveItem()">save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <confirm ref="confirm"></confirm>
-      
+    <drink-dialog ref="drinkDialog"/>
+    
   </v-card>
         
 </template>
@@ -195,15 +100,14 @@
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
-import DrinkIngredients from '../components/DrinkIngredients'
-import bus from '../bus'
+import AlcoholicIcon from '../components/AlcoholicIcon'
+import DrinkDialog from '../components/DrinkDialog'
 
 export default {
   name: 'Drinks',
   data() {
     return {
       item: {},
-      dialog: false,
       edit: false,
       valid: true,
       menu: false,
@@ -215,7 +119,8 @@ export default {
   components: {
     Loading,
     Confirm,
-    DrinkIngredients
+    AlcoholicIcon,
+    DrinkDialog,
   },
   
   created() {
@@ -225,7 +130,6 @@ export default {
   computed: {
     ...mapGetters({
       items: 'drinks/sortedItems',
-      glasses: 'glasses/sortedItems',
     }),
     ...mapState({
       loading: state => state.drinks.loadingAll,
@@ -239,7 +143,6 @@ export default {
     },
   
     showMenu(item, e) {
-      this.$refs.form.reset()
       this.item = JSON.parse(JSON.stringify(item))
       this.menuX = e.clientX
       this.menuY = e.clientY
@@ -247,47 +150,18 @@ export default {
     },
   
     addItem() {
-      this.$refs.form.reset()
-      this.item = {
+      this.$refs.drinkDialog.open({
         id: undefined,
         primaryName: undefined,
         secondaryName: undefined,
         instructions: undefined,
         glassId: undefined,
         ingredients: []
-      }
-      this.edit = false
-      this.$store.dispatch('glasses/loadAll')
-      bus.$emit('keyboard-install', this.$refs.form)
-      this.dialog = true
+      })
     },
     
     editItem() {
-      this.edit = true
-      this.$store.dispatch('glasses/loadAll')
-      bus.$emit('keyboard-install', this.$refs.form)
-      this.dialog = true
-    },
-    
-    closeDialog() {
-      this.dialog = false
-      this.item = {}
-      bus.$emit('keyboard-remove', this.$refs.form)
-    },
-    
-    saveItem() {
-      if (! this.$refs.form.validate()) return
-      if ((! this.item.ingredients) || (this.item.ingredients.length == 0)) {
-        this.$store.commit('setError', 'At least one ingredient is required!')
-        return
-      }
-      this.$socket.emit('saveDrink', this.item, (res) => {
-        if (res.error) {
-          this.$store.commit('setError', res.error)
-        } else {
-          this.closeDialog()
-        }
-      })
+      this.$refs.drinkDialog.open(this.item, true)
     },
     
     deleteItem() {
@@ -310,7 +184,6 @@ export default {
   
   beforeRouteLeave(to, from, next) {
     this.$store.commit('drinks/destroy')
-    this.$store.commit('glasses/destroy')
     next()
   }
   

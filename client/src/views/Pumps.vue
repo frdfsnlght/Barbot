@@ -31,12 +31,7 @@
           ripple
         >
           <v-list-tile-avatar>
-            <v-icon v-if="item.running">mdi-run</v-icon>
-            <v-icon v-else-if="!item.state">mdi-power-off</v-icon>
-            <v-icon v-else-if="item.state=='loaded'">mdi-plus</v-icon>
-            <v-icon v-else-if="item.state=='ready'">mdi-check</v-icon>
-            <v-icon v-else-if="item.state=='empty'" class="red--text">mdi-battery-outline</v-icon>
-            <v-icon v-else-if="item.state=='dirty'">mdi-spray-bottle</v-icon>
+            <pump-icon :pump="item"/>
           </v-list-tile-avatar>
           
           <v-list-tile-content>
@@ -177,6 +172,7 @@ import bus from '../bus'
 import Loading from '../components/Loading'
 import PumpWizardDialog from '../components/PumpWizardDialog'
 import PumpFlushDialog from '../components/PumpFlushDialog'
+import PumpIcon from '../components/PumpIcon'
 
 export default {
   name: 'Ingredients',
@@ -192,6 +188,7 @@ export default {
     Loading,
     PumpWizardDialog,
     PumpFlushDialog,
+    PumpIcon,
   },
   
   created() {
@@ -210,10 +207,17 @@ export default {
     }),
     ...mapState({
       loading: state => state.pumps.loading,
-      setup: state => state.pumps.setup,
       flushing: state => state.pumps.flushing,
       isConsole: state => state.isConsole,
+      dispenserState: state => state.dispenser.state,
     })
+  },
+  
+  watch: {
+    dispenserState(v) {
+      if (v != 'setup')
+        this.$router.replace({name: 'home'})
+    },
   },
   
   methods: {
@@ -233,7 +237,7 @@ export default {
     },
     
     disableActions() {
-      return !(this.isConsole && this.setup) || this.anyPumpRunning
+      return !(this.isConsole && this.dispenserState == 'setup') || this.anyPumpRunning
     },
 
     showMenu(item, e) {
@@ -272,19 +276,19 @@ export default {
     },
   
     onLogout() {
-      if (! ((this.$store.state.options.pumpSetupRequiresAdmin == false) || this.$store.state.user.isAdmin))
+      if (! ((this.$store.state.options.dispenserSetupRequiresAdmin == false) || this.$store.state.user.isAdmin))
         this.$router.replace({name: 'home'})
     },
     
   },
   
   beforeRouteEnter(to, from, next) {
-    if (! ((store.state.options.pumpSetupRequiresAdmin == false) || store.state.user.isAdmin))
+    if (! ((store.state.options.dispenserSetupRequiresAdmin == false) || store.state.user.isAdmin))
       next({name: 'home'})
     else
       next(t => {
         if (t.isConsole) {
-          t.$socket.emit('core_startPumpSetup', (res) => {
+          t.$socket.emit('dispenser_startSetup', (res) => {
             if (res.error) {
               t.$store.commit('setError', res.error)
             }

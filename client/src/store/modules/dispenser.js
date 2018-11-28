@@ -5,7 +5,8 @@ export default {
     state: {
         state: 'wait',
         drinkOrder: null,
-        glassReady: true,
+        glass: true,
+        parentalCode: false,
     },
     
     mutations: {
@@ -17,12 +18,18 @@ export default {
         socket_dispenser_state(state, dState) {
             state.state = dState.state
             state.drinkOrder = dState.drinkOrder
+            console.log('state=' + state.state)
+            console.log('drinkOrder=' + state.drinkOrder)
         },
     
-        socket_dispenser_glassReady(state, glassReady) {
-            state.glassReady = glassReady
+        socket_dispenser_glass(state, glass) {
+            state.glass = glass
         },
 
+        socket_dispenser_parentalCode(state, parentalCode) {
+            state.parentalCode = parentalCode
+        },
+        
     },
     
 }

@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import core from './modules/core'
 import dispenser from './modules/dispenser'
 import alerts from './modules/alerts'
 import audio from './modules/audio'
@@ -17,7 +16,6 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     modules: {
-        core: core,
         dispenser: dispenser,
         alerts: alerts,
         audio: audio,

@@ -37,7 +37,7 @@
                 <v-text-field
                   label="Code"
                   v-model="order.parentalCode"
-                  hint="You must enter the parental code to order an alcoholic drink"
+                  hint="You must enter the parental code to order this drink"
                   :append-icon="showCode ? 'mdi-eye-off' : 'mdi-eye'"
                   :type="showCode ? 'text' : 'password'"
                   required
@@ -114,7 +114,7 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('core_submitDrinkOrder', this.order, (res) => {
+      this.$socket.emit('dispenser_submitDrinkOrder', this.order, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {

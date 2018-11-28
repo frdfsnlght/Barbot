@@ -7,7 +7,6 @@ export default {
         items: [],
         loading: false,
         loadedAll: false,
-        setup: false,
         flushing: false,
     },
     
@@ -36,6 +35,12 @@ export default {
             let i = state.items.find((e) => { return e.state == 'ready' })
             return !!i
         },
+        getPump(state) {
+            return (id) => {
+                return state.items.find((e) => { return e.id === id })
+            }
+        },
+        
     },
   
     mutations: {
@@ -70,10 +75,6 @@ export default {
             state.loadedAll = true
         },
         
-        socket_pumps_setup(state, setup) {
-            state.setup = setup
-        },
-
         socket_pumps_flushing(state, flushing) {
             state.flushing = flushing
         },

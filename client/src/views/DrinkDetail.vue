@@ -39,8 +39,7 @@
           @click="gotoIngredientDetail(di.ingredientId)"
         >
           <v-list-tile-avatar>
-            <v-icon v-if="di.ingredient.isAlcoholic">mdi-flash</v-icon>
-            <v-icon v-else>mdi-baby-buggy</v-icon>
+            <alcoholic-icon :alcoholic="di.ingredient.isAlcoholic"/>
             <v-icon v-if="di.ingredient.isAvailable">mdi-gas-station</v-icon>
           </v-list-tile-avatar>
 
@@ -81,6 +80,7 @@
 import { mapState } from 'vuex'
 import Loading from '../components/Loading'
 import OrderDrinkDialog from '../components/OrderDrinkDialog'
+import AlcoholicIcon from '../components/AlcoholicIcon'
 
 export default {
   name: 'DrinkDetail',
@@ -98,6 +98,7 @@ export default {
   components: {
     Loading,
     OrderDrinkDialog,
+    AlcoholicIcon,
   },
   
   created() {

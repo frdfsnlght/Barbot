@@ -8,17 +8,12 @@
       dense
     >
       <v-toolbar-title>Orders</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="toggleDispenserHold()">
-        <v-icon v-if="dispenserState == 'hold'">mdi-play</v-icon>
-        <v-icon v-else>mdi-pause</v-icon>
-      </v-btn>
     </v-toolbar>
       
     <loading v-if="loading"></loading>
     
     <p
-      v-else-if="!item.length"
+      v-else-if="!items.length"
       class="title text-xs-center pa-3"
     >
       Place an order by clicking the "+" button below.
@@ -26,37 +21,39 @@
     
     <template v-else>
     
-      <v-list two-line>
-        <v-list-tile
-          v-for="item in items"
-          :key="item.id"
-          avatar
-          ripple
-          @click="itemDetail(item)"
-        >
-          
-          <v-list-tile-avatar>
-            <v-icon v-if="item.userHold">mdi-pause</v-icon>
-            <v-icon v-else-if="item.ingredientHold">mdi-pause-octagon</v-icon>
-            <v-icon v-else>mdi-play</v-icon>
-          </v-list-tile-avatar>
-          
-          <v-list-tile-content>
-            <v-list-tile-title>{{item.drink.name}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{item.name}}</v-list-tile-sub-title>
-          </v-list-tile-content>
-          
-          <v-list-tile-action>
-            <v-btn
-              icon
-              @click.stop="showMenu(item, $event)"
-            >
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </v-list-tile-action>
-          
-        </v-list-tile>
-      </v-list>
+      <div style="max-height: 27vh; overflow-y: auto">
+        <v-list two-line>
+          <v-list-tile
+            v-for="item in items"
+            :key="item.id"
+            avatar
+            ripple
+            @click="itemDetail(item)"
+          >
+            
+            <v-list-tile-avatar>
+              <v-icon v-if="item.userHold">mdi-pause</v-icon>
+              <v-icon v-else-if="item.ingredientHold">mdi-pause-octagon</v-icon>
+              <v-icon v-else>mdi-play</v-icon>
+            </v-list-tile-avatar>
+            
+            <v-list-tile-content>
+              <v-list-tile-title>{{item.drink.name}}</v-list-tile-title>
+              <v-list-tile-sub-title>{{item.name}}</v-list-tile-sub-title>
+            </v-list-tile-content>
+            
+            <v-list-tile-action>
+              <v-btn
+                icon
+                @click.stop="showMenu(item, $event)"
+              >
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+            
+          </v-list-tile>
+        </v-list>
+      </div>
 
       <v-menu
         v-model="menu"
@@ -155,22 +152,6 @@ export default {
       this.$router.push({name: 'drinkOrderDetail', params: {id: item.id}})
     },
 
-    toggleDispenserHold() {
-      if (this.dispenserState == 'hold') {
-        this.$socket.emit('dispenser_stopHold', (res) => {
-            if (res.error) {
-                this.$store.commit('setError', res.error)
-            }
-        })
-      } else {
-        this.$socket.emit('dispenser_startHold', (res) => {
-            if (res.error) {
-                this.$store.commit('setError', res.error)
-            }
-        })
-      }
-    },
-    
     showMenu(item, e) {
       this.item = JSON.parse(JSON.stringify(item))
       this.menuX = e.clientX

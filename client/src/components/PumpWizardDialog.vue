@@ -19,7 +19,6 @@
                     label="Container size"
                     v-model="loadParams.containerAmount"
                     :rules="[v => !!v || 'Container size is required']"
-                    mask="####"
                     required
                     data-kbType="positiveInteger"
                   ></v-text-field>
@@ -91,7 +90,7 @@
         
               <v-flex class="text-xs-center mb-3">
                 <p v-if="isFullPrime">Insert the pump tube into the ingredient container.</p>
-                <p v-if="!dispenserGlassReady" class="red--text">Place a glass in the dispensing area.</p>
+                <p v-if="!dispenserGlass" class="red--text">Place a glass in the dispensing area.</p>
               </v-flex>
               
               <v-flex v-if="isFullPrime" class="text-xs-center">
@@ -99,8 +98,8 @@
                   color="primary"
                   large
                   class="px-5"
-                  :loading="!dispenserGlassReady || pump.running"
-                  :disabled="!dispenserGlassReady || pump.running"
+                  :loading="!dispenserGlass || pump.running"
+                  :disabled="!dispenserGlass || pump.running"
                   @click="primePump()"
                 >
                   prime
@@ -115,8 +114,8 @@
               <v-flex class="text-xs-center">
                 <v-btn
                   :color="isFullPrime ? 'secondary' : 'primary'"
-                  :loading="!dispenserGlassReady || pump.running"
-                  :disabled="!dispenserGlassReady || pump.running"
+                  :loading="!dispenserGlass || pump.running"
+                  :disabled="!dispenserGlass || pump.running"
                   @click="primePump(microPrimeSmall)"
                 >
                   {{microPrimeSmall}} ml
@@ -124,8 +123,8 @@
                 </v-btn>
                 <v-btn
                   :color="isFullPrime ? 'secondary' : 'primary'"
-                  :loading="!dispenserGlassReady || pump.running"
-                  :disabled="!dispenserGlassReady || pump.running"
+                  :loading="!dispenserGlass || pump.running"
+                  :disabled="!dispenserGlass || pump.running"
                   @click="primePump(microPrimeLarge)"
                 >
                   {{microPrimeLarge}} ml
@@ -159,14 +158,14 @@
         
               <v-flex class="text-xs-center mb-3">
                 <p>Insert the pump tube into a container of clean water.</p>
-                <p v-if="!dispenserGlassReady" class="red--text">Place a glass in the dispensing area.</p>
+                <p v-if="!dispenserGlass" class="red--text">Place a glass in the dispensing area.</p>
               </v-flex>
               
               <v-flex class="text-xs-center">
                 <v-btn
                   color="primary"
-                  :loading="!dispenserGlassReady || pump.running"
-                  :disabled="!dispenserGlassReady || pump.running"
+                  :loading="!dispenserGlass || pump.running"
+                  :disabled="!dispenserGlass || pump.running"
                   @click="cleanPump()"
                 >
                   clean
@@ -174,8 +173,8 @@
                 </v-btn>
                 <v-btn
                   color="primary"
-                  :loading="!dispenserGlassReady || pump.running"
-                  :disabled="!dispenserGlassReady || pump.running"
+                  :loading="!dispenserGlass || pump.running"
+                  :disabled="!dispenserGlass || pump.running"
                   @click="drainPump()"
                 >
                   drain
@@ -233,7 +232,7 @@ export default {
   computed: {
     ...mapState({
       defaultUnits: state => state.options.defaultUnits,
-      dispenserGlassReady: state => state.dispenser.glassReady,
+      dispenserGlass: state => state.dispenser.glass,
       microPrimeSmall: state => state.options.microPrimeSmall,
       microPrimeLarge: state => state.options.microPrimeLarge,
     }),
@@ -277,6 +276,14 @@ export default {
     
     submitLoad() {
       if (! this.$refs.loadForm.validate()) return
+      
+      let amount = +(this.loadParams.containerAmount)
+      if (isNaN(amount)) {
+        this.$store.commit('setError', 'Invalid container amount!')
+        return
+      }
+      this.loadParams.containerAmount = Math.round(amount * 10) / 10
+      
       this.$socket.emit('loadPump', this.loadParams, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)

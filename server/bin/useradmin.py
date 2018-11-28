@@ -66,7 +66,10 @@ if __name__ == '__main__':
     subp.set_defaults(func = listUsers)
     
     args = parser.parse_args()
-    args.func(args)
+    if args.subparser is None:
+        parser.print_help()
+    else:
+        args.func(args)
         
     
 

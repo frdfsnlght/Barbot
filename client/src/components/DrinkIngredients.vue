@@ -28,7 +28,7 @@
         </v-list-tile-avatar>
         
         <v-list-tile-content>
-          <v-list-tile-title>{{item.amount}} {{item.units}} {{item.ingredient.name}}</v-list-tile-title>
+          <v-list-tile-title>{{item.amount | fixedAmount}} {{item.units}} {{item.ingredient.name}}</v-list-tile-title>
         </v-list-tile-content>
         
         <v-list-tile-action>
@@ -89,7 +89,6 @@
                     label="Step"
                     v-model="item.step"
                     :rules="[v => !!v || 'Step is required']"
-                    mask="##"
                     required
                     autofocus
                     data-kbType="positiveInteger"
@@ -102,7 +101,6 @@
                     label="Amount"
                     v-model="item.amount"
                     :rules="[v => !!v || 'Amount is required']"
-                    mask="###"
                     required
                     data-kbType="positiveNumber"
                     tabindex="2"
@@ -153,7 +151,6 @@
 import { mapState } from 'vuex'
 import SelectIngredient from '../components/SelectIngredient'
 import SelectUnits from '../components/SelectUnits'
-//import { toML, convertUnits } from '../utils'
 import utils from '../utils'
 import bus from '../bus'
 
@@ -249,8 +246,17 @@ export default {
       if (this.editIndex != -1) {
         this.items.splice(this.editIndex, 1)
       }
-        
-      console.log('drinkSizeLimit: ' + this.drinkSizeLimit)
+
+      let amount = +(this.item.amount)
+      if (isNaN(amount)) {
+        this.$store.commit('setError', 'Invalid amount!')
+        return
+      }
+      let step = Math.trunc(+(this.item.step))
+      if (isNaN(step)) {
+        this.$store.commit('setError', 'Invalid step!')
+        return
+      }
       
       // don't allow duplicate ingredients
       if (this.items.find(item => item.ingredientId === this.item.ingredientId)) {
@@ -259,7 +265,6 @@ export default {
       }
         
       // don't allow more than 4 ingredients in the same step
-      let step = this.item.step
       let stepIngs = this.items.filter(function(i) { return i.step == step })
       if (stepIngs.length >= 4) {
         this.$store.commit('setError', 'There are already 4 ingredients in the same step!')
@@ -267,7 +272,7 @@ export default {
       }
         
       // don't allow more ingredients than configured
-      let totalMLs = utils.toML(this.item.amount, this.item.units)
+      let totalMLs = utils.toML(amount, this.item.units)
       this.items.forEach((i) => { totalMLs += utils.toML(i.amount, i.units) })
       if (totalMLs > this.drinkSizeLimit) {
         this.$store.commit('setError',
@@ -278,6 +283,8 @@ export default {
       }
       
       this.item['ingredient'] = this.$store.getters['ingredients/getById'](this.item['ingredientId'])
+      this.item.amount = amount
+      this.item.step = step
       this.items.push(JSON.parse(JSON.stringify(this.item)))
       this.closeDialog()
       console.dir(this.items)
