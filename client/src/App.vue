@@ -284,7 +284,7 @@ export default {
     },
     
     restartX() {
-      this.$socket.emit('restartX', (res) => {
+      this.$socket.emit('core_restartX', (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
@@ -293,7 +293,7 @@ export default {
     
     restart() {
       this.$refs.confirm.open('Restart', 'Are you sure you want to restart the system?').then(() => {
-        this.$socket.emit('restart', (res) => {
+        this.$socket.emit('core_restart', (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
           }
@@ -303,7 +303,7 @@ export default {
     
     shutdown() {
       this.$refs.confirm.open('Shutdown', 'Are you sure you want to shutdown the system?').then(() => {
-        this.$socket.emit('shutdown', (res) => {
+        this.$socket.emit('core_shutdown', (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
           }

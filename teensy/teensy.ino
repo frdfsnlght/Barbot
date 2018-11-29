@@ -353,6 +353,8 @@ bool processChecksum(char* cmd, int len) {
         return false;
     }
     char* hex = cmd + len - 2;
+    len -= 3;
+    cmd[len] = '\0';
     uint8_t sentCS = readHex(&hex);
     uint8_t calcCS = 0;
     for (int i = 0; i < len; i++)
@@ -361,7 +363,6 @@ bool processChecksum(char* cmd, int len) {
         sendError("CHK");
         return false;
     }
-    cmd[len - 3] = 0;
     return true;
 }
 
@@ -700,10 +701,10 @@ unsigned readHex(char** strPtr) {
             i = (i << 4) + (*str - '0');
             str++;
         } else if ((*str >= 'a') && (*str <= 'f')) {
-            i = (i << 4) + (*str - 'a');
+            i = (i << 4) + (*str - 'a') + 10;
             str++;
         } else if ((*str >= 'A') && (*str <= 'F')) {
-            i = (i << 4) + (*str - 'A');
+            i = (i << 4) + (*str - 'A') + 10;
             str++;
         } else
             break;
