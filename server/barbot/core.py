@@ -36,7 +36,7 @@ def restart():
 
     bus.emit('lights/play', 'restart')
     bus.emit('audio/play', 'restart', console = True)
-    time.sleep(2)
+    time.sleep(config.getfloat('core', 'restartDelay'))
     
     cmd = config.get('core', 'restartCommand').split(' ')
     out = subprocess.run(cmd,
@@ -52,11 +52,12 @@ def shutdown():
         
     bus.emit('lights/play', 'shutdown')
     bus.emit('audio/play', 'shutdown', console = True)
+    
     try:
         serial.write('RT{}'.format(config.get('core', 'shutdownTimer')))
     except serial.SerialError as e:
         _logger.error(e)
-    time.sleep(2)
+    time.sleep(config.getfloat('core', 'shutdownDelay'))
     
     cmd = config.get('core', 'shutdownCommand').split(' ')
     out = subprocess.run(cmd,
