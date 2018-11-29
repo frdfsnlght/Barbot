@@ -314,21 +314,21 @@ Text Label 8600 2300 0    50   ~ 0
 P6
 Text Label 8500 2200 0    50   ~ 0
 P7
-Text Label 6800 2900 2    50   ~ 0
-P8
-Text Label 6700 2800 2    50   ~ 0
-P9
-Text Label 6600 2700 2    50   ~ 0
-P10
-Text Label 6500 2600 2    50   ~ 0
-P11
-Text Label 6400 2500 2    50   ~ 0
-P12
-Text Label 6300 2400 2    50   ~ 0
-P13
-Text Label 6200 2300 2    50   ~ 0
-P14
 Text Label 6100 2200 2    50   ~ 0
+P8
+Text Label 6200 2300 2    50   ~ 0
+P9
+Text Label 6300 2400 2    50   ~ 0
+P10
+Text Label 6400 2500 2    50   ~ 0
+P11
+Text Label 6500 2600 2    50   ~ 0
+P12
+Text Label 6600 2700 2    50   ~ 0
+P13
+Text Label 6700 2800 2    50   ~ 0
+P14
+Text Label 6800 2900 2    50   ~ 0
 P15
 Text Label 7200 3100 2    50   ~ 0
 ~ENABLE

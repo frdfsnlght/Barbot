@@ -94,7 +94,7 @@ def _socket_connect():
     drinkOrder = dispenser.drinkOrder
     if drinkOrder:
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
-    emit('dispenser_state', {'state': dispenser.state, 'order': drinkOrder})
+    emit('dispenser_state', {'state': dispenser.state, 'drinkOrder': drinkOrder})
     emit('dispenser_glass', dispenser.glass)
     emit('dispenser_parentalCode', True if dispenser.getParentalCode() else False)
     emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])

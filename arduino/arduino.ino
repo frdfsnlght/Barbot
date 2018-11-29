@@ -198,6 +198,7 @@ void loopSerial() {
         } else if (ch == 8) {
             if (inputBuffer.length) {
                 inputBuffer.length--;
+                inputBuffer.data[inputBuffer.length] = '\0';
             }
         } else if (ch == 27) {
             if (inputBuffer.length) {

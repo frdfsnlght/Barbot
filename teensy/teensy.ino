@@ -79,14 +79,15 @@ Stepper pump4(19, PIN_DIR);
 Stepper pump5(18, PIN_DIR);
 Stepper pump6(17, PIN_DIR);
 Stepper pump7(16, PIN_DIR);
-Stepper pump8(9, PIN_DIR);
-Stepper pump9(8, PIN_DIR);
-Stepper pump10(7, PIN_DIR);
-Stepper pump11(6, PIN_DIR);
-Stepper pump12(5, PIN_DIR);
-Stepper pump13(4, PIN_DIR);
-Stepper pump14(3, PIN_DIR);
-Stepper pump15(2, PIN_DIR);
+
+Stepper pump8(2, PIN_DIR);
+Stepper pump9(3, PIN_DIR);
+Stepper pump10(4, PIN_DIR);
+Stepper pump11(5, PIN_DIR);
+Stepper pump12(6, PIN_DIR);
+Stepper pump13(7, PIN_DIR);
+Stepper pump14(8, PIN_DIR);
+Stepper pump15(9, PIN_DIR);
 
 Stepper* allPumps[] = {&pump0, &pump1, &pump2, &pump3, &pump4, &pump5, &pump6, &pump7,
                        &pump8, &pump9, &pump10, &pump11, &pump12, &pump13, &pump14, &pump15};
@@ -145,6 +146,7 @@ void loopSerial() {
         } else if (ch == 8) {
             if (inputBuffers[BUF_SERIAL].length) {
                 inputBuffers[BUF_SERIAL].length--;
+                inputBuffers[BUF_SERIAL].data[inputBuffers[BUF_SERIAL].length] = '\0';
             }
         } else if (ch == 27) {
             if (inputBuffers[BUF_SERIAL].length) {
@@ -763,7 +765,7 @@ void sendPumpStopped(byte pumpNum) {
     send("*PS");
     sendInt(pumpNum);
     sendChar(',');
-    sendInt(allPumps[i]->getPosition());
+    sendInt(allPumps[pumpNum]->getPosition());
     sendChar('\n');
 }
 
