@@ -132,6 +132,10 @@ def processPumpCommand(cmd):
     ch = cmd[0].upper()
     if ch == 'P':
         cmdPumpPump(cmd[1:])
+    elif ch == 'S':
+        cmdPumpSpeed(cmd[1:])
+    elif ch == 'A':
+        cmdPumpAccel(cmd[1:])
     elif ch == 'H':
         cmdPumpHalt(cmd[1:])
     elif ch == 'F':
@@ -191,6 +195,16 @@ def cmdPumpPump(cmd):
     
     sendOK()
     sendPumpRunning(pump)
+    
+def cmdPumpSpeed(cmd):
+    global pumpSpeed
+    (pumpSpeed, cmd) = readUInt(cmd)
+    sendOK()
+        
+def cmdPumpAccel(cmd):
+    global pumpAccel
+    (pumpAccel, cmd) = readUInt(cmd)
+    sendOK()
     
 # <#>    
 def cmdPumpHalt(cmd):

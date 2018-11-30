@@ -19,6 +19,7 @@ _pumpExtras = {}
 
 @bus.on('server/start')
 def _bus_serverStart():
+    _bus_configLoaded()
     pumps = Pump.select()
     if len(pumps) != config.getint('pumps', 'count'):
         _logger.warning('Database pump count doesn\'t match configuration count!')
@@ -29,6 +30,14 @@ def _bus_serverStart():
             p.save(force_insert = True)
         _logger.info('Initialized pumps')
 
+@bus.on('config/loaded')
+def _bus_configLoaded():
+    try:
+        serial.write('PS{}'.format(config.getint('pumps', 'speed')), timeout = 1)
+        serial.write('PA{}'.format(config.getint('pumps', 'acceleration')), timeout = 1)
+    except serial.SerialError as e:
+        _logger.error(e)
+        
 @bus.on('serial/event')
 def _bus_serialEvent(e):
     m = _pumpStopEventPattern.match(e)
