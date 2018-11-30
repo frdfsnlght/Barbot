@@ -187,14 +187,19 @@ void loopSerial() {
         ch = Serial.read();
         if ((ch == '\r') || (ch == '\n')) {
             if (inputBuffer.length) {
-                if (strcmp(inputBuffer.data, "PING") == 0)
+                if (strcmp(inputBuffer.data, "PING") == 0) {
+                    sendChar(24);
+                    sendChar(24);
+                    sendChar(24);
+                    sendChar(24);
                     send("PONG\n");
-                else {
+                } else {
                     processCommand();
                 }
             }
-            inputBuffer.data[0] = '\0';
-            inputBuffer.length = 0;
+            resetInputBuffer();
+        } else if (ch == 24) {
+            resetInputBuffer();
         } else if (ch == 8) {
             if (inputBuffer.length) {
                 inputBuffer.length--;
@@ -202,14 +207,12 @@ void loopSerial() {
             }
         } else if (ch == 27) {
             if (inputBuffer.length) {
-                inputBuffer.data[0] = '\0';
-                inputBuffer.length = 0;
+                resetInputBuffer();
                 send(F("CANCELED\n"));
             }
         } else if ((ch >= 32) && (ch <= 126)) {
             if (inputBuffer.length >= (INPUT_BUFFER_LENGTH - 1)) {
-                inputBuffer.data[0] = '\0';
-                inputBuffer.length = 0;
+                resetInputBuffer();
                 sendError(F("overflow"));
                 return;
             }
@@ -217,6 +220,11 @@ void loopSerial() {
             inputBuffer.data[inputBuffer.length] = '\0';
         }
     }
+}
+
+void resetInputBuffer() {
+    inputBuffer.data[0] = '\0';
+    inputBuffer.length = 0;
 }
 
 void loopLights() {
