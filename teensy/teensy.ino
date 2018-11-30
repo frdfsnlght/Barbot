@@ -55,9 +55,9 @@ constexpr unsigned long LED_TOGGLE_INTERVAL = 500;
 constexpr int ERR_OK                    = 0;
 constexpr int ERR_PUMPS_ARE_RUNNING     = 1;
 
-constexpr int SERIAL_SPEEDS[]           = {115200, 58824, 38400, 19200, 9600};
-constexpr int NUM_SERIAL_SPEEDS         = sizeof(SERIAL_SPEEDS) / sizeof(int);
-constexpr unsigned long SERIAL_SPEED_CHECK_INTERVAL = 1000;
+constexpr uint32_t SERIAL_SPEEDS[]      = {115200, 58824, 38400, 19200, 9600};
+constexpr int NUM_SERIAL_SPEEDS         = sizeof(SERIAL_SPEEDS) / sizeof(uint32_t);
+constexpr unsigned long SERIAL_SPEED_CHECK_INTERVAL = 2000;
 constexpr int PING_TIMEOUT              = 3000;
 
 constexpr int CHECKSUM_RETRIES          = 3;
@@ -107,7 +107,7 @@ bool pumpsEnabledOverride = false;
 bool pumpsFlushing = false;
 
 uint32_t lastSerialSpeedCheck = 0;
-int serialSpeed = 0;
+uint32_t serialSpeed = 0;
 bool commEnabled = true;
 
 bool ledOn = false;
@@ -226,7 +226,7 @@ void loopLED() {
     }
 }
 
-void detectSerial1Speed() {
+bool detectSerial1Speed() {
     for (int i = 0; i < NUM_SERIAL_SPEEDS; i++) {
         send("# trying ");
         sendInt(SERIAL_SPEEDS[i]);
@@ -238,21 +238,28 @@ void detectSerial1Speed() {
             send("# detected ");
             sendInt(serialSpeed);
             sendChar('\n');
-            return;
+            return true;
         }
     }
-    sendError("unable to detect serial speed");
     serialSpeed = 0;
+    return false;
 }
 
 bool ping() {
     while (Serial1.available())
         Serial1.read();
+    Serial1.print((char)24);
+    Serial1.print((char)24);
+    Serial1.print((char)24);
+    Serial1.print((char)24);
     Serial1.println("PING");
     unsigned long time = millis();
     while ((millis() - time) < PING_TIMEOUT) {
         while (Serial1.available()) {
             ch = Serial1.read();
+            send("# received ");
+            sendInt(ch);
+            sendChar('\n');
             if ((ch == '\r') || (ch == '\n')) {
                 if (inputBuffers[BUF_SERIAL1].length && 
                     strcmp(inputBuffers[BUF_SERIAL1].data, "PONG") == 0) {
@@ -260,6 +267,8 @@ bool ping() {
                     return true;
                 }
                 resetInputBuffer(BUF_SERIAL1);
+            } else if (ch == 24) {
+                    resetInputBuffer(BUF_SERIAL1);
             } else if (inputBuffers[BUF_SERIAL1].length == 0) {
                 if (ch == 'P') {
                     appendInputBuffer(BUF_SERIAL1, ch);
@@ -375,8 +384,10 @@ void processCommCommand(char* cmd) {
             return;
         case 'D':
         case 'd':
-            detectSerial1Speed();
-            cmdCommStatus();
+            if (detectSerial1Speed())
+                cmdCommStatus();
+            else
+                sendError("unable to detect serial speed");
             return;
         case 'P':
         case 'p':
@@ -384,6 +395,10 @@ void processCommCommand(char* cmd) {
                 sendOK();
             else
                 sendError("timeout");
+            break;
+        case 'S':
+        case 's':
+            cmdCommSpeed(cmd + 1);
             break;
         case '?':
             cmdCommStatus();
@@ -399,6 +414,17 @@ void cmdCommEnable() {
         commEnabled = false;
     else
         commEnabled = true;
+    sendOK();
+}
+
+void cmdCommSpeed(char* str) {
+    uint32_t speed = readUInt(&str);
+    if (speed == 0)
+        serialSpeed = 0;
+    else {
+        serialSpeed = speed;
+        Serial1.begin(speed, SERIAL_8N1);
+    }
     sendOK();
 }
 
