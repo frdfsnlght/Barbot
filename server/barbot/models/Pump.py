@@ -166,7 +166,7 @@ class Pump(BarbotModel):
     @staticmethod
     def primePump(params, *args, **kwargs):
         p = Pump.get(Pump.id == int(params['id']))
-        p.prime(float(params['amount']) if 'amount' in params else p.volume, *args, **kwargs)
+        p.prime(float(params['amount']) if 'amount' in params else (p.volume * config.getfloat('pumps', 'primeFactor')), *args, **kwargs)
         
     @staticmethod
     def drainPump(id, *args, **kwargs):

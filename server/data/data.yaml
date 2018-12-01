@@ -111,7 +111,7 @@ drinks:
   - amount: 4.0
     units: oz
     ingredient: Coca Cola
-    step: 2
+    step: 1
   instructions: Pour the rum into a highball glass filled with ice and top with cola.
 
 - primaryName: Spiced Rum and Coke
@@ -124,7 +124,7 @@ drinks:
   - amount: 6.0
     units: oz
     ingredient: Coca Cola
-    step: 2
+    step: 1
   instructions: Pour the rum into a highball glass filled with ice and top with cola.
 
 - primaryName: Swedish Lemonade
@@ -167,6 +167,19 @@ drinks:
   - amount: 2.0
     units: oz
     ingredient: Cachaca
+  - amount: 2.0
+    units: oz
+    ingredient: Lime Juice
+  - amount: 1.0
+    units: oz
+    ingredient: Sugar Syrup
+
+- primaryName: Caipiroska
+  glass_id: 4
+  ingredients:
+  - amount: 2.0
+    units: oz
+    ingredient: Vodka
   - amount: 2.0
     units: oz
     ingredient: Lime Juice
