@@ -164,7 +164,7 @@ export default {
     },
   
     toggleHoldItem() {
-      this.$socket.emit('core_toggleDrinkOrderHold', this.item.id, (res) => {
+      this.$socket.emit('dispenser_toggleDrinkOrderHold', this.item.id, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         }
@@ -173,7 +173,7 @@ export default {
     
     cancelItem() {
       this.$refs.confirm.open('Cancel', 'Are you sure you want to cancel this order?', {rejectText: 'No'}).then(() => {
-        this.$socket.emit('core_cancelDrinkOrder', this.item.id, (res) => {
+        this.$socket.emit('dispenser_cancelDrinkOrder', this.item.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           }
