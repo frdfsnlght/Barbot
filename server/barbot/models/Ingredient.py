@@ -14,6 +14,11 @@ class Ingredient(BarbotModel):
     isAlcoholic = BooleanField(default = False)
     timesDispensed = IntegerField(default = 0)
     amountDispensed = FloatField(default = 0)
+    
+    lastContainerAmount = FloatField(null = True)
+    lastAmount = FloatField(null = True)
+    lastUnits = CharField(null = True)
+    
     source = CharField(default = 'local')
     
     @staticmethod
@@ -67,6 +72,9 @@ class Ingredient(BarbotModel):
             'timesDispensed': self.timesDispensed,
             'amountDispensed': self.amountDispensed,
             'isAvailable': pump and pump.isReady(),
+            'lastContainerAmount': self.lastContainerAmount,
+            'lastAmount': self.lastAmount,
+            'lastUnits': self.lastUnits,
         }
         if drinks:
             out['drinks'] = [di.toDict(drink = True) for di in self.drinks]
@@ -81,6 +89,9 @@ class Ingredient(BarbotModel):
         if stats:
             out['timesDispensed'] = self.timesDispensed
             out['amountDispensed'] = self.amountDispensed
+            out['lastContainerAmount'] = self.lastContainerAmount
+            out['lastAmount'] = self.lastAmount
+            out['lastUnits'] = self.lastUnits
         return out
     
     class Meta:

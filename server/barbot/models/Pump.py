@@ -281,6 +281,11 @@ class Pump(BarbotModel):
         if not Pump.setup:
             raise ModelError('Pumps are not in setup!')
         if self.state == Pump.LOADED:
+            ing = self.ingredient
+            ing.lastContainerAmount = self.containerAmount
+            ing.lastAmount = self.amount
+            ing.lastUnits = self.units
+            ing.save()
             self.state = Pump.UNUSED
             self.ingredient = None
             self.containerAmount = 0
@@ -314,6 +319,11 @@ class Pump(BarbotModel):
                 self.start(amount, forward = False)
             if self.state != Pump.UNUSED:
                 self.state = Pump.DIRTY
+                ing = self.ingredient
+                ing.lastContainerAmount = self.containerAmount
+                ing.lastAmount = self.amount
+                ing.lastUnits = self.units
+                ing.save()
             self.ingredient = None
             self.containerAmount = 0
             self.amount = 0

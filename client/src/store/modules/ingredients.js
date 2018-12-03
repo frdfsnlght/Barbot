@@ -26,6 +26,7 @@ export default {
     mutations: {
         loading(state) {
             state.loading = true
+            state.loadedOne = false
         },
         
         loadedAll(state, items) {
@@ -101,17 +102,28 @@ export default {
             })
         },
         
-        loadById({commit, state}, id) {
-            if (state.loadedOne) return
+        loadById({commit}, id) {
+            
+            let resolve = null
+            let reject = null
+            
+            let p = new Promise((res, rej) => {
+                resolve = res
+                reject = rej
+            })
+
             commit('loading')
             Vue.prototype.$socket.emit('getIngredient', id, (res) => {
                 if (res.error) {
                     commit('setError', res.error, {root: true})
                     commit('loadedOne', {})
+                    reject()
                 } else {
                     commit('loadedOne', res.item)
+                    resolve(res.item)
                 }
             })
+            return p
         },
         
     }

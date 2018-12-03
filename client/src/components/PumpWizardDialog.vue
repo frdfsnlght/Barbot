@@ -68,7 +68,7 @@
           <v-spacer></v-spacer>
           <v-btn
             flat
-            @click="closeAll()">close</v-btn>
+            @click="closeAll()">cancel</v-btn>
           <v-btn
             v-if="!isReload"
             flat
@@ -237,11 +237,30 @@ export default {
   },
 
   computed: {
+    loadParamsIngredientId() {
+      return this.loadParams.ingredientId
+    },
     ...mapState({
       dispenserGlass: state => state.dispenser.glass,
       microPrimeSmall: state => state.options.microPrimeSmall,
       microPrimeLarge: state => state.options.microPrimeLarge,
     }),
+  },
+  
+  watch: {
+    loadParamsIngredientId(v) {
+      console.log('loadParamsIngredientId: ' + v)
+      if (v) {
+        this.$store.dispatch('ingredients/loadById', v).then((i) => {
+          console.dir(i)
+          if (i.lastContainerAmount) {
+            this.loadParams.containerAmount = i.lastContainerAmount
+            this.loadParams.percent = Math.round((i.lastAmount / i.lastContainerAmount) * 100)
+            this.loadParams.units = i.lastUnits
+          }
+        })
+      }
+    },
   },
   
   methods: {
@@ -288,8 +307,10 @@ export default {
         this.$store.commit('setError', 'Invalid container amount!')
         return
       }
-      this.loadParams.containerAmount = Math.round(amount * 10) / 10
+      //this.loadParams.containerAmount = Math.round(amount * 10) / 10
       
+//      console.log('loadParams:')
+//      console.dir(this.loadParams))
       this.$socket.emit('loadPump', this.loadParams, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)

@@ -135,6 +135,12 @@ def importIngredients(ingredients):
                     i.timesDispensed = ingredient['timesDispensed']
                 if 'amountDispensed' in ingredient:
                     i.amountDispensed = ingredient['amountDispensed']
+                if 'lastContainerAmount' in ingredient:
+                    i.lastContainerAmount = ingredient['lastContainerAmount']
+                if 'lastAmount' in ingredient:
+                    i.lastAmount = ingredient['lastAmount']
+                if 'lastUnits' in ingredient:
+                    i.lastUnits = ingredient['lastUnits']
             i.source = args.source
             oi = i.alreadyExists()
             if oi:
