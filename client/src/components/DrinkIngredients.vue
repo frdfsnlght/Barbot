@@ -151,7 +151,7 @@
 import { mapState } from 'vuex'
 import SelectIngredient from '../components/SelectIngredient'
 import SelectUnits from '../components/SelectUnits'
-import utils from '../utils'
+import units from '../units'
 import bus from '../bus'
 
 
@@ -197,7 +197,6 @@ export default {
       })
     },
     ...mapState({
-      defaultUnits: state => state.options.defaultUnits,
       drinkSizeLimit: state => state.options.drinkSizeLimit,
     }),
     
@@ -219,7 +218,7 @@ export default {
         id: null,
         ingredientId: undefined,
         amount: undefined,
-        units: this.defaultUnits,
+        units: units.defaultUnits(),
         step: maxStep,
       }
       this.editIndex = -1
@@ -272,13 +271,12 @@ export default {
       }
         
       // don't allow more ingredients than configured
-      let totalMLs = utils.toML(amount, this.item.units)
-      this.items.forEach((i) => { totalMLs += utils.toML(i.amount, i.units) })
+      let totalMLs = units.toML(amount, this.item.units)
+      this.items.forEach((i) => { totalMLs += units.toML(i.amount, i.units) })
       if (totalMLs > this.drinkSizeLimit) {
         this.$store.commit('setError',
           'Drink ingredients exceed configured limit of ' +
-            utils.convertUnits(this.drinkSizeLimit, 'ml', this.defaultUnits).toFixed() + ' ' +
-            this.defaultUnits)
+            units.format(units.toOther(this.drinkSizeLimit, units.defaultUnits()), units.defaultUnits()) + '.')
         return
       }
       

@@ -1,13 +1,13 @@
 <template>
 
-  <v-autocomplete
+  <v-select
     v-bind="this.$attrs"
     :items="ingredients"
     label="Ingredient"
     item-text="name"
     item-value="id"
     v-model="id"
-  ></v-autocomplete>
+  ></v-select>
           
 </template>
 

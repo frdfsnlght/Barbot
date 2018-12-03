@@ -6,7 +6,7 @@ from threading import Lock, Timer
 from ..db import db, BarbotModel, ModelError, addModel
 from ..config import config
 from ..bus import bus
-from .. import utils
+from .. import units
 from .. import serial
 from .Ingredient import Ingredient
 
@@ -53,10 +53,10 @@ def _bus_serialEvent(e):
                 pump.lastAmount = float(steps) / config.getfloat('pumps', 'stepsPerML')
                 
                 if pump.lastAmount > 0 and (pump.state == Pump.LOADED or pump.state == Pump.READY):
-                    pump.amount = utils.convertUnits(utils.toML(pump.amount, pump.units) - pump.lastAmount, 'ml', pump.units)
+                    pump.amount = units.toOther(units.toML(pump.amount, pump.units) - pump.lastAmount, pump.units)
                     if pump.amount < 0:
                         pump.amount = 0
-                    if utils.toML(pump.amount, pump.units) < config.getint('pumps', 'ingredientEmptyAmount'):
+                    if units.toML(pump.amount, pump.units) < config.getint('pumps', 'ingredientEmptyAmount'):
                         pump.state = Pump.EMPTY
 
                 pump.save()
@@ -233,7 +233,7 @@ class Pump(BarbotModel):
                 raise ModelError('amount is required')
             if not self.units:
                 raise ModelError('units is required')
-            if utils.toML(self.amount, self.units) > utils.toML(self.containerAmount, self.units):
+            if units.toML(self.amount, self.units) > units.toML(self.containerAmount, self.units):
                 raise ModelError('amount must be less than container amount')
             if not self.ingredient:
                 raise ModelError('ingredient is required')

@@ -5,7 +5,7 @@ from peewee import *
 from ..db import db, BarbotModel, ModelError, addModel
 from ..bus import bus
 from ..config import config
-from .. import utils
+from .. import units
 
 from .Glass import Glass
 
@@ -112,7 +112,7 @@ class Drink(BarbotModel):
         # don't allow more ingredients than configured
         totalMLs = 0
         for i in ingredients:
-            totalMLs = totalMLs + utils.toML(float(i['amount']), i['units'])
+            totalMLs = totalMLs + units.toML(float(i['amount']), i['units'])
         if totalMLs > config.getint('client', 'drinkSizeLimit'):
             raise ModelError('Drink ingredients exceed configured limit!')
             

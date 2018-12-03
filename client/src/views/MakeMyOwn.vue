@@ -31,7 +31,9 @@
             class="mb-3"
             :disabled="!dispenserGlass || (anyPumpRunning && dispensingId != pump.id)"
             @mousedown="startPump(pump.id)"
+            @touchstart="startPump(pump.id)"
             @mouseup="stopPump()"
+            @touchend="stopPump()"
           >
             <alcoholic-icon :alcoholic="pump.ingredient.isAlcoholic" class="mr-3"/>
             {{pump.ingredient.name}}
@@ -94,7 +96,7 @@ import { mapGetters, mapState } from 'vuex'
 import AlcoholicIcon from '../components/AlcoholicIcon'
 import ParentalCodeDialog from '../components/ParentalCodeDialog'
 import DrinkDialog from '../components/DrinkDialog'
-import utils from '../utils'
+import units from '../units'
 
 
 export default {
@@ -137,7 +139,6 @@ export default {
       dispenserState: state => state.dispenser.state,
       dispenserGlass: state => state.dispenser.glass,
       dispenserParentalCode: state => state.dispenser.parentalCode,
-      defaultUnits: state => state.options.defaultUnits,
     })
   },
   
@@ -197,7 +198,7 @@ export default {
     },
     
     captureIngredient(ingredient, amount) {
-      amount = Math.round(utils.convertUnits(amount, 'ml', this.defaultUnits) * 10) / 10
+      amount = Math.round(units.toOther(amount, units.defaultUnits()) * 10) / 10
       
       // find max step
       let maxStep = 1
@@ -214,7 +215,7 @@ export default {
           ingredient: ingredient,
           ingredientId: ingredient.id,
           amount: amount,
-          units: this.defaultUnits,
+          units: units.defaultUnits(),
           step: maxStep,
         })
       } else {

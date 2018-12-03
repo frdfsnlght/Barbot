@@ -31,6 +31,7 @@ export default new Vuex.Store({
     state: {
         connected: false,
         options: {},
+        units: {},
         error: false,
         notification: false,
         notificationColor: 'info',
@@ -47,16 +48,18 @@ export default new Vuex.Store({
             state.connected = false
         },
         
-        socket_clientOptions(state, options) {
+        socket_options(state, options) {
             state.options = options
-            //console.log('clientOptions:')
-            //console.dir(options)
             if (! options.autoConsole) {
                 if (options.isConsole !== state.isConsole) {
                     state.isConsole = options.isConsole
                     console.log('Client is now ' + (state.isConsole ? '' : 'NOT ') + 'running as console.')
                 }
             }
+        },
+        
+        socket_units(state, units) {
+            state.units = units
         },
         
         setError(state, error) {

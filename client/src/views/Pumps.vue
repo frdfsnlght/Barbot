@@ -169,6 +169,7 @@
 import { mapState, mapGetters } from 'vuex'
 import store from '../store/store'
 import bus from '../bus'
+import units from '../units'
 import Loading from '../components/Loading'
 import PumpWizardDialog from '../components/PumpWizardDialog'
 import PumpFlushDialog from '../components/PumpFlushDialog'
@@ -228,7 +229,7 @@ export default {
   
     itemIngredient(item) {
       if (! item.ingredient) return '<no ingredient>'
-      return item.amount.toFixed() + ' ' + item.units + ' ' + item.ingredient.name + ' (' + Math.round((item.amount / item.containerAmount) * 100)   + '%)'
+      return units.format(item.amount, item.units) + ' ' + item.ingredient.name + ' (' + Math.round((item.amount / item.containerAmount) * 100) + '%)'
     },
     
     itemState(item) {

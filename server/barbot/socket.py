@@ -6,6 +6,7 @@ from peewee import DoesNotExist
 
 from .config import config
 from .bus import bus
+from . import units
 from .db import ModelError
 from . import core
 from . import dispenser
@@ -90,7 +91,8 @@ def _socket_default_error_handler(e):
 def _socket_connect():
     global _consoleSessionId
     _logger.info('Connection opened from ' + request.remote_addr)
-    emit('clientOptions', _buildClientOptions())
+    emit('options', _buildOptions())
+    emit('units', _buildUnits())
     drinkOrder = dispenser.drinkOrder
     if drinkOrder:
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
@@ -492,7 +494,8 @@ def socket_alerts_clear():
     
 @bus.on('config/reloaded')
 def _but_config_reloaded():
-    socket.emit('clientOptions', _buildClientOptions())
+    socket.emit('clientOptions', _buildOptions())
+    socket.emit('units', _buildUnits())
     
 @bus.on('serial/event')
 def _bus_serial_event(e):
@@ -628,7 +631,7 @@ def _bus_modelPumpFlushing():
 
 
     
-def _buildClientOptions():
+def _buildOptions():
     opts = dict(config.items('client'))
     for k, v in opts.items():
         if _booleanPattern.match(v):
@@ -639,3 +642,12 @@ def _buildClientOptions():
             opts[k] = config.getfloat('client', k)
     return opts
             
+def _buildUnits():
+    print(dir(units))
+    u = {
+        'default': units.default,
+        'order': units.order,
+        'conversions': units.conversions,
+    }
+    return u
+    

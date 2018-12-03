@@ -6,7 +6,7 @@ from .bus import bus
 from .config import config
 from .db import db, ModelError
 from . import serial
-from . import utils
+from . import units
 from .models.Drink import Drink
 from .models.DrinkOrder import DrinkOrder
 from .models.DrinkIngredient import DrinkIngredient
@@ -321,7 +321,7 @@ def _dispenseDrinkOrder(o):
         for di in ingredients:
             ingredient = di.ingredient
             pump = ingredient.pump.first()
-            amount = utils.toML(di.amount, di.units)
+            amount = units.toML(di.amount, di.units)
             pump.start(amount, forward = True)
             ingredient.timesDispensed = ingredient.timesDispensed + 1
             ingredient.amountDispensed = ingredient.amountDispensed + amount
@@ -429,7 +429,7 @@ def _rebuildMenu():
             # check for all the drink's ingredients
             for di in drink.ingredients:
                 pump = Pump.getPumpWithIngredientId(di.ingredient_id)
-                if not pump or pump.state == Pump.EMPTY or utils.toML(pump.amount, pump.units) < utils.toML(di.amount, di.units):
+                if not pump or pump.state == Pump.EMPTY or units.toML(pump.amount, pump.units) < units.toML(di.amount, di.units):
                     onMenu = False
                     break
             if onMenu != drink.isOnMenu:

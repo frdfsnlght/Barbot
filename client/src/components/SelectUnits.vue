@@ -1,21 +1,29 @@
 <template>
 
-  <v-autocomplete
+  <v-select
     v-bind="this.$attrs"
-    :items="['oz', 'ml']"
+    :items="unitsList"
     label="Units"
     v-model="units"
-  ></v-autocomplete>
+  ></v-select>
 
 </template>
 
 <script>
+
+import units from '../units'
 
 export default {
   name: 'SelectUnits',
   props: {
     value: {
       type: String,
+    },
+  },
+  
+  computed: {
+    unitsList() {
+      return units.units()
     },
   },
   
@@ -34,17 +42,5 @@ export default {
     },
   },
   
-  computed: {
-  },
-  
-  created() {
-  },
-  
-  destroyed() {
-  },
-  
-  methods: {
-  },
-
 }
 </script>

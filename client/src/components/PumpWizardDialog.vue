@@ -13,9 +13,37 @@
             <v-container grid-list-md>
               <v-layout wrap>
               
+                <v-flex xs12>
+                  <select-ingredient
+                    autofocus
+                    v-model="loadParams.ingredientId"
+                    required
+                    :rules="[v => !!v || 'Ingredient is required']"
+                  ></select-ingredient>
+                </v-flex>
+                
+                <v-flex xs12>
+                  Ingredient level: {{loadParams.percent}}%
+                </v-flex>
+                
+                <v-flex xs12>
+                  <v-slider
+                    v-model="loadParams.percent"
+                    min="1"
+                    max="100"
+                    step="1"
+                    thumb-label="always"
+                    always-dirty
+                    required
+                    prepend-icon="mdi-minus"
+                    @click:prepend="loadParams.percent -= 1"
+                    append-icon="mdi-plus"
+                    @click:append="loadParams.percent += 1"
+                  ></v-slider>
+                </v-flex>
+                
                 <v-flex xs6>
                   <v-text-field
-                    autofocus
                     label="Container size"
                     v-model="loadParams.containerAmount"
                     :rules="[v => !!v || 'Container size is required']"
@@ -30,28 +58,6 @@
                     required
                     :rules="[v => !!v || 'Units is required']"
                   ></select-units>
-                </v-flex>
-                
-                <v-flex xs10>
-                  <v-slider
-                    label="Ingredient level"
-                    v-model="loadParams.percent"
-                    min="1"
-                    max="100"
-                    required
-                  ></v-slider>
-                </v-flex>
-                
-                <v-flex xs2>
-                  {{loadParams.percent}}%
-                </v-flex>
-                
-                <v-flex xs12>
-                  <select-ingredient
-                    v-model="loadParams.ingredientId"
-                    required
-                    :rules="[v => !!v || 'Ingredient is required']"
-                  ></select-ingredient>
                 </v-flex>
                 
               </v-layout>
@@ -204,6 +210,7 @@ import { mapState } from 'vuex'
 import SelectIngredient from '../components/SelectIngredient'
 import SelectUnits from '../components/SelectUnits'
 import bus from '../bus'
+import units from '../units'
 
 export default {
   name: 'PumpWizardDialog',
@@ -231,7 +238,6 @@ export default {
 
   computed: {
     ...mapState({
-      defaultUnits: state => state.options.defaultUnits,
       dispenserGlass: state => state.dispenser.glass,
       microPrimeSmall: state => state.options.microPrimeSmall,
       microPrimeLarge: state => state.options.microPrimeLarge,
@@ -248,7 +254,7 @@ export default {
         this.loadParams = {
           id: this.pump.id,
           containerAmount: undefined,
-          units: this.defaultUnits,
+          units: units.defaultUnits(),
           percent: 50,
           ingredientId: undefined,
         }
