@@ -9,6 +9,7 @@ var/*.db*
 var/*.pid
 var/parentalCode
 var/volume
+var/glass
 etc/config.ini
 content
 audio/audio.yaml
