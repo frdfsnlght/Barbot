@@ -52,8 +52,5 @@ export default {
     this.$store.commit('ingredients/destroy')
   },
   
-  methods: {
-  },
-
 }
 </script>
