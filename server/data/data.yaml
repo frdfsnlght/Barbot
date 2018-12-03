@@ -93,7 +93,7 @@ ingredients:
 - name: Sugar Syrup
 - name: Grenadine
 - name: Sweet and Sour
-- name: Lemomade
+- name: Lemonade
 - name: Iced Tea
 
 # =======================================================
@@ -436,7 +436,7 @@ drinks:
     ingredient: Vodka
   - amount: 2.0
     units: oz
-    ingredient: Lemomade
+    ingredient: Lemonade
   - amount: 2.0
     units: oz
     ingredient: Iced Tea
