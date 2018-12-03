@@ -8,6 +8,9 @@ import barbot.config
 
 config = barbot.config.load()
 
+import barbot.units
+barbot.units.load()
+
 from barbot.db import db, initializeDB, ModelError
 from barbot.models.Glass import Glass
 from barbot.models.Ingredient import Ingredient
