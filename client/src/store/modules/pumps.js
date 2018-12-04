@@ -7,17 +7,11 @@ export default {
         items: [],
         loading: false,
         loadedAll: false,
-        flushing: false,
     },
     
     getters: {
         sortedItems(state) {
             return state.items.slice().sort((a, b) => {
-                return a.id - b.id
-            })
-        },
-        sortedFlushablePumps(state) {
-            return state.items.filter(p => { return (! p.state) || (p.state == 'dirty') }).sort((a, b) => {
                 return a.id - b.id
             })
         },
@@ -27,7 +21,6 @@ export default {
             })
         },
         anyPumpRunning(state) {
-            if (state.flushing) return true
             let i = state.items.find((e) => { return e.running })
             return !!i
         },
@@ -60,7 +53,7 @@ export default {
             state.loadedAll = false
         },
         
-        socket_pumpSaved(state, item) {
+        socket_pump_changed(state, item) {
             if (state.loadedAll) {
                 let i = state.items.find((e) => { return e.id === item.id })
                 if (i) {
@@ -68,17 +61,13 @@ export default {
                 }
             }
         },
-
+        
         socket_pumps(state, pumps) {
             state.items = pumps
             state.loading = false
             state.loadedAll = true
         },
         
-        socket_pumps_flushing(state, flushing) {
-            state.flushing = flushing
-        },
-
     },
     
     actions: {
@@ -86,7 +75,7 @@ export default {
         loadAll({commit, state}) {
             if (state.loadedAll) return
             commit('loading')
-            Vue.prototype.$socket.emit('getPumps', (res) => {
+            Vue.prototype.$socket.emit('pump_getAll', (res) => {
                 if (res.error) {
                     commit('setError', res.error, {root: true})
                     commit('loadedAll', [])

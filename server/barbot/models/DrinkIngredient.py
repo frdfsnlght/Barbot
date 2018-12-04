@@ -37,7 +37,7 @@ class DrinkIngredient(BarbotModel):
         out = {
             'id': self.id,
             'drinkId': self.drink.id,
-            'ingredientId': self.ingredient.id,
+            'ingredient_id': self.ingredient.id,
             'amount': self.amount,
             'units': self.units,
             'step': self.step,

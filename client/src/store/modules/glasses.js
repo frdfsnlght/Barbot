@@ -4,82 +4,79 @@ export default {
     namespaced: true,
     
     state: {
-        items: [],
-        item: {},
+        glasses: null,
+        glass: {},
         loading: false,
-        loadedAll: false,
-        loadedOne: false,
     },
     
     getters: {
-        sortedItems(state) {
-            return state.items.slice().sort((a, b) => {
-                if (a.size < b.size) return -1
-                if (a.size > b.size) return 1
-                if (a.units < b.units) return -1
-                if (a.units > b.units) return 1
-                return a.type.localeCompare(b.type, 'en', {'sensitivity': 'base'})
-            })
+        
+        sortedGlasses(state) {
+            if (state.glasses)
+                return state.glasses.slice().sort((a, b) => {
+                    if (a.size < b.size) return -1
+                    if (a.size > b.size) return 1
+                    if (a.units < b.units) return -1
+                    if (a.units > b.units) return 1
+                    return a.type.localeCompare(b.type, 'en', {'sensitivity': 'base'})
+                })
+            else
+                return []
         }
+        
     },
   
     mutations: {
+        
         loading(state) {
             state.loading = true
         },
         
-        loadedAll(state, items) {
-            state.items = items
+        setGlasses(state, glasses) {
+            state.glasses = glasses
             state.loading = false
-            state.loadedAll = true
         },
   
-        loadedOne(state, item) {
-            state.item = item
+        setGlass(state, glass) {
+            state.glass = glass
             state.loading = false
-            state.loadedOne = true
         },
-
+  
         destroy(state) {
-            state.items = []
-            state.item = {}
-            state.loadedAll = false
-            state.loadedOne = false
+            state.glasses = null
+            state.glass = {}
         },
         
-        socket_glassSaved(state, item) {
-            if (state.loadedAll) {
-                let g = state.items.find((e) => { return e.id === item.id })
+        socket_glass_changed(state, glass) {
+            if (state.glasses) {
+                let g = state.glasses.find((e) => { return e.id === glass.id })
                 if (g) {
-                    Object.assign(g, item)
+                    Object.assign(g, glass)
                     this.commit('notify', 'Glass updated', {root: true})
-                    console.log('updated glass ' + item.id)
                 } else {
-                    state.items.push(item)
+                    state.glasses.push(glass)
                     this.commit('notify', 'Glass added', {root: true})
-                    console.log('added glass '  + item.id)
                 }
             }
-            if (state.loadedOne && state.item.id === item.id) {
-                Object.assign(state.item, item)
+            if (state.glass.id === glass.id) {
+                state.glass = glass
                 this.commit('notify', 'Glass updated', {root: true})
             }
         },
 
-        socket_glassDeleted(state, item) {
-            if (state.loadedAll) {
-                let g = state.items.find((e) => { return e.id === item.id })
+        socket_glass_deleted(state, glass) {
+            if (state.glasses) {
+                let g = state.glasses.find((e) => { return e.id === glass.id })
                 if (g) {
-                    let i = state.items.indexOf(g)
+                    let i = state.glasses.indexOf(g)
                     if (i != -1) {
-                        state.items.splice(i, 1)
+                        state.glasses.splice(i, 1)
                         this.commit('notify', 'Glass deleted', {root: true})
-                        console.log('deleted glass '  + item.id)
                     }
                 }
             }
-            if (state.loadedOne && state.item.id === item.id) {
-                state.item = {}
+            if (state.glass.id === glass.id) {
+                state.glass = null
                 this.commit('notify', 'Glass deleted', {root: true})
             }
         },
@@ -88,29 +85,37 @@ export default {
     
     actions: {
         
-        loadAll({commit, state}) {
-            if (state.loadedAll) return
-            commit('loading')
-            Vue.prototype.$socket.emit('getGlasses', (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedAll', [])
-                } else {
-                    commit('loadedAll', res.items)
+        getAll({commit, state}) {
+            return new Promise((resolve, reject) => {
+                if (state.glasses)
+                    resolve()
+                else {
+                    commit('loading')
+                    Vue.prototype.$socket.emit('glass_getAll', (res) => {
+                        if (res.error) {
+                            commit('setError', res.error, {root: true})
+                            reject()
+                        } else {
+                            commit('setGlasses', res.glasses)
+                            resolve(res.glasses)
+                        }
+                    })
                 }
             })
         },
         
-        loadById({commit, state}, id) {
-            if (state.loadedOne) return
-            commit('loading')
-            Vue.prototype.$socket.emit('getGlass', id, (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedOne', {})
-                } else {
-                    commit('loadedOne', res.item)
-                }
+        getOne({commit}, id) {
+            return new Promise((resolve, reject) => {
+                commit('loading')
+                Vue.prototype.$socket.emit('glass_getOne', id, (res) => {
+                    if (res.error) {
+                        commit('setError', res.error, {root: true})
+                        reject()
+                    } else {
+                        commit('setGlass', res.glass)
+                        resolve(res.glass)
+                    }
+                })
             })
         },
         

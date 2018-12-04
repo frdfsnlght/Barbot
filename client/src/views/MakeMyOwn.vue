@@ -208,12 +208,12 @@ export default {
       let stepIngs = this.ingredients.filter(function(i) { return i.step == maxStep })
       if (stepIngs.length >= 4) maxStep++
       
-      let ing = this.ingredients.find((e) => { return e.ingredientId === ingredient.id })
+      let ing = this.ingredients.find((e) => { return e.ingredient_id === ingredient.id })
       if (! ing) {
         this.ingredients.push({
           id: null,
           ingredient: ingredient,
-          ingredientId: ingredient.id,
+          ingredient_id: ingredient.id,
           amount: amount,
           units: units.defaultUnits(),
           step: maxStep,
@@ -231,7 +231,7 @@ export default {
         primaryName: undefined,
         secondaryName: undefined,
         instructions: undefined,
-        glassId: undefined,
+        glass_id: undefined,
         ingredients: this.ingredients,
       }).then(() => {
         this.ingredients = []

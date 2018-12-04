@@ -5,7 +5,7 @@
     <loading v-if="loading"></loading>
     
     <p
-      v-else-if="!items.length"
+      v-else-if="!glasses.length"
       class="title text-xs-center ma-3"
     >
       No glasses are currently available.
@@ -15,20 +15,20 @@
     
       <v-list two-line>
         <v-list-tile
-          v-for="item in items"
-          :key="item.id"
+          v-for="glass in glasses"
+          :key="glass.id"
           ripple
-          @click="itemDetail(item)"
+          @click="gotoDetail(glass)"
         >
           <v-list-tile-content>
-            <v-list-tile-title>{{item.size}} {{item.units}} {{item.type}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+            <v-list-tile-title>{{glass.size}} {{glass.units}} {{glass.type}}</v-list-tile-title>
+            <v-list-tile-sub-title>{{glass.description}}</v-list-tile-sub-title>
           </v-list-tile-content>
           
           <v-list-tile-action>
             <v-btn
               icon
-              @click.stop="showMenu(item, $event)"
+              @click.stop="showMenu(glass, $event)"
             >
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
@@ -45,7 +45,7 @@
         offset-y
       >
         <v-list>
-          <v-list-tile ripple @click="editItem()">
+          <v-list-tile ripple @click="editGlass()">
             <v-list-tile-content>
               <v-list-tile-title>Edit</v-list-tile-title>
             </v-list-tile-content>
@@ -54,7 +54,7 @@
             </v-list-tile-action>
           </v-list-tile>
           
-          <v-list-tile ripple @click="deleteItem()">
+          <v-list-tile ripple @click="deleteGlass()">
             <v-list-tile-content>
               <v-list-tile-title>Delete</v-list-tile-title>
             </v-list-tile-content>
@@ -74,13 +74,13 @@
         fixed
         bottom right
         color="primary"
-        @click="addItem"
+        @click="addGlass"
       >
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
+    <v-dialog v-model="dialog" persistent scrollable @keydown.esc="closeDialog" @keydown.enter.prevent="saveGlass">
       <v-card>
         <v-card-title>
           <span
@@ -100,7 +100,7 @@
                 <v-flex xs12>
                   <v-text-field
                     label="Type"
-                    v-model="item.type"
+                    v-model="glass.type"
                     :rules="[v => !!v || 'Type is required']"
                     required
                     autofocus
@@ -113,7 +113,7 @@
                   <v-text-field
                     label="Size"
                     mask="##"
-                    v-model="item.size"
+                    v-model="glass.size"
                     :rules="[v => !!v || 'Size is required']"
                     required
                     data-kbType="positiveInteger"
@@ -123,7 +123,7 @@
                 
                 <v-flex xs6>
                   <select-units
-                    v-model="item.units"
+                    v-model="glass.units"
                     required
                     :rules="[v => !!v || 'Units is required']"
                   ></select-units>
@@ -133,7 +133,7 @@
                   <v-textarea
                     label="Description"
                     auto-grow
-                    v-model="item.description"
+                    v-model="glass.description"
                     :data-kbUCFirst="true"
                     tabindex="3"
                   ></v-textarea>
@@ -151,7 +151,7 @@
           <v-btn
             :disabled="!valid"
             flat
-            @click="saveItem()">save</v-btn>
+            @click="saveGlass()">save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -174,7 +174,7 @@ export default {
   name: 'Glasses',
   data() {
     return {
-      item: {},
+      glass: {},
       dialog: false,
       edit: false,
       valid: true,
@@ -194,7 +194,7 @@ export default {
   
   computed: {
     ...mapGetters({
-      items: 'glasses/sortedItems'
+      glasses: 'glasses/sortedGlasses'
     }),
     ...mapState({
       loading: state => state.glasses.loading,
@@ -203,21 +203,21 @@ export default {
   
   methods: {
   
-    itemDetail(item) {
-      this.$router.push({name: 'glassDetail', params: {id: item.id}})
+    gotoDetail(glass) {
+      this.$router.push({name: 'glassDetail', params: {id: glass.id}})
     },
   
-    showMenu(item, e) {
+    showMenu(glass, e) {
       this.$refs.form.reset()
-      this.item = JSON.parse(JSON.stringify(item))
+      this.glass = JSON.parse(JSON.stringify(glass))
       this.menuX = e.clientX
       this.menuY = e.clientY
       this.menu = true
     },
     
-    addItem() {
+    addGlass() {
       this.$refs.form.reset()
-      this.item = {
+      this.glass = {
         id: undefined,
         type: undefined,
         size: undefined,
@@ -229,7 +229,7 @@ export default {
       this.dialog = true
     },
     
-    editItem() {
+    editGlass() {
       this.edit = true
       bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
@@ -237,13 +237,16 @@ export default {
     
     closeDialog() {
       this.dialog = false
-      this.item = {}
+      this.glass = {}
       bus.$emit('keyboard-remove', this.$refs.form)
     },
     
-    saveItem() {
+    saveGlass() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('saveGlass', this.item, (res) => {
+//      glass = JSON.parse(JSON.stringify(this.glass))
+      if (typeof(this.glass.size) == 'string')
+        this.glass.size = parseInt(this.glass.size)
+      this.$socket.emit('glass_save', this.glass, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {
@@ -252,9 +255,9 @@ export default {
       })
     },
     
-    deleteItem() {
-      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.item.size + ' ' + this.item.units + ' ' + this.item.type + '"?').then(() => {
-        this.$socket.emit('deleteGlass', this.item.id, (res) => {
+    deleteGlass() {
+      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.glass.size + ' ' + this.glass.units + ' ' + this.glass.type + '"?').then(() => {
+        this.$socket.emit('glass_delete', this.glass.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           }
@@ -266,7 +269,7 @@ export default {
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      t.$store.dispatch('glasses/loadAll')
+      t.$store.dispatch('glasses/getAll')
     });
   },
   

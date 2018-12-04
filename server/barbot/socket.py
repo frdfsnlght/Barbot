@@ -7,7 +7,7 @@ from peewee import DoesNotExist
 from .config import config
 from .bus import bus
 from . import units
-from .db import ModelError
+from .db import db, ModelError
 from . import core
 from . import dispenser
 from . import wifi
@@ -35,6 +35,9 @@ _logger = logging.getLogger('Socket')
 _consoleSessionId = None
 
 
+class ValidationError(Exception):
+    pass
+    
 def success(d = None, **kwargs):
     out = {'error': False, **kwargs}
     if type(d) is dict:
@@ -45,16 +48,10 @@ def success(d = None, **kwargs):
 def error(msg):
     return {'error': str(msg)}
 
-def userLoggedIn():
-    return 'user' in session
+#--------------------------------
+# decorators
+#
 
-def userIsAdmin():
-    return 'user' in session and session['user'].isAdmin
-
-def checkAdmin(clientOpt):
-    b = config.getboolean('client', clientOpt)
-    return userIsAdmin() if b else True
-    
 def requireUser(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
@@ -73,10 +70,55 @@ def requireAdmin(f):
             return error('Permission denied!')
     return wrapped
     
-@socket.on_error_default  # handles all namespaces without an explicit error handler
-def _socket_default_error_handler(e):
-    _logger.exception(e)
-    return error('An internal error has ocurred!')
+def requireDispenserState(state):
+    def wrap(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            if dispenser.state == state:
+                return f(*args, **kwargs)
+            else:
+                return error('Invalid dispenser state!')
+        return wrapped
+    return wrap
+        
+def validate(rules):
+    def wrap(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            if isinstance(args[0], dict):
+                try:
+                    validateParams(args[0], rules)
+                    return f(*args, **kwargs)
+                except ValidationError as e:
+                    return error(e)
+            else:
+                return f(*args, **kwargs)
+        return wrapped
+    return wrap
+
+#--------------------------------
+# helpers
+#
+
+def userLoggedIn():
+    return 'user' in session
+
+def userIsAdmin():
+    return 'user' in session and session['user'].isAdmin
+
+def checkAdmin(clientOpt):
+    b = config.getboolean('client', clientOpt)
+    return userIsAdmin() if b else True
+    
+def validateParams(params, rules):
+    for param, rule in rules.items():
+        if param in params:
+            if not isinstance(params[param], rule[0]):
+                if params[param] is not None or (len(rule) > 1 and rule[1]):
+                    raise ValidationError('{} is not of type {}'.format(param, str(rule[0])))
+        else:
+            if len(rule) == 1 or rule[1]:
+                raise ValidationError('{} is required'.format(param))
     
 #================================================================
 # socket events
@@ -86,6 +128,11 @@ def _socket_default_error_handler(e):
 #-------------------------------
 # special
 #
+    
+@socket.on_error_default  # handles all namespaces without an explicit error handler
+def _socket_default_error_handler(e):
+    _logger.exception(e)
+    return error('An internal error has ocurred!')
     
 @socket.on('connect')
 def _socket_connect():
@@ -100,7 +147,6 @@ def _socket_connect():
     emit('dispenser_glass', dispenser.glass)
     emit('dispenser_parentalCode', True if dispenser.getParentalCode() else False)
     emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])
-    emit('pumps_flushing', Pump.flushing)
     emit('wifi_state', wifi.state)
     emit('alerts_changed', alerts.getAll())
     bus.emit('socket/connect', request)
@@ -137,6 +183,10 @@ def _socket_logout():
         del session['user']
     return success()
 
+#-------------------------------
+# core
+#
+    
 @socket.on('core_restartX')
 def _socket_restartX():
     if not checkAdmin('restartXRequiresAdmin'):
@@ -170,11 +220,18 @@ def _socket_shutdown():
     except core.CoreError as e:
         return error(e)
 
+#-------------------------------
+# audio
+#
+        
 @socket.on('audio_setVolume')
 def _socket_audio_setVolume(volume):
     audio.setVolume(float(volume))
     return success()
 
+#-------------------------------
+# dispenser
+#
 
 @socket.on('dispenser_startSetup')
 def _socket_dispenser_startSetup():
@@ -280,6 +337,10 @@ def _socket_dispenser_toggleDrinkOrderHold(id):
     except DoesNotExist:
         return error('Drink order not found!')
         
+#-------------------------------
+# wifi
+#
+        
 @socket.on('wifi_getNetworks')
 def _socket_wifi_getNetworks():
     return success(networks = wifi.getNetworks())
@@ -298,99 +359,350 @@ def _socket_wifi_disconnectFromNetwork(ssid):
 def _socket_wifi_forgetNetwork(ssid):
     wifi.forgetNetwork(ssid)
     return success()
-    
-@socket.on('getGlasses')
-def _socket_getGlasses():
-    return success(items = [g.toDict() for g in Glass.select()])
 
-@socket.on('getGlass')
-def _socket_getGlass(id):
-    try:
-        g = Glass.get(Glass.id == id)
-        return success(item = g.toDict(drinks = True))
-    except DoesNotExist:
+#-------------------------------
+# glass
+#
+
+@socket.on('glass_getAll')
+def _socket_glass_getAll():
+    return success(glasses = [g.toDict() for g in Glass.select()])
+
+@socket.on('glass_getOne')
+def _socket_glass_getOne(id):
+    glass = Glass.get_or_none(Glass.id == id)
+    if not glass:
         return error('Glass not found!')
+    return success(glass = glass.toDict(drinks = True))
+
+@socket.on('glass_save')
+@validate({
+    'id': [int, False],
+    'type': [str, False],
+    'size': [int, False],
+    'units': [str, False],
+    'description': [str, False],
     
-@socket.on('saveGlass')
-def _socket_saveGlass(item):
+})
+def _socket_glass_save(params):
     try:
-        Glass.saveFromDict(item)
+        if 'id' in params:
+            glass = Glass.get_or_none(Glass.id == params['id'])
+            if not glass:
+                return error('Glass not found!')
+        else:
+            glass = Glass()
+
+        if 'type' in params:
+            glass.type = params['type']
+        if 'size' in params:
+            glass.size = params['size']
+        if 'units' in params:
+            glass.units = params['units']
+        if 'description' in params:
+            glass.description = params['description']
+            
+        glass.save()
+        socket.emit('glass_changed', glass.toDict(drinks = True))
         return success()
+        
     except ModelError as e:
         return error(e)
 
-@socket.on('deleteGlass')
-def _socket_deleteGlass(id):
+@socket.on('glass_delete')
+def _socket_glass_delete(id):
     try:
-        Glass.deleteById(id)
+        glass = Glass.get_or_none(Glass.id == id)
+        if not glass:
+            return error('Glass not found!')
+        glass.delete_instance()
+        socket.emit('glass_deleted', glass.toDict())
         return success()
-    except DoesNotExist:
-        return error('Glass not found!')
     except ModelError as e:
         return error(e)
          
-@socket.on('getIngredients')
-def _socket_getIngredients():
-    return success(items = [i.toDict() for i in Ingredient.select()])
+#-------------------------------
+# ingredient
+#
 
-@socket.on('getIngredient')
-def _socket_getIngredient(id):
-    try:
-        i = Ingredient.get(Ingredient.id == id)
-        return success(item = i.toDict(drinks = True))
-    except DoesNotExist:
+@socket.on('ingredient_getAll')
+def _socket_ingredient_getAll():
+    return success(ingredients = [i.toDict() for i in Ingredient.select()])
+
+@socket.on('ingredient_getOne')
+def _socket_ingredient_getOne(id):
+    ingredient = Ingredient.get_or_none(Ingredient.id == id)
+    if not ingredient:
         return error('Ingredient not found!')
+    return success(ingredient = ingredient.toDict(drinks = True))
     
-@socket.on('saveIngredient')
-def _socket_saveIngredient(item):
+@socket.on('ingredient_save')
+@validate({
+    'id': [int, False],
+    'name': [str, False],
+    'isAlcoholic': [bool, False],
+    'timesDispensed': [int, False],
+    'amountDispensed': [(float, int), False],
+    'lastContainerAmount': [(float, int), False],
+    'lastAmount': [(float, int), False],
+    'lastUnits': [str, False],
+})
+def _socket_ingredient_save(params):
     try:
-        Ingredient.saveFromDict(item)
+        if 'id' in params:
+            ingredient = Ingredient.get_or_none(Ingredient.id == params['id'])
+            if not ingredient:
+                return error('Ingredient not found!')
+        else:
+            ingredient = Ingredient()
+
+        if 'name' in params:
+            ingredient.name = params['ingredient']
+        if 'isAlcoholic' in params:
+            ingredient.isAlcoholic = params['isAlcoholic']
+        if 'timesDispensed' in params:
+            ingredient.timesDispensed = params['timesDispensed']
+        if 'amountDispensed' in params:
+            ingredient.amountDispensed = params['amountDispensed']
+        if 'lastContainerAmount' in params:
+            ingredient.lastContainerAmount = params['lastContainerAmount']
+        if 'lastAmount' in params:
+            ingredient.lastAmount = params['lastAmount']
+        if 'lastUnits' in params:
+            ingredient.lastUnits = params['lastUnits']
+            
+        ingredient.save()
+        socket.emit('ingredient_changed', ingredient.toDict(drinks = True))
+        return success()
+        
+    except ModelError as e:
+        return error(e)
+
+@socket.on('ingredient_delete')
+def _socket_ingredient_delete(id):
+    try:
+        ingredient = Ingredient.get_or_none(Ingredient.id == id)
+        if not ingredient:
+            return error('Ingredient not found!')
+        ingredient.delete_instance()
+        socket.emit('ingredient_deleted', ingredient.toDict())
         return success()
     except ModelError as e:
         return error(e)
 
-@socket.on('deleteIngredient')
-def _socket_deleteIngredient(id):
+#-------------------------------
+# drink
+#
+
+@socket.on('drink_getAll')
+def _socket_drink_getAll():
+    return success(drinks = [d.toDict(glass = True, ingredients = True) for d in Drink.select()])
+    
+@socket.on('drink_getOne')
+def _socket_drink_getOne(id):
+    drink = Drink.get_or_none(Drink.id == id)
+    if not drink:
+        return error('Drink not found!')
+    return success(drink = drink.toDict(glass = True, ingredients = True))
+    
+@socket.on('drink_save')
+@validate({
+    'id': [int, False],
+    'primaryName': [str, False],
+    'secondaryName': [str, False],
+    'glass_id': [int, False],
+    'instructions': [str, False],
+    'isFavorite': [bool, False],
+    'timesDispensed': [int, False],
+    'ingredients': [list, False],
+})
+@db.atomic()
+def _socket_drink_save(params):
     try:
-        Ingredient.deleteById(id)
+        if 'id' in params:
+            drink = Drink.get_or_none(Drink.id == params['id'])
+            if not drink:
+                return error('Drink not found!')
+        else:
+            drink = Drink()
+
+        if 'glass_id' in params:
+            glass = Glass.get_or_none(Glass.id == params['glass_id'])
+            if not glass:
+                return error('Glass not found!')
+            drink.glass = glass
+            
+        if 'primaryName' in params:
+            drink.primaryName = params['primaryName']
+        if 'secondaryName' in params:
+            drink.secondaryName = params['secondaryName']
+        if 'instructions' in params:
+            drink.instructions = params['instructions']
+        if 'isFavorite' in params:
+            drink.isFavorite = params['isFavorite']
+        if 'timesDispensed' in params:
+            drink.timesDispensed = params['timesDispensed']
+            
+        if 'ingredients' in params:
+            if drink.get_id() is None:
+                drink.save()
+            drink.setIngredients(params['ingredients'])
+        
+        drink.save()
+        socket.emit('drink_changed', drink.toDict(glass = True, ingredients = True))
         return success()
-    except DoesNotExist:
-        return error('Ingredient not found!')
+        
     except ModelError as e:
         return error(e)
 
-@socket.on('getDrinks')
-def _socket_getDrinks():
-    return success(items = [d.toDict(ingredients = True) for d in Drink.select()])
-    
-@socket.on('getDrink')
-def _socket_getDrink(id):
+@socket.on('drink_delete')
+def _socket_drink_delete(id):
     try:
-        d = Drink.get(Drink.id == id)
-        return success(item = d.toDict(glass = True, ingredients = True))
-    except DoesNotExist:
-        return error('Drink not found!')
-    
-@socket.on('saveDrink')
-def _socket_saveDrink(item):
-    try:
-        Drink.saveFromDict(item)
+        drink = Drink.get_or_none(Drink.id == id)
+        if not drink:
+            return error('Drink not found!')
+        drink.delete_instance()
+        socket.emit('drink_deleted', drink.toDict())
         return success()
-    except DoesNotExist:
-        return error('Drink not found!')
     except ModelError as e:
         return error(e)
 
-@socket.on('deleteDrink')
-def _socket_deleteDrink(id):
+#-------------------------------
+# pump
+#
+ 
+@socket.on('pump_getAll')
+def _socket_pump_getAll():
+    return success(items = [p.toDict(ingredient = True) for p in Pump.select()])
+ 
+@socket.on('pump_load')
+@requireDispenserState(dispenser.ST_SETUP)
+@validate({
+    'pump_id': [int, True],
+    'ingredient_id': [int, True],
+    'containerAmount': [(float, int), True],
+    'units': [str, True],
+    'amount': [(float, int), True]
+})
+def _socket_pump_load(params):
     try:
-        Drink.deleteById(id)
+        pump = Pump.get_or_none(Pump.id == params['pump_id'])
+        if not pump:
+            return error('Pump not found!')
+        if not (pump.isUnused() or pump.isReady() or pump.isEmpty()):
+            return error('Invalid pump state!')
+            
+        ingredient = Ingredient.get_or_none(Ingredient.id == params['ingredient_id'])
+        if not ingredient:
+            return error('Ingredient not found!')
+        
+        pump.load(ingredient, params['containerAmount'], params['units'], params['amount'])
+        socket.emit('pump_changed', pump.toDict(ingredient = True))
         return success()
-    except DoesNotExist:
-        return error('Drink not found!')
+        
     except ModelError as e:
         return error(e)
-         
+    
+
+@socket.on('pump_unload')
+@requireDispenserState(dispenser.ST_SETUP)
+def _socket_pump_unload(id):
+    try:
+        pump = Pump.get_or_none(Pump.id == id)
+        if not pump:
+            return error('Pump not found!')
+        if not pump.isLoaded():
+            return error('Invalid pump state!')
+            
+        pump.unload()
+        socket.emit('pump_changed', pump.toDict(ingredient = True))
+        return success()
+        
+    except ModelError as e:
+        return error(e)
+    
+@socket.on('pump_prime')
+@requireDispenserState(dispenser.ST_SETUP)
+def _socket_pump_prime(id):
+    try:
+        pump = Pump.get_or_none(Pump.id == id)
+        if not pump:
+            return error('Pump not found!')
+        if not pump.isLoaded():
+            return error('Invalid pump state!')
+            
+        pump.prime()
+        return success()
+        
+    except ModelError as e:
+        return error(e)
+
+@socket.on('pump_drain')
+@requireDispenserState(dispenser.ST_SETUP)
+def _socket_pump_drain(id):
+    try:
+        pump = Pump.get_or_none(Pump.id == id)
+        if not pump:
+            return error('Pump not found!')
+        if not (pump.isReady() or pump.isEmpty() or pump.isUnused() or pump.isDirty()):
+            return error('Invalid pump state!')
+            
+        pump.drain()
+        return success()
+
+    except ModelError as e:
+        return error(e)
+        
+@socket.on('pump_clean')
+@requireDispenserState(dispenser.ST_SETUP)
+def _socket_pump_clean(id):
+    try:
+        pump = Pump.get_or_none(Pump.id == id)
+        if not pump:
+            return error('Pump not found!')
+        if not (pump.isEmpty() or pump.isUnused() or pump.isDirty()):
+            return error('Invalid pump state!')
+            
+        pump.clean()
+        return success()
+
+    except ModelError as e:
+        return error(e)
+        
+@socket.on('pump_start')
+@requireDispenserState(dispenser.ST_SETUP)
+def _socket_pump_start(id):
+    try:
+        pump = Pump.get_or_none(Pump.id == id)
+        if not pump:
+            return error('Pump not found!')
+            
+        pump.start(0, forward = True)
+        return success()
+
+    except ModelError as e:
+        return error(e)
+    
+@socket.on('pump_stop')
+@requireDispenserState(dispenser.ST_SETUP)
+def _socket_pump_stop(id):
+    try:
+        pump = Pump.get_or_none(Pump.id == id)
+        if not pump:
+            return error('Pump not found!')
+            
+        pump.stop()
+        return success()
+
+    except ModelError as e:
+        return error(e)
+    
+
+
+
+
+        
+    
 @socket.on('getDrinksMenu')
 def _socket_getDrinksMenu():
     return success(items = [d.toDict() for d in Drink.getMenuDrinks()])
@@ -407,76 +719,8 @@ def _socket_getDrinkOrder(id):
     except DoesNotExist:
         return error('Drink order not found!')
     
-@socket.on('getPumps')
-def _socket_getPumps():
-    return success(items = [p.toDict(ingredient = True) for p in Pump.select()])
     
-@socket.on('loadPump')
-def _socket_loadPump(params):
-    try:
-        Pump.loadPump(params)
-        return success()
-    except DoesNotExist:
-        return error('Pump not found!')
-    except ModelError as e:
-        return error(e)
-
-@socket.on('unloadPump')
-def _socket_unloadPump(id):
-    try:
-        Pump.unloadPump(id)
-        return success()
-    except DoesNotExist:
-        return error('Pump not found!')
-    except ModelError as e:
-        return error(e)
     
-@socket.on('primePump')
-def _socket_primePump(params):
-    try:
-        Pump.primePump(params, useThread = True)
-        return success()
-    except DoesNotExist:
-        return error('Pump not found!')
-    except ModelError as e:
-        return error(e)
-    
-@socket.on('drainPump')
-def _socket_drainPump(id):
-    try:
-        Pump.drainPump(id, useThread = True)
-        return success()
-    except DoesNotExist:
-        return error('Pump not found!')
-    except ModelError as e:
-        return error(e)
-
-@socket.on('cleanPump')
-def socket_cleanPump(params):
-    try:
-        Pump.cleanPump(params, useThread = True)
-        return success()
-    except DoesNotExist:
-        return error('Pump not found!')
-    except ModelError as e:
-        return error(e)
-
-@socket.on('startFlushingPumps')
-def socket_startFlushingPumps(ids):
-    try:
-        Pump.startFlush(ids)
-        return success()
-    except ModelError as e:
-        return error(e)
-        
-@socket.on('stopFlushingPumps')
-def socket_stopFlushingPumps():
-    try:
-        Pump.stopFlush()
-        return success()
-    except ModelError as e:
-        return error(e)
-        
 @socket.on('alerts_clear')
 def socket_alerts_clear():
     alerts.clear()
@@ -569,13 +813,13 @@ def _bus_audio_volume(volume):
 # glass
 #
 
-@bus.on('model/glass/saved')
-def _bus_modelGlassSaved(g):
-    socket.emit('glassSaved', g.toDict())
+#@bus.on('model/glass/saved')
+#def _bus_modelGlassSaved(g):
+#    socket.emit('glassSaved', g.toDict())
 
-@bus.on('model/glass/deleted')
-def _bus_modelGlassDeleted(g):
-    socket.emit('glassDeleted', g.toDict())
+#@bus.on('model/glass/deleted')
+#def _bus_modelGlassDeleted(g):
+#    socket.emit('glassDeleted', g.toDict())
 
 #-------------------------------
 # ingredient
@@ -617,18 +861,10 @@ def _bus_modelDrinkOrderDeleted(o):
 # pump
 #
     
-@bus.on('model/pump/saved')
-def _bus_modelPumpSaved(p):
-    socket.emit('pumpSaved', p.toDict(ingredient = True))
-
-@bus.on('model/pump/setup')
-def _bus_modelPumpSetup():
-    socket.emit('pumps_setup', Pump.setup)
-
-@bus.on('model/pump/flushing')
-def _bus_modelPumpFlushing():
-    socket.emit('pumps_flushing', Pump.flushing)
-
+@bus.on('model/pump/changed')
+def _bus_model_pump_changed(p):
+    socket.emit('pump_changed', p.toDict(ingredient = True))
+    
 
     
 def _buildOptions():
@@ -643,7 +879,6 @@ def _buildOptions():
     return opts
             
 def _buildUnits():
-    print(dir(units))
     u = {
         'default': units.default,
         'order': units.order,

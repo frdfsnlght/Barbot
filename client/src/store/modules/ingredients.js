@@ -4,83 +4,80 @@ export default {
     namespaced: true,
     
     state: {
-        items: [],
-        item: {},
+        ingredients: null,
+        ingredient: {},
         loading: false,
-        loadedAll: false,
-        loadedOne: false,
     },
     
     getters: {
-        sortedItems(state) {
-            return state.items.slice().sort((a, b) => {
-                return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
-            })
+        
+        sortedIngredients(state) {
+            if (state.ingredients)
+                return state.ingredients.slice().sort((a, b) => {
+                    return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
+                })
+            else
+                return []
         },
+        
         getById: (state) => (id) => {
-            if (! state.loadedAll) return null
-            return state.items.find(item => item.id === id)
+            if (! state.ingredients) return null
+            return state.ingredients.find(ingredient => ingredient.id === id)
         }
+        
     },
   
     mutations: {
+        
         loading(state) {
             state.loading = true
-            state.loadedOne = false
         },
         
-        loadedAll(state, items) {
-            state.items = items
+        setIngredients(state, ingredients) {
+            state.ingredients = ingredients
             state.loading = false
-            state.loadedAll = true
         },
         
-        loadedOne(state, item) {
-            state.item = item
+        setIngredient(state, ingredient) {
+            state.ingredient = ingredient
             state.loading = false
-            state.loadedOne = true
         },
         
         destroy(state) {
-            state.items = []
-            state.item = {}
-            state.loadedAll = false
-            state.loadedOne = false
+            state.ingredients = null
+            state.ingredient = {}
         },
         
-        socket_ingredientSaved(state, item) {
-            if (state.loadedAll) {
-                let i = state.items.find((e) => { return e.id === item.id })
+        socket_ingredient_changed(state, ingredient) {
+            if (state.ingredients) {
+                let i = state.ingredients.find((e) => { return e.id === ingredient.id })
                 if (i) {
-                    Object.assign(i, item)
+                    Object.assign(i, ingredient)
                     this.commit('notify', 'Ingredient updated', {root: true})
-                    console.log('updated ingredient ' + item.id)
                 } else {
-                    state.items.push(item)
+                    state.ingredients.push(ingredient)
                     this.commit('notify', 'Ingredient added', {root: true})
-                    console.log('added ingredient '  + item.id)
                 }
             }
-            if (state.loadedOne && state.item.id === item.id) {
-                Object.assign(state.item, item)
+            if (state.ingredient.id === ingredient.id) {
+                Object.assign(state.ingredient, ingredient)
                 this.commit('notify', 'Ingredient updated', {root: true})
             }
         },
 
-        socket_ingredientDeleted(state, item) {
-            if (state.loadedAll) {
-                let i = state.items.find((e) => { return e.id === item.id })
+        socket_ingredient_deleted(state, ingredient) {
+            if (state.ingredients) {
+                let i = state.ingredients.find((e) => { return e.id === ingredient.id })
                 if (i) {
-                    let idx = state.items.indexOf(i)
+                    let idx = state.ingredients.indexOf(i)
                     if (idx != -1) {
-                        state.items.splice(idx, 1)
+                        state.ingredients.splice(idx, 1)
                         this.commit('notify', 'Ingredient deleted', {root: true})
-                        console.log('deleted ingredient '  + item.id)
                     }
                 }
             }
-            if (state.loadedOne && state.item.id === item.id) {
-                state.item = {}
+            if (state.ingredient.id === ingredient.id) {
+                state.ingredient = {}
                 this.commit('notify', 'Ingredient deleted', {root: true})
             }
         },
@@ -89,41 +86,38 @@ export default {
     
     actions: {
         
-        loadAll({commit, state}) {
-            if (state.loadedAll) return
-            commit('loading')
-            Vue.prototype.$socket.emit('getIngredients', (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedAll', [])
-                } else {
-                    commit('loadedAll', res.items)
+        getAll({commit, state}) {
+            return new Promise((resolve, reject) => {
+                if (state.glasses)
+                    resolve()
+                else {
+                    commit('loading')
+                    Vue.prototype.$socket.emit('ingredient_getAll', (res) => {
+                        if (res.error) {
+                            commit('setError', res.error, {root: true})
+                            reject()
+                        } else {
+                            commit('setIngredients', res.ingredients)
+                            resolve(res.ingredients)
+                        }
+                    })
                 }
             })
         },
         
-        loadById({commit}, id) {
-            
-            let resolve = null
-            let reject = null
-            
-            let p = new Promise((res, rej) => {
-                resolve = res
-                reject = rej
+        getOne({commit}, id) {
+            return new Promise((resolve, reject) => {
+                commit('loading')
+                Vue.prototype.$socket.emit('ingredient_getOne', id, (res) => {
+                    if (res.error) {
+                        commit('setError', res.error, {root: true})
+                        reject()
+                    } else {
+                        commit('setIngredient', res.ingredient)
+                        resolve(res.ingredient)
+                    }
+                })
             })
-
-            commit('loading')
-            Vue.prototype.$socket.emit('getIngredient', id, (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedOne', {})
-                    reject()
-                } else {
-                    commit('loadedOne', res.item)
-                    resolve(res.item)
-                }
-            })
-            return p
         },
         
     }

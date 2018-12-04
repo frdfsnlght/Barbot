@@ -35,62 +35,24 @@ class Drink(BarbotModel):
         from .DrinkIngredient import DrinkIngredient
         return Drink.select(Drink).distinct().join(DrinkIngredient).where(DrinkIngredient.ingredient.in_(list(ingredients))).execute()
 
-    @staticmethod
-    @db.atomic()
-    def saveFromDict(item):
-        if 'id' in item.keys() and item['id'] != False:
-            d = Drink.get(Drink.id == item['id'])
-        else:
-            d = Drink()
-        d.set(item)
-        if 'ingredients' in item:
-            if d.get_id() is None:
-                d.save(emitEvent = False)
-            d.setIngredients(item['ingredients'])
-        d.save()
-        
-    @staticmethod
-    def deleteById(id):
-        d = Drink.get(Drink.id == id)
-        d.delete_instance()
-    
     # override
-    def save(self, emitEvent = True, *args, **kwargs):
-    
+    def save(self, *args, **kwargs):
         if self.alreadyExists():
             raise ModelError('A drink with the same name already exists!')
-    
         if self.is_dirty():
             self.updatedDate = datetime.datetime.now()
-        if super().save(*args, **kwargs):
-            if emitEvent:
-                bus.emit('model/drink/saved', self)
+        return super().save(*args, **kwargs)
         
     # override
     def delete_instance(self, *args, **kwargs):
-    
         for o in self.orders:
             if o.isWaiting():
                 raise ModelError('This drink has a pending order!')
-    
         super().delete_instance(*args, **kwargs)
-        bus.emit('model/drink/deleted', self)
 
     def alreadyExists(self):
         d = Drink.select().where(Drink.primaryName == self.primaryName, Drink.secondaryName == self.secondaryName).first()
         return d if d and self.id != d.id else None
-    
-    def set(self, dict):
-        if 'primaryName' in dict:
-            self.primaryName = str(dict['primaryName'])
-        if 'secondaryName' in dict:
-            self.secondaryName = str(dict['secondaryName'])
-        if 'instructions' in dict:
-            self.instructions = str(dict['instructions'])
-        if 'isAlcoholic' in dict:
-            self.isAlcoholic = bool(dict['isAlcoholic'])
-        if 'glassId' in dict:
-            self.glass = int(dict['glassId'])
     
     def name(self):
         return self.primaryName + (('/' + self.secondaryName) if self.secondaryName else '')
@@ -120,7 +82,7 @@ class Drink(BarbotModel):
         
         # update/remove ingredients
         for di in self.ingredients:
-            i = next((ingredient for ingredient in ingredients if ingredient['ingredientId'] == di.ingredient.id), None)
+            i = next((ingredient for ingredient in ingredients if ingredient['ingredient_id'] == di.ingredient.id), None)
             if i:
                 di.set(i)
                 di.save()
@@ -138,7 +100,7 @@ class Drink(BarbotModel):
             di.set(ingredient)
             di.save()
             isAlcoholic = isAlcoholic | di.ingredient.isAlcoholic
-            _logger.info('add ingredient ' + str(ingredient['ingredientId']))
+            _logger.info('add ingredient ' + str(ingredient['ingredient_id']))
     
         self.isAlcoholic = isAlcoholic
     
@@ -147,7 +109,7 @@ class Drink(BarbotModel):
             'id': self.id,
             'primaryName': self.primaryName,
             'secondaryName': self.secondaryName,
-            'glassId': self.glass.id,
+            'glass_id': self.glass.id,
             'instructions': self.instructions,
             'isFavorite': self.isFavorite,
             'isAlcoholic': self.isAlcoholic,

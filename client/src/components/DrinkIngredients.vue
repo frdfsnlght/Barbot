@@ -117,7 +117,7 @@
                 
                 <v-flex xs12>
                   <select-ingredient
-                    v-model="item.ingredientId"
+                    v-model="item.ingredient_id"
                     required
                     :rules="[v => !!v || 'Ingredient is required']"
                     tabindex="3"
@@ -216,7 +216,7 @@ export default {
         
       this.item = {
         id: null,
-        ingredientId: undefined,
+        ingredient_id: undefined,
         amount: undefined,
         units: units.defaultUnits(),
         step: maxStep,
@@ -258,7 +258,7 @@ export default {
       }
       
       // don't allow duplicate ingredients
-      if (this.items.find(item => item.ingredientId === this.item.ingredientId)) {
+      if (this.items.find(item => item.ingredient_id === this.item.ingredient_id)) {
         this.$store.commit('setError', 'This ingredient is already in the drink!')
         return
       }
@@ -280,7 +280,7 @@ export default {
         return
       }
       
-      this.item['ingredient'] = this.$store.getters['ingredients/getById'](this.item['ingredientId'])
+      this.item['ingredient'] = this.$store.getters['ingredients/getOne'](this.item['ingredient_id'])
       this.item.amount = amount
       this.item.step = step
       this.items.push(JSON.parse(JSON.stringify(this.item)))

@@ -87,7 +87,19 @@ def _bus_drinkSaved(drink):
 @bus.on('model/drink/deleted')
 def _bus_drinkDeleted(drink):
     _rebuildMenu()
-            
+    
+def inWait():
+    return state == ST_WAIT
+    
+def inSetup():
+    return state == ST_SETUP
+    
+def inHold():
+    return state == ST_HOLD
+    
+def inDispense():
+    return state == ST_DISPENSE
+    
 def startSetup():
     global _requestSetup
     if anyPumpsRunning():
@@ -202,13 +214,10 @@ def _threadLoop():
             if _requestSetup:
                 state = ST_SETUP
                 bus.emit('dispenser/state', state, None)
-                Pump.startSetup()
                 while _requestSetup and not _exitEvent.is_set():
-                    _checkIdle()
                     time.sleep(1)
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
-                Pump.stopSetup()
                 _rebuildMenu()
                 
             if _requestDispense:

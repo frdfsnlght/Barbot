@@ -21,47 +21,21 @@ class Ingredient(BarbotModel):
     
     source = CharField(default = 'local')
     
-    @staticmethod
-    def saveFromDict(item):
-        if 'id' in item.keys() and item['id'] != False:
-            i = Ingredient.get(Ingredient.id == item['id'])
-        else:
-            i = Ingredient()
-        i.set(item)
-        i.save()
-        
-    @staticmethod
-    def deleteById(id):
-        i = Ingredient.get(Ingredient.id == id)
-        i.delete_instance()
-        
     # override
-    def save(self, emitEvent = False, *args, **kwargs):
-    
+    def save(self, *args, **kwargs):
         if self.alreadyExists():
             raise ModelError('An ingredient with the same name already exists!')
-    
-        if super().save(*args, **kwargs) or emitEvent == 'force':
-            bus.emit('model/ingredient/saved', self)
+        return super().save(*args, **kwargs)
     
     # override
     def delete_instance(self, *args, **kwargs):
-    
         if self.drinks.execute():
             raise ModelError('This ingredient is used by at least one drink!')
-    
         super().delete_instance(*args, **kwargs)
-        bus.emit('model/ingredient/deleted', self)
 
     def alreadyExists(self):
         i = Ingredient.select().where(Ingredient.name == self.name).first()
         return i if i and self.id != i.id else None
-    
-    def set(self, dict):
-        if 'name' in dict:
-            self.name = str(dict['name'])
-        if 'isAlcoholic' in dict:
-            self.isAlcoholic = bool(dict['isAlcoholic'])
     
     def toDict(self, drinks = False):
         pump = self.pump.first()

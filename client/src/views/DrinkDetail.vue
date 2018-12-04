@@ -6,68 +6,72 @@
     
     <template v-else>
     
-      <h1 class="pa-3">{{item.name}}</h1>
+      <div class="pa-3">
       
-      <p
-        v-if="item.isAlcoholic"
-        class="px-3 subheading">Alcoholic</p>
-      <p
-        v-else
-        class="px-3 subheading">Non-alcoholic</p>
-
-      <p
-        v-if="item.isFavorite"
-        class="px-3 subheading">This drink is a favorite</p>
-
-      <p
-        v-if="item.isOnMenu"
-        class="px-3 subheading">This drink is on the menu</p>
-
-      <p class="px-3 subheading">Times dispensed: {{timesDispensed}}</p>
+        <h1 class="mb-3">{{drink.name}}</h1>
         
-      <p class="px-3 subheading">Glass: {{glassName}}</p>
-        
-      <h2 class="px-3">Ingredients</h2>
+        <p
+          v-if="drink.isAlcoholic"
+          class="subheading">Alcoholic</p>
+        <p
+          v-else
+          class="subheading">Non-alcoholic</p>
 
-      <v-list>
+        <p
+          v-if="drink.isFavorite"
+          class="subheading">This drink is a favorite</p>
 
-        <v-list-tile
-          v-for="di in sortedIngredients"
-          :key="di.ingredient.id"
-          ripple
-          avatar
-          @click="gotoIngredientDetail(di.ingredientId)"
-        >
-          <v-list-tile-avatar>
-            <alcoholic-icon :alcoholic="di.ingredient.isAlcoholic"/>
-            <v-icon v-if="di.ingredient.isAvailable">mdi-gas-station</v-icon>
-          </v-list-tile-avatar>
+        <p
+          v-if="drink.isOnMenu"
+          class="subheading">This drink is on the menu</p>
 
-          <v-list-tile-content>
-            <v-list-tile-title>{{di.ingredient.amount}} {{di.ingredient.units}} {{di.ingredient.name}}</v-list-tile-title>
-          </v-list-tile-content>
+        <p class="subheading">Times dispensed: {{timesDispensed}}</p>
           
-        </v-list-tile>
-        
-      </v-list>
+        <p class="subheading">Glass: {{glassName}}</p>
+          
+        <h2>Ingredients</h2>
 
-      <p class="px-3 subheading">{{item.instructions}}</p>
-      
-      <template v-if="item.isOnMenu">
-      
-        <order-drink-dialog ref="orderDrinkDialog"></order-drink-dialog>
+        <v-list>
 
-        <v-btn
-          fab
-          fixed
-          bottom right
-          color="primary"
-          @click="orderDrink"
-        >
-          <v-icon dark>mdi-plus</v-icon>
-        </v-btn>
+          <v-list-tile
+            v-for="di in sortedIngredients"
+            :key="di.ingredient.id"
+            ripple
+            avatar
+            @click="gotoIngredientDetail(di.ingredient_id)"
+          >
+            <v-list-tile-avatar>
+              <alcoholic-icon :alcoholic="di.ingredient.isAlcoholic"/>
+              <v-icon v-if="di.ingredient.isAvailable">mdi-gas-station</v-icon>
+            </v-list-tile-avatar>
+
+            <v-list-tile-content>
+              <v-list-tile-title>{{di.ingredient.amount}} {{di.ingredient.units}} {{di.ingredient.name}}</v-list-tile-title>
+            </v-list-tile-content>
+            
+          </v-list-tile>
+          
+        </v-list>
+
+        <p class="subheading">{{drink.instructions}}</p>
         
-      </template>
+        <template v-if="drink.isOnMenu">
+        
+          <order-drink-dialog ref="orderDrinkDialog"></order-drink-dialog>
+
+          <v-btn
+            fab
+            fixed
+            bottom right
+            color="primary"
+            @click="orderDrink"
+          >
+            <v-icon dark>mdi-plus</v-icon>
+          </v-btn>
+          
+        </template>
+        
+      </div>
       
     </template>
     
@@ -107,17 +111,17 @@ export default {
   
   computed: {
     timesDispensed() {
-      return this.item.timesDispensed || 0
+      return this.drink.timesDispensed || 0
     },
     glassName() {
-      return this.item.glass ? this.item.glass.name : ''
+      return this.drink.glass ? this.drink.glass.name : ''
     },
     hasIngredients() {
-      return this.item.ingredients && this.item.ingredients.length > 0
+      return this.drink.ingredients && this.drink.ingredients.length > 0
     },
     sortedIngredients() {
       if (! this.hasIngredients) return []
-      return this.item.ingredients.slice().sort((a, b) => {
+      return this.drink.ingredients.slice().sort((a, b) => {
         if (a.ingredient.step < b.ingredient.step) return -1
         if (a.ingredient.step > b.ingredient.step) return 1
         return a.ingredient.name.localeCompare(b.ingredient.name, 'en', {'sensitivity': 'base'})
@@ -125,7 +129,7 @@ export default {
     },
     ...mapState({
       loading: state => state.drinks.loading,
-      item: state => state.drinks.item,
+      drink: state => state.drinks.drink,
     })
   },
   
@@ -136,7 +140,7 @@ export default {
     },
     
     orderDrink() {
-      this.$refs.orderDrinkDialog.open(this.item).then(() => {
+      this.$refs.orderDrinkDialog.open(this.drink).then(() => {
         if (this.locationHistory)
           this.$router.go(-2)
       })
@@ -146,7 +150,7 @@ export default {
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      t.$store.dispatch('drinks/loadById', t.id)
+      t.$store.dispatch('drinks/getOne', t.id)
     });
   },
   
@@ -156,8 +160,8 @@ export default {
   },
   
   sockets: {
-    drinkDeleted(item) {
-      if (this.item.id && (item.id === this.item.id)) {
+    drinkDeleted(drink) {
+      if (this.drink.id && (drink.id === this.drink.id)) {
         window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
       }
     }

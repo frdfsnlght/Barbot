@@ -15,15 +15,31 @@
               
                 <v-flex xs12>
                   <select-ingredient
-                    autofocus
-                    v-model="loadParams.ingredientId"
+                    :autofocus="!isReload"
+                    v-model="loadParams.ingredient_id"
                     required
+                    :disabled="isReload"
                     :rules="[v => !!v || 'Ingredient is required']"
                   ></select-ingredient>
                 </v-flex>
                 
-                <v-flex xs12>
-                  Ingredient level: {{loadParams.percent}}%
+                <v-flex xs6>
+                  <v-text-field
+                    label="Container size"
+                    v-model="loadParams.containerAmount"
+                    :autofocus="isReload"
+                    :rules="[v => !!v || 'Container size is required']"
+                    required
+                    data-kbType="positiveNumber"
+                  ></v-text-field>
+                </v-flex>
+                  
+                <v-flex xs6>
+                  <select-units
+                    v-model="loadParams.units"
+                    required
+                    :rules="[v => !!v || 'Units is required']"
+                  ></select-units>
                 </v-flex>
                 
                 <v-flex xs12>
@@ -42,22 +58,8 @@
                   ></v-slider>
                 </v-flex>
                 
-                <v-flex xs6>
-                  <v-text-field
-                    label="Container size"
-                    v-model="loadParams.containerAmount"
-                    :rules="[v => !!v || 'Container size is required']"
-                    required
-                    data-kbType="positiveInteger"
-                  ></v-text-field>
-                </v-flex>
-                  
-                <v-flex xs6>
-                  <select-units
-                    v-model="loadParams.units"
-                    required
-                    :rules="[v => !!v || 'Units is required']"
-                  ></select-units>
+                <v-flex xs12>
+                  Amount: {{loadParamsAmount}}
                 </v-flex>
                 
               </v-layout>
@@ -95,49 +97,43 @@
             <v-layout column>
         
               <v-flex class="text-xs-center mb-3">
-                <p v-if="isFullPrime">Insert the pump tube into the ingredient container.</p>
+                <p v-if="isAutoPrime">Insert the pump tube into the ingredient container.</p>
                 <p v-if="!dispenserGlass" class="red--text">Place a glass in the dispensing area.</p>
               </v-flex>
               
-              <v-flex v-if="isFullPrime" class="text-xs-center">
+              <v-flex class="text-xs-center">
+              
                 <v-btn
-                  color="primary"
+                  v-if="isAutoPrime"
+                  color="green"
                   large
                   class="px-5"
                   :loading="!dispenserGlass || pump.running"
                   :disabled="!dispenserGlass || pump.running"
                   @click="primePump()"
                 >
+                  autoprime
+                  <span slot="loader">Waiting...</span>
+                </v-btn>
+                
+                <v-btn
+                  v-else
+                  color="green"
+                  large
+                  class="px-5"
+                  :loading="!dispenserGlass"
+                  :disabled="!dispenserGlass"
+                  @mousedown="startPump()"
+                  @touchstart="startPump()"
+                  @mouseup="stopPump()"
+                  @touchend="stopPump()"
+                >
                   prime
                   <span slot="loader">Waiting...</span>
                 </v-btn>
+                
               </v-flex>
                 
-              <v-flex v-if="isFullPrime" class="text-xs-center">
-                <p class="my-3">If you need to prime the pump a little more, use these:</p>
-              </v-flex>
-              
-              <v-flex class="text-xs-center">
-                <v-btn
-                  :color="isFullPrime ? 'secondary' : 'primary'"
-                  :loading="!dispenserGlass || pump.running"
-                  :disabled="!dispenserGlass || pump.running"
-                  @click="primePump(microPrimeSmall)"
-                >
-                  {{microPrimeSmall}} ml
-                  <span slot="loader">Waiting...</span>
-                </v-btn>
-                <v-btn
-                  :color="isFullPrime ? 'secondary' : 'primary'"
-                  :loading="!dispenserGlass || pump.running"
-                  :disabled="!dispenserGlass || pump.running"
-                  @click="primePump(microPrimeLarge)"
-                >
-                  {{microPrimeLarge}} ml
-                  <span slot="loader">Waiting...</span>
-                </v-btn>
-              </v-flex>
-        
             </v-layout>
           </v-container>
                 
@@ -169,7 +165,8 @@
               
               <v-flex class="text-xs-center">
                 <v-btn
-                  color="primary"
+                  color="green"
+                  large
                   :loading="!dispenserGlass || pump.running"
                   :disabled="!dispenserGlass || pump.running"
                   @click="cleanPump()"
@@ -178,13 +175,33 @@
                   <span slot="loader">Waiting...</span>
                 </v-btn>
                 <v-btn
-                  color="primary"
+                  color="green"
+                  large
                   :loading="!dispenserGlass || pump.running"
                   :disabled="!dispenserGlass || pump.running"
                   @click="drainPump()"
                 >
                   drain
                   <span slot="loader">Waiting...</span>
+                </v-btn>
+              </v-flex>
+              
+              <v-flex class="text-xs-center">
+                <v-btn
+                  v-if="!pump.running"
+                  color="green"
+                  large
+                  @click="startPump()"
+                >
+                  flush
+                </v-btn>
+                <v-btn
+                  v-else
+                  color="red"
+                  large
+                  @click="stopPump()"
+                >
+                  stop
                 </v-btn>
               </v-flex>
         
@@ -225,7 +242,7 @@ export default {
       isReload: false,
       
       primeDialog: false,
-      isFullPrime: false,
+      isAutoPrime: false,
       
       cleanDialog: false,
     }
@@ -238,28 +255,50 @@ export default {
 
   computed: {
     loadParamsIngredientId() {
-      return this.loadParams.ingredientId
+      return this.loadParams.ingredient_id
+    },
+    loadParamsPercent() {
+      return this.loadParams.percent
+    },
+    loadParamsContainerAmount() {
+      return this.loadParams.containerAmount
+    },
+    loadParamsAmount() {
+      if (this.loadParams.containerAmount)
+        return units.format(this.loadParams.containerAmount * this.loadParams.percent / 100, this.loadParams.units)
+      else
+        return ''
+    },
+    pumpRunning() {
+      return this.pump.running
     },
     ...mapState({
       dispenserGlass: state => state.dispenser.glass,
-      microPrimeSmall: state => state.options.microPrimeSmall,
-      microPrimeLarge: state => state.options.microPrimeLarge,
     }),
   },
   
   watch: {
     loadParamsIngredientId(v) {
-      console.log('loadParamsIngredientId: ' + v)
-      if (v) {
+      if (v && (! this.isReload)) {
         this.$store.dispatch('ingredients/loadById', v).then((i) => {
-          console.dir(i)
           if (i.lastContainerAmount) {
             this.loadParams.containerAmount = i.lastContainerAmount
-            this.loadParams.percent = Math.round((i.lastAmount / i.lastContainerAmount) * 100)
             this.loadParams.units = i.lastUnits
+            this.loadParams.amount = i.lastAmount
+            this.loadParams.percent = Math.round((i.lastAmount / i.lastContainerAmount) * 100)
           }
         })
       }
+    },
+    loadParamsContainerAmount() {
+      this.loadParamsAmountRecalculate()
+    },
+    loadParamsPercent() {
+      this.loadParamsAmountRecalculate()
+    },
+    pumpRunning(v) {
+      if (!v && this.isAutoPrime)
+        this.isAutoPrime = false
     },
   },
   
@@ -271,20 +310,22 @@ export default {
       if (! this.pump.state) {
         this.isReload = false
         this.loadParams = {
-          id: this.pump.id,
+          pump_id: this.pump.id,
           containerAmount: undefined,
           units: units.defaultUnits(),
           percent: 50,
-          ingredientId: undefined,
+          ingredient_id: undefined,
+          amount: 0,
         }
       } else if ((this.pump.state == 'ready') || (this.pump.state == 'empty')) {
         this.isReload = true
         this.loadParams = {
-          id: this.pump.id,
+          pump_id: this.pump.id,
           containerAmount: this.pump.containerAmount,
           units: this.pump.units,
+          ingredient_id: this.pump.ingredient_id,
+          amount: this.pump.containerAmount,
           percent: 100,
-          ingredientId: this.pump.ingredientId,
         }
       }
       this.loadDialog = true
@@ -307,11 +348,7 @@ export default {
         this.$store.commit('setError', 'Invalid container amount!')
         return
       }
-      //this.loadParams.containerAmount = Math.round(amount * 10) / 10
-      
-//      console.log('loadParams:')
-//      console.dir(this.loadParams))
-      this.$socket.emit('loadPump', this.loadParams, (res) => {
+      this.$socket.emit('pump_load', this.loadParams, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         } else {
@@ -322,26 +359,29 @@ export default {
       })
     },
 
+    loadParamsAmountRecalculate() {
+      if (this.loadParams.containerAmount)
+        this.loadParams.amount = this.loadParams.containerAmount * this.loadParams.percent / 100
+      else
+        this.loadParams.amount = 0
+    },
+    
     openPrime() {
       if (this.pump.state == 'loaded')
-        this.isFullPrime = true
+        this.isAutoPrime = true
       else
-        this.isFullPrime = false
+        this.isAutoPrime = false
       this.primeDialog = true
     },
     
-    primePump(amount) {
-      let params = {
-        id: this.pump.id,
-        amount: amount
-      }
-      this.$socket.emit('primePump', params, (res) => {
+    primePump() {
+      this.$socket.emit('pump_prime', this.pump.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
       })
     },
-    
+
     closePrime() {
       this.primeDialog = false
     },
@@ -355,11 +395,7 @@ export default {
     },
     
     cleanPump() {
-      let params = {
-        id: this.pump.id,
-        amount: undefined
-      }
-      this.$socket.emit('cleanPump', params, (res) => {
+      this.$socket.emit('pump_clean', this.pump.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
@@ -367,12 +403,29 @@ export default {
     },
     
     drainPump() {
-      this.$socket.emit('drainPump', this.pump.id, (res) => {
+      this.$socket.emit('pump_drain', this.pump.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
       })
     },
+
+    startPump() {
+      this.$socket.emit('pump_start', this.pump.id, (res) => {
+        if (res.error) {
+            this.$store.commit('setError', res.error)
+        }
+      })
+    },
+    
+    stopPump() {
+      this.$socket.emit('pump_stop', this.pump.id, (res) => {
+        if (res.error) {
+            this.$store.commit('setError', res.error)
+        }
+      })
+    },
+    
     
     closeAll() {
       this.closeLoad()

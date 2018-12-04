@@ -5,7 +5,7 @@
     <loading v-if="loading"></loading>
     
     <p
-      v-else-if="!items.length"
+      v-else-if="!drinks.length"
       class="title text-xs-center ma-3"
     >
       No drinks are currently available.
@@ -15,27 +15,27 @@
     
       <v-list two-line>
         <v-list-tile
-          v-for="item in items"
-          :key="item.id"
+          v-for="drink in drinks"
+          :key="drink.id"
           avatar
           ripple
-          @click="itemDetail(item)"
+          @click="gotoDetail(drink)"
         >
           <v-list-tile-avatar>
-            <v-icon v-if="item.isOnMenu">mdi-cup-water</v-icon>
-            <v-icon v-if="item.isFavorite">mdi-heart</v-icon>
-            <alcoholic-icon :alcoholic="item.isAlcoholic"/>
+            <v-icon v-if="drink.isOnMenu">mdi-cup-water</v-icon>
+            <v-icon v-if="drink.isFavorite">mdi-heart</v-icon>
+            <alcoholic-icon :alcoholic="drink.isAlcoholic"/>
           </v-list-tile-avatar>
 
           <v-list-tile-content>
-            <v-list-tile-title>{{item.primaryName}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{item.secondaryName}}</v-list-tile-sub-title>
+            <v-list-tile-title>{{drink.primaryName}}</v-list-tile-title>
+            <v-list-tile-sub-title>{{drink.secondaryName}}</v-list-tile-sub-title>
           </v-list-tile-content>
           
           <v-list-tile-action>
             <v-btn
               icon
-              @click.stop="showMenu(item, $event)"
+              @click.stop="showMenu(drink, $event)"
             >
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
@@ -53,7 +53,7 @@
       >
         <v-list>
         
-          <v-list-tile ripple @click="editItem()">
+          <v-list-tile ripple @click="editDrink()">
             <v-list-tile-content>
               <v-list-tile-title>Edit</v-list-tile-title>
             </v-list-tile-content>
@@ -62,7 +62,7 @@
             </v-list-tile-action>
           </v-list-tile>
           
-          <v-list-tile ripple @click="deleteItem()">
+          <v-list-tile ripple @click="deleteDrink()">
             <v-list-tile-content>
               <v-list-tile-title>Delete</v-list-tile-title>
             </v-list-tile-content>
@@ -82,7 +82,7 @@
         fixed
         bottom right
         color="primary"
-        @click="addItem"
+        @click="addDrink"
       >
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
@@ -107,7 +107,7 @@ export default {
   name: 'Drinks',
   data() {
     return {
-      item: {},
+      drink: {},
       edit: false,
       valid: true,
       menu: false,
@@ -129,44 +129,44 @@ export default {
   
   computed: {
     ...mapGetters({
-      items: 'drinks/sortedItems',
+      drinks: 'drinks/sortedDrinks',
     }),
     ...mapState({
-      loading: state => state.drinks.loadingAll,
+      loading: state => state.drinks.loading,
     })
   },
   
   methods: {
   
-    itemDetail(item) {
-      this.$router.push({name: 'drinkDetail', params: {id: item.id}})
+    gotoDetail(drink) {
+      this.$router.push({name: 'drinkDetail', params: {id: drink.id}})
     },
   
-    showMenu(item, e) {
-      this.item = JSON.parse(JSON.stringify(item))
+    showMenu(drink, e) {
+      this.drink = JSON.parse(JSON.stringify(drink))
       this.menuX = e.clientX
       this.menuY = e.clientY
       this.menu = true
     },
   
-    addItem() {
+    addDrink() {
       this.$refs.drinkDialog.open({
         id: undefined,
         primaryName: undefined,
         secondaryName: undefined,
         instructions: undefined,
-        glassId: undefined,
+        glass_id: undefined,
         ingredients: []
       })
     },
     
-    editItem() {
-      this.$refs.drinkDialog.open(this.item, true)
+    editDrink() {
+      this.$refs.drinkDialog.open(this.drink, true)
     },
     
-    deleteItem() {
-      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.item.name + '"?').then(() => {
-        this.$socket.emit('deleteDrink', this.item.id, (res) => {
+    deleteDrink() {
+      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.drink.name + '"?').then(() => {
+        this.$socket.emit('drink_delete', this.drink.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           }
@@ -178,7 +178,7 @@ export default {
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      t.$store.dispatch('drinks/loadAll')
+      t.$store.dispatch('drinks/getAll')
     });
   },
   

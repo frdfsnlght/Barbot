@@ -5,7 +5,7 @@
     <loading v-if="loading"></loading>
     
     <p
-      v-else-if="!items.length"
+      v-else-if="!ingredients.length"
       class="title text-xs-center ma-3"
     >
       No ingredients are currently available.
@@ -15,25 +15,25 @@
     
       <v-list>
         <v-list-tile
-          v-for="item in items"
-          :key="item.id"
+          v-for="ingredient in ingredients"
+          :key="ingredient.id"
           avatar
           ripple
-          @click="itemDetail(item)"
+          @click="gotoDetail(ingredient)"
         >
           <v-list-tile-avatar>
-            <alcoholic-icon :alcoholic="item.isAlcoholic"/>
-            <v-icon v-if="item.isAvailable">mdi-gas-station</v-icon>
+            <alcoholic-icon :alcoholic="ingredient.isAlcoholic"/>
+            <v-icon v-if="ingredient.isAvailable">mdi-gas-station</v-icon>
           </v-list-tile-avatar>
           
           <v-list-tile-content>
-            <v-list-tile-title>{{item.name}}</v-list-tile-title>
+            <v-list-tile-title>{{ingredient.name}}</v-list-tile-title>
           </v-list-tile-content>
           
           <v-list-tile-action>
             <v-btn
               icon
-              @click.stop="showMenu(item, $event)"
+              @click.stop="showMenu(ingredient, $event)"
             >
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
@@ -51,7 +51,7 @@
       >
         <v-list>
         
-          <v-list-tile ripple @click="editItem()">
+          <v-list-tile ripple @click="editIngredient()">
             <v-list-tile-content>
               <v-list-tile-title>Edit</v-list-tile-title>
             </v-list-tile-content>
@@ -60,7 +60,7 @@
             </v-list-tile-action>
           </v-list-tile>
           
-          <v-list-tile ripple @click="deleteItem()">
+          <v-list-tile ripple @click="deleteIngredient()">
             <v-list-tile-content>
               <v-list-tile-title>Delete</v-list-tile-title>
             </v-list-tile-content>
@@ -80,13 +80,13 @@
         fixed
         bottom right
         color="primary"
-        @click="addItem"
+        @click="addIngredient"
       >
         <v-icon dark>mdi-plus</v-icon>
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
+    <v-dialog v-model="dialog" persistent scrollable @keydown.esc="closeDialog" @keydown.enter.prevent="saveIngredient">
       <v-card>
         <v-card-title>
           <span
@@ -106,7 +106,7 @@
                 <v-flex xs12>
                   <v-text-field
                     label="Name"
-                    v-model="item.name"
+                    v-model="ingredient.name"
                     :rules="[v => !!v || 'Name is required']"
                     required
                     autofocus
@@ -118,7 +118,7 @@
                 <v-flex xs12>
                   <v-checkbox
                     label="Is this ingredient alcoholic?"
-                    v-model="item.isAlcoholic"
+                    v-model="ingredient.isAlcoholic"
                     required
                   ></v-checkbox>
                 </v-flex>
@@ -135,7 +135,7 @@
           <v-btn
             :disabled="!valid"
             flat
-            @click="saveItem()">save</v-btn>
+            @click="saveIngredient()">save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -158,7 +158,7 @@ export default {
   name: 'Ingredients',
   data() {
     return {
-      item: {},
+      ingredient: {},
       dialog: false,
       edit: false,
       valid: true,
@@ -178,7 +178,7 @@ export default {
   
   computed: {
     ...mapGetters({
-      items: 'ingredients/sortedItems'
+      ingredients: 'ingredients/sortedIngredients'
     }),
     ...mapState({
       loading: state => state.ingredients.loading,
@@ -187,21 +187,21 @@ export default {
   
   methods: {
   
-    itemDetail(item) {
-      this.$router.push({name: 'ingredientDetail', params: {id: item.id}})
+    gotoDetail(ingredient) {
+      this.$router.push({name: 'ingredientDetail', params: {id: ingredient.id}})
     },
   
-    showMenu(item, e) {
+    showMenu(ingredient, e) {
       this.$refs.form.reset()
-      this.item = JSON.parse(JSON.stringify(item))
+      this.ingredient = JSON.parse(JSON.stringify(ingredient))
       this.menuX = e.clientX
       this.menuY = e.clientY
       this.menu = true
     },
   
-    addItem() {
+    addIngredient() {
       this.$refs.form.reset()
-      this.item = {
+      this.ingredient = {
         id: undefined,
         name: undefined
       }
@@ -210,7 +210,7 @@ export default {
       this.dialog = true
     },
     
-    editItem() {
+    editIngredient() {
       this.edit = true
       bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
@@ -218,13 +218,13 @@ export default {
     
     closeDialog() {
       this.dialog = false
-      this.item = {}
+      this.ingredient = {}
       bus.$emit('keyboard-remove', this.$refs.form)
     },
     
-    saveItem() {
+    saveIngredient() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('saveIngredient', this.item, (res) => {
+      this.$socket.emit('ingredient_save', this.ingredient, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {
@@ -233,9 +233,9 @@ export default {
       })
     },
     
-    deleteItem() {
-      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.item.name + '"?').then(() => {
-        this.$socket.emit('deleteIngredient', this.item.id, (res) => {
+    deleteIngredient() {
+      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.ingredient.name + '"?').then(() => {
+        this.$socket.emit('ingredient_delete', this.ingredient.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           }
@@ -247,7 +247,7 @@ export default {
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      t.$store.dispatch('ingredients/loadAll')
+      t.$store.dispatch('ingredients/getAll')
     });
   },
   

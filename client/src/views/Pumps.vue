@@ -9,22 +9,6 @@
       <v-list two-line>
       
         <v-list-tile
-          avatar
-          ripple
-          :disabled="anyPumpRunning && !flushing"
-          @click="openFlush()"
-        >
-          <v-list-tile-avatar>
-            <v-icon>mdi-spray-bottle</v-icon>
-          </v-list-tile-avatar>
-          <v-list-tile-content>
-            <v-list-tile-title>Flush Pumps</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        
-        <v-divider/>
-    
-        <v-list-tile
           v-for="item in items"
           :key="item.id"
           avatar
@@ -156,7 +140,6 @@
       </v-menu>
       
       <pump-wizard-dialog ref="pumpWizardDialog" :pump="item"></pump-wizard-dialog>
-      <pump-flush-dialog ref="pumpFlushDialog"></pump-flush-dialog>
       
     </template>
     
@@ -172,7 +155,6 @@ import bus from '../bus'
 import units from '../units'
 import Loading from '../components/Loading'
 import PumpWizardDialog from '../components/PumpWizardDialog'
-import PumpFlushDialog from '../components/PumpFlushDialog'
 import PumpIcon from '../components/PumpIcon'
 
 export default {
@@ -188,7 +170,6 @@ export default {
   components: {
     Loading,
     PumpWizardDialog,
-    PumpFlushDialog,
     PumpIcon,
   },
   
@@ -208,7 +189,6 @@ export default {
     }),
     ...mapState({
       loading: state => state.pumps.loading,
-      flushing: state => state.pumps.flushing,
       isConsole: state => state.isConsole,
       dispenserState: state => state.dispenser.state,
     })
@@ -222,10 +202,6 @@ export default {
   },
   
   methods: {
-  
-    openFlush() {
-      this.$refs.pumpFlushDialog.open()
-    },
   
     itemIngredient(item) {
       if (! item.ingredient) return '<no ingredient>'
@@ -253,7 +229,7 @@ export default {
     },
   
     unloadPump() {
-      this.$socket.emit('unloadPump', this.item.id, (res) => {
+      this.$socket.emit('pump_unload', this.item.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
@@ -265,7 +241,7 @@ export default {
     },
   
     drainPump() {
-      this.$socket.emit('drainPump', this.item.id, (res) => {
+      this.$socket.emit('pump_drain', this.item.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }

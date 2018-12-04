@@ -6,38 +6,42 @@
     
     <template v-else>
     
-      <h1 class="pa-3">{{item.name}}</h1>
-      <p class="px-3 subheading">{{item.description}}</p>
+      <div class="pa-3">
+    
+        <h1 class="mb-3">{{glass.name}}</h1>
+        <p class="subheading">{{glass.description}}</p>
 
-      <h2 class="px-3">Drinks</h2>
+        <h2>Drinks</h2>
 
-      <p
-        v-if="!hasDrinks"
-        class="pa-3 subheading"
-      >No drinks use this glass.</p>
-      
-      <v-list v-else>
-
-        <v-list-tile
-          v-for="drink in sortedDrinks"
-          :key="drink.id"
-          ripple
-          avatar
-          @click="gotoDrinkDetail(drink.id)"
-        >
-          <v-list-tile-avatar>
-            <v-icon v-if="drink.isFavorite">mdi-heart</v-icon>
-            <alcoholic-icon :alcoholic="drink.isAlcoholic"/>
-          </v-list-tile-avatar>
-
-          <v-list-tile-content>
-            <v-list-tile-title>{{drink.name}}</v-list-tile-title>
-          </v-list-tile-content>
-          
-        </v-list-tile>
+        <p
+          v-if="!hasDrinks"
+          class="subheading"
+        >No drinks use this glass.</p>
         
-      </v-list>
+        <v-list v-else>
 
+          <v-list-tile
+            v-for="drink in sortedDrinks"
+            :key="drink.id"
+            ripple
+            avatar
+            @click="gotoDrinkDetail(drink.id)"
+          >
+            <v-list-tile-avatar>
+              <v-icon v-if="drink.isFavorite">mdi-heart</v-icon>
+              <alcoholic-icon :alcoholic="drink.isAlcoholic"/>
+            </v-list-tile-avatar>
+
+            <v-list-tile-content>
+              <v-list-tile-title>{{drink.name}}</v-list-tile-title>
+            </v-list-tile-content>
+            
+          </v-list-tile>
+          
+        </v-list>
+
+      </div>
+      
     </template>
     
   </v-card>
@@ -68,17 +72,17 @@ export default {
   
   computed: {
     hasDrinks() {
-      return this.item.drinks && this.item.drinks.length > 0
+      return this.glass.drinks && this.glass.drinks.length > 0
     },
     sortedDrinks() {
       if (! this.hasDrinks) return []
-      return this.item.drinks.slice().sort((a, b) => {
+      return this.glass.drinks.slice().sort((a, b) => {
         return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
       })
     },
     ...mapState({
       loading: state => state.glasses.loading,
-      item: state => state.glasses.item,
+      glass: state => state.glasses.glass,
     })
   },
   
@@ -92,7 +96,7 @@ export default {
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      t.$store.dispatch('glasses/loadById', t.$route.params.id)
+      t.$store.dispatch('glasses/getOne', t.$route.params.id)
     });
   },
   
@@ -102,8 +106,8 @@ export default {
   },
   
   sockets: {
-    glassDeleted(item) {
-      if (this.item.id && (item.id === this.item.id)) {
+    glass_deleted(glass) {
+      if (this.glass.id && (glass.id === this.glass.id)) {
         window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
       }
     }

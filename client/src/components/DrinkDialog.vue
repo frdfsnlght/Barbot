@@ -55,7 +55,7 @@
                   item-text="name"
                   item-value="id"
                   label="Glass"
-                  v-model="drink.glassId"
+                  v-model="drink.glass_id"
                   :rules="[v => !!v || 'Glass is required']"
                   required
                   tabindex="4"
@@ -123,14 +123,14 @@ export default {
   
   computed: {
     ...mapGetters({
-      glasses: 'glasses/sortedItems',
+      glasses: 'glasses/sortedGlasses',
     }),
   },
   
   methods: {
 
     open(drink, edit = false) {
-      this.$store.dispatch('glasses/loadAll')
+      this.$store.dispatch('glasses/getAll')
       bus.$emit('keyboard-install', this.$refs.form)
       this.$refs.form.reset()
       this.edit = edit
@@ -153,7 +153,7 @@ export default {
         this.$store.commit('setError', 'At least one ingredient is required!')
         return
       }
-      this.$socket.emit('saveDrink', this.drink, (res) => {
+      this.$socket.emit('drink_save', this.drink, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {

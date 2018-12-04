@@ -40,12 +40,12 @@ export default {
   
   computed: {
     ...mapGetters({
-      ingredients: 'ingredients/sortedItems'
+      ingredients: 'ingredients/sortedIngredients'
     }),
   },
   
   mounted() {
-    this.$store.dispatch('ingredients/loadAll')
+    this.$store.dispatch('ingredients/getAll')
   },
   
   destroyed() {

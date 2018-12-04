@@ -16,51 +16,21 @@ class Glass(BarbotModel):
     description = TextField(null = True)
     source = CharField(default = 'local')
     
-    @staticmethod
-    def saveFromDict(item):
-        if 'id' in item.keys() and item['id'] != False:
-            g = Glass.get(Glass.id == item['id'])
-        else:
-            g = Glass()
-        g.set(item)
-        g.save()
-        
-    @staticmethod
-    def deleteById(id):
-        g = Glass.get(Glass.id == id)
-        g.delete_instance()
-        
     # override
     def save(self, *args, **kwargs):
-    
         if self.alreadyExists():
             raise ModelError('The same glass already exists!')
-    
-        if super().save(*args, **kwargs):
-            bus.emit('model/glass/saved', self)
+        return super().save(*args, **kwargs)
 
     # override
     def delete_instance(self, *args, **kwargs):
-    
         if self.drinks.execute():
             raise ModelError('This glass is used by at least one drink!')
-        
         super().delete_instance(*args, **kwargs)
-        bus.emit('model/glass/deleted', self)
             
     def alreadyExists(self):
         g = Glass.select().where(Glass.type == self.type, Glass.size == self.size, Glass.units == self.units).first()
         return g if g and self.id != g.id else None
-    
-    def set(self, dict):
-        if 'type' in dict:
-            self.type = str(dict['type'])
-        if 'size' in dict:
-            self.size = int(dict['size'])
-        if 'units' in dict:
-            self.units = str(dict['units'])
-        if 'description' in dict:
-            self.description = str(dict['description'])
     
     def name(self):
         return str(self.size) + ' ' + self.units + ' ' + self.type

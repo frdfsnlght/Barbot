@@ -4,78 +4,74 @@ export default {
     namespaced: true,
     
     state: {
-        items: [],
-        item: {},
+        drinks: null,
+        drink: {},
         loading: false,
-        loadedAll: false,
-        loadedOne: false,
     },
     
     getters: {
-        sortedItems(state) {
-            return state.items.slice().sort((a, b) => {
-                return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
-            })
+        
+        sortedDrinks(state) {
+            if (state.drinks)
+                return state.drinks.slice().sort((a, b) => {
+                    return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
+                })
+            else
+                return []
         }
     },
   
     mutations: {
+        
         loading(state) {
             state.loading = true
         },
         
-        loadedAll(state, items) {
-            state.items = items
+        setDrinks(state, drinks) {
+            state.drinks = drinks
             state.loading = false
-            state.loadedAll = true
         },
         
-        loadedOne(state, item) {
-            state.item = item
+        setDrink(state, drink) {
+            state.drink = drink
             state.loading = false
-            state.loadedOne = true
         },
         
         destroy(state) {
-            state.items = []
-            state.item = {}
-            state.loadedAll = false
-            state.loadedOne = false
+            state.drink = null
+            state.drink = {}
         },
         
-        socket_drinkSaved(state, item) {
-            if (state.loadedAll) {
-                let d = state.items.find((e) => { return e.id === item.id })
+        socket_drink_saved(state, drink) {
+            if (state.drinks) {
+                let d = state.drinks.find((e) => { return e.id === drink.id })
                 if (d) {
-                    Object.assign(d, item)
+                    Object.assign(d, drink)
                     this.commit('notify', 'Drink updated', {root: true})
-                    console.log('updated drink ' + item.id)
                 } else {
-                    state.items.push(item)
+                    state.drinks.push(drink)
                     this.commit('notify', 'Drink added', {root: true})
-                    console.log('added drink '  + item.id)
                 }
             }
-            if (state.loadedOne && state.item.id === item.id) {
-                Object.assign(state.item, item)
+            if (state.drink.id === drink.id) {
+                Object.assign(state.drink, drink)
                 this.commit('notify', 'Drink updated', {root: true})
             }
         },
 
-        socket_drinkDeleted(state, item) {
-            if (state.loadedAll) {
-                let d = state.items.find((e) => { return e.id === item.id })
+        socket_drink_deleted(state, drink) {
+            if (state.drinks) {
+                let d = state.drinks.find((e) => { return e.id === drink.id })
                 if (d) {
-                    let i = state.items.indexOf(d)
+                    let i = state.drinks.indexOf(d)
                     if (i != -1) {
-                        state.items.splice(i, 1)
+                        state.drinks.splice(i, 1)
                         this.commit('notify', 'Drink deleted', {root: true})
-                        console.log('deleted drink '  + item.id)
                     }
                 }
             }
-            if (state.loadedOne && state.item.id === item.id) {
-                state.item = {}
+            if (state.drink.id === drink.id) {
+                state.drink = {}
                 this.commit('notify', 'Drink deleted', {root: true})
             }
         },
@@ -84,29 +80,37 @@ export default {
     
     actions: {
         
-        loadAll({commit, state}) {
-            if (state.loadedAll) return
-            commit('loading')
-            Vue.prototype.$socket.emit('getDrinks', (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedAll', [])
-                } else {
-                    commit('loadedAll', res.items)
+        getAll({commit, state}) {
+            return new Promise((resolve, reject) => {
+                if (state.drinks)
+                    resolve()
+                else {
+                    commit('loading')
+                    Vue.prototype.$socket.emit('drink_getAll', (res) => {
+                        if (res.error) {
+                            commit('setError', res.error, {root: true})
+                            reject()
+                        } else {
+                            commit('setDrinks', res.drinks)
+                            resolve(res.drinks)
+                        }
+                    })
                 }
             })
         },
         
-        loadById({commit, state}, id) {
-            if (state.loadedOne) return
-            commit('loading')
-            Vue.prototype.$socket.emit('getDrink', id, (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedOne', {})
-                } else {
-                    commit('loadedOne', res.item)
-                }
+        getOne({commit}, id) {
+            return new Promise((resolve, reject) => {
+                commit('loading')
+                Vue.prototype.$socket.emit('drink_getOne', id, (res) => {
+                    if (res.error) {
+                        commit('setError', res.error, {root: true})
+                        reject()
+                    } else {
+                        commit('setDrink', res.drink)
+                        resolve()
+                    }
+                })
             })
         },
         
