@@ -301,7 +301,7 @@ export default {
             bus.$emit('keyboard-remove', this.$refs.connectForm)
           }
         })
-      })
+      }, ()=>{})
     },
     
     connectToNewNetwork() {

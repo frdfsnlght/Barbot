@@ -42,7 +42,6 @@ _lastDrinkOrderCheckTime = time.time()
 _lastIdleAudioCheckTime = time.time()
 _control = None
 _pump = None
-_suppressMenuRebuild = False
 
 glass = False
 state = ST_WAIT
@@ -58,7 +57,6 @@ def _bus_serverStart():
     _exitEvent.clear()
     _thread = Thread(target = _threadLoop, name = 'DispenserThread', daemon = True)
     _thread.start()
-    _rebuildMenu()
 
 @bus.on('server/stop')
 def _bus_serverStop():
@@ -79,15 +77,6 @@ def _bus_serialEvent(e):
             bus.emit('dispenser/glass', glass)
             _dispenserEvent.set()
             
-@bus.on('model/drink/saved')
-def _bus_drinkSaved(drink):
-    if not _suppressMenuRebuild:
-        _rebuildMenu()
-
-@bus.on('model/drink/deleted')
-def _bus_drinkDeleted(drink):
-    _rebuildMenu()
-    
 def inWait():
     return state == ST_WAIT
     
@@ -162,29 +151,6 @@ def stopPump():
     _pump.stop()
     _pump = None
 
-def submitDrinkOrder(item):
-    d = Drink.get(Drink.id == item['drinkId'])
-    if d.isAlcoholic:
-        code = getParentalCode()
-        if code:
-            if 'parentalCode' not in item:
-                raise DispenserError('Parental code required!')
-            if item['parentalCode'] != code:
-                raise DispenserError('Invalid parental code!')
-    o = DrinkOrder.submitFromDict(item)
-    bus.emit('dispenser/drinkOrderSubmitted', o)
-    bus.emit('audio/play', 'drinkOrderSubmitted', sessionId = o.sessionId)
-
-def cancelDrinkOrder(id):
-    o = DrinkOrder.cancelById(id)
-    bus.emit('dispenser/drinkOrderCancelled', o)
-    bus.emit('audio/play', 'drinkOrderCancelled', sessionId = o.sessionId)
-        
-def toggleDrinkOrderHold(id):
-    o = DrinkOrder.toggleHoldById(id)
-    bus.emit('dispenser/drinkOrderHoldToggled', o)
-    bus.emit('audio/play', 'drinkOrderOnHold' if o.userHold else 'drinkOrderOffHold', sessionId = o.sessionId)
-    
 def setParentalCode(code):
     if not code:
         try:
@@ -218,7 +184,8 @@ def _threadLoop():
                     time.sleep(1)
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
-                _rebuildMenu()
+                # TODO: move this to when pump stops?
+                Drink.rebuildMenu()
                 
             if _requestDispense:
                 state = ST_DISPENSE
@@ -269,6 +236,9 @@ def _checkIdle():
     global _lastIdleAudioCheckTime
     if (time.time() - _lastIdleAudioCheckTime) > config.getfloat('dispenser', 'idleAudioInterval'):
         _lastIdleAudioCheckTime = time.time()
+        
+        DrinkOrder.deleteOldCompleted(config.getint('dispenser', 'maxDrinkOrderAge'))
+        
         if random.random() <= config.getfloat('dispenser', 'idleAudioChance'):
             bus.emit('audio/play', 'idle', console = True)
     
@@ -332,9 +302,6 @@ def _dispenseDrinkOrder(o):
             pump = ingredient.pump.first()
             amount = units.toML(di.amount, di.units)
             pump.start(amount, forward = True)
-            ingredient.timesDispensed = ingredient.timesDispensed + 1
-            ingredient.amountDispensed = ingredient.amountDispensed + amount
-            ingredient.save()
             pumps.append(pump)
             
         # wait for the pumps to stop, glass removed, order cancelled
@@ -409,61 +376,7 @@ def _dispenseDrinkOrder(o):
     bus.emit('dispenser/state', state, drinkOrder)
     bus.emit('lights/play', None)
     _resetTimers()
-    _rebuildMenu()
     
-    DrinkOrder.deleteOldCompleted(config.getint('dispenser', 'maxDrinkOrderAge'))
-    
-@db.atomic()
-def _rebuildMenu():
-    global _suppressMenuRebuild
-    _logger.info('Rebuilding drinks menu')
-    _suppressMenuRebuild = True
-    menuUpdated = False
-    ingredients = Pump.getReadyIngredients()
-    menuDrinks = Drink.getMenuDrinks()
 
-    # trivial case
-    if not ingredients:
-        for drink in menuDrinks:
-            drink.isOnMenu = False
-            drink.save()
-            menuUpdated = True
-        
-    else:
-        for drink in Drink.getDrinksWithIngredients(ingredients):
-            # remove this drink from the existing menu drinks
-            menuDrinks = [d for d in menuDrinks if d.id != drink.id]
-            
-            onMenu = True
-            # check for all the drink's ingredients
-            for di in drink.ingredients:
-                pump = Pump.getPumpWithIngredientId(di.ingredient_id)
-                if not pump or pump.state == Pump.EMPTY or units.toML(pump.amount, pump.units) < units.toML(di.amount, di.units):
-                    onMenu = False
-                    break
-            if onMenu != drink.isOnMenu:
-                drink.isOnMenu = onMenu
-                drink.save()
-                menuUpdated = True
-    
-        # any drinks in the original list are no longer on the menu
-        for drink in menuDrinks:
-            drink.isOnMenu = False
-            drink.save()
-            menuUpdated = True
-            
-    bus.emit('drinksMenuUpdated')
-        
-    _updateDrinkOrders()
-    _suppressMenuRebuild = False
-
-@db.atomic()
-def _updateDrinkOrders():
-    _logger.info('Updating drink orders')
-    readyPumps = Pump.getReadyPumps()
-    for o in DrinkOrder.getWaiting():
-        if o.drink.isOnMenu == o.ingredientHold:
-            o.ingredientHold = not o.drink.isOnMenu
-            o.save()
             
     

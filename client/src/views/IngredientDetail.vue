@@ -41,7 +41,7 @@
             :key="di.drink.id"
             ripple
             avatar
-            @click="gotoDrinkDetail(di.drinkId)"
+            @click="gotoDrinkDetail(di.drink_id)"
           >
             <v-list-tile-avatar>
               <v-icon v-if="di.drink.isFavorite">mdi-heart</v-icon>

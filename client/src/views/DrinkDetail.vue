@@ -43,12 +43,13 @@
             <v-list-tile-avatar>
               <alcoholic-icon :alcoholic="di.ingredient.isAlcoholic"/>
               <v-icon v-if="di.ingredient.isAvailable">mdi-gas-station</v-icon>
+              <v-icon>mdi-numeric-{{di.step}}-box-outline</v-icon>
             </v-list-tile-avatar>
-
-            <v-list-tile-content>
-              <v-list-tile-title>{{di.ingredient.amount}} {{di.ingredient.units}} {{di.ingredient.name}}</v-list-tile-title>
-            </v-list-tile-content>
             
+            <v-list-tile-content>
+              <v-list-tile-title>{{ingredientAmount(di)}} {{di.ingredient.name}}</v-list-tile-title>
+            </v-list-tile-content>
+
           </v-list-tile>
           
         </v-list>
@@ -85,6 +86,7 @@ import { mapState } from 'vuex'
 import Loading from '../components/Loading'
 import OrderDrinkDialog from '../components/OrderDrinkDialog'
 import AlcoholicIcon from '../components/AlcoholicIcon'
+import units from '../units'
 
 export default {
   name: 'DrinkDetail',
@@ -134,7 +136,11 @@ export default {
   },
   
   methods: {
-    
+
+    ingredientAmount(drinkIngredient) {
+      return units.format(drinkIngredient.amount, drinkIngredient.units)
+    },
+  
     gotoIngredientDetail(id) {
       this.$router.push({name: 'ingredientDetail', params: {id: id}})
     },
@@ -143,7 +149,7 @@ export default {
       this.$refs.orderDrinkDialog.open(this.drink).then(() => {
         if (this.locationHistory)
           this.$router.go(-2)
-      })
+      }, ()=>{})
     },
     
   },

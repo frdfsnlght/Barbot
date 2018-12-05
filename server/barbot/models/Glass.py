@@ -20,13 +20,18 @@ class Glass(BarbotModel):
     def save(self, *args, **kwargs):
         if self.alreadyExists():
             raise ModelError('The same glass already exists!')
-        return super().save(*args, **kwargs)
+        if super().save(*args, **kwargs):
+            bus.emit('model/glass/saved', self)
+            return True
+        else:
+            return False
 
     # override
     def delete_instance(self, *args, **kwargs):
         if self.drinks.execute():
             raise ModelError('This glass is used by at least one drink!')
         super().delete_instance(*args, **kwargs)
+        bus.emit('model/glass/deleted', self)
             
     def alreadyExists(self):
         g = Glass.select().where(Glass.type == self.type, Glass.size == self.size, Glass.units == self.units).first()

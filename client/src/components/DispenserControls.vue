@@ -162,10 +162,10 @@
       <v-flex>
         <div class="text-xs-center py-3">
             <span
-              v-for="p in pumps"
-              :key="p.id"
+              v-for="pump in pumps"
+              :key="pump.id"
             >
-              <pump-icon :pump="p"/>
+              <pump-icon :pump="pump"/>
             </span>
         </div>
       </v-flex>
@@ -197,7 +197,7 @@ export default {
   
   computed: {
     ...mapGetters({
-      pumps: 'pumps/sortedItems',
+      pumps: 'pumps/sortedPumps',
     }),
     ...mapState([
       'isConsole',

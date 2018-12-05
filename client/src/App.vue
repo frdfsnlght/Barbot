@@ -18,13 +18,6 @@
           <v-list-tile-title>Drinks</v-list-tile-title>
         </v-list-tile>
       
-        <v-list-tile v-if="isConsole && anyPumpReady" @click="gotoMakeMyOwn()">
-          <v-list-tile-action>
-            <v-icon>mdi-account</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title>Make My Own</v-list-tile-title>
-        </v-list-tile>
-      
         <v-list-tile @click="gotoIngredients()">
           <v-list-tile-action>
             <v-icon>mdi-cart</v-icon>
@@ -163,7 +156,7 @@
 
 <script>
 
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import bus from './bus'
 import HTMLTitle from './components/HTMLTitle'
 import Confirm from './components/Confirm'
@@ -203,9 +196,6 @@ export default {
     title () {
       return this.options.appTitle + (this.pageTitle ? (": " + this.pageTitle) : "");
     },
-    ...mapGetters({
-      anyPumpReady: 'pumps/anyPumpReady',
-    }),
     ...mapState([
       'options',
       'isConsole',
@@ -235,11 +225,6 @@ export default {
       this.$router.push({name: 'drinks'})
     },
     
-    gotoMakeMyOwn() {
-      this.drawer = false
-      this.$router.push({name: 'makeMyOwn'})
-    },
-    
     gotoIngredients() {
       this.drawer = false
       this.$router.push({name: 'ingredients'})
@@ -254,29 +239,29 @@ export default {
       this.drawer = false
       this.checkAdmin('dispenserSetupRequiresAdmin').then(() => {
         this.$router.push({name: 'pumps'})
-      })
+      }, ()=>{})
     },
     
     gotoSettings() {
       this.drawer = false
       this.checkAdmin('settingsRequiresAdmin').then(() => {
         this.$router.push({name: 'settings'})
-      })
+      }, ()=>{})
     },
 
     checkRestartX() {
       this.drawer = false
-      this.checkAdmin('restartXRequiresAdmin').then(this.restartX)
+      this.checkAdmin('restartXRequiresAdmin').then(this.restartX, ()=>{})
     },
 
     checkRestart() {
       this.drawer = false
-      this.checkAdmin('restartRequiresAdmin').then(this.restart)
+      this.checkAdmin('restartRequiresAdmin').then(this.restart, ()=>{})
     },
 
     checkShutdown() {
       this.drawer = false
-      this.checkAdmin('shutdownRequiresAdmin').then(this.shutdown)
+      this.checkAdmin('shutdownRequiresAdmin').then(this.shutdown, ()=>{})
     },
 
     reloadClient() {
@@ -298,7 +283,7 @@ export default {
               this.$store.commit('setError', res.error)
           }
         })
-      })
+      }, ()=>{})
     },
     
     shutdown() {
@@ -308,13 +293,13 @@ export default {
               this.$store.commit('setError', res.error)
           }
         })
-      })
+      }, ()=>{})
     },
     
     logout() {
       this.$refs.loginDialog.logout().then(() => {
         bus.$emit('logout')
-      })
+      }, ()=>{})
     },
     
     showPage(pageTitle) {

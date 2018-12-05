@@ -88,7 +88,7 @@ export default {
         
         getAll({commit, state}) {
             return new Promise((resolve, reject) => {
-                if (state.glasses)
+                if (state.ingredients)
                     resolve()
                 else {
                     commit('loading')

@@ -240,7 +240,7 @@ export default {
             this.$store.commit('setError', res.error)
           }
         })
-      })
+      }, ()=>{})
     },
     
   },

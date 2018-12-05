@@ -13,7 +13,7 @@
     <loading v-if="loading"></loading>
     
     <p
-      v-else-if="!items.length"
+      v-else-if="!drinkOrders.length"
       class="title text-xs-center pa-3"
     >
       Place an order by clicking the "+" button below.
@@ -24,28 +24,28 @@
       <div style="max-height: 27vh; overflow-y: auto">
         <v-list two-line>
           <v-list-tile
-            v-for="item in items"
-            :key="item.id"
+            v-for="drinkOrder in drinkOrders"
+            :key="drinkOrder.id"
             avatar
             ripple
-            @click="itemDetail(item)"
+            @click="gotoDetail(drinkOrder)"
           >
             
             <v-list-tile-avatar>
-              <v-icon v-if="item.userHold">mdi-pause</v-icon>
-              <v-icon v-else-if="item.ingredientHold">mdi-pause-octagon</v-icon>
+              <v-icon v-if="drinkOrder.userHold">mdi-pause</v-icon>
+              <v-icon v-else-if="drinkOrder.ingredientHold">mdi-pause-octagon</v-icon>
               <v-icon v-else>mdi-play</v-icon>
             </v-list-tile-avatar>
             
             <v-list-tile-content>
-              <v-list-tile-title>{{item.drink.name}}</v-list-tile-title>
-              <v-list-tile-sub-title>{{item.name}}</v-list-tile-sub-title>
+              <v-list-tile-title>{{drinkOrder.drink.name}}</v-list-tile-title>
+              <v-list-tile-sub-title>{{drinkOrder.name}}</v-list-tile-sub-title>
             </v-list-tile-content>
             
             <v-list-tile-action>
               <v-btn
                 icon
-                @click.stop="showMenu(item, $event)"
+                @click.stop="showMenu(drinkOrder, $event)"
               >
                 <v-icon>mdi-dots-vertical</v-icon>
               </v-btn>
@@ -64,18 +64,18 @@
       >
         <v-list>
         
-          <v-list-tile ripple @click="toggleHoldItem()">
+          <v-list-tile ripple @click="toggleHold()">
             <v-list-tile-content>
-              <v-list-tile-title v-if="item.userHold">Dispense</v-list-tile-title>
+              <v-list-tile-title v-if="drinkOrder.userHold">Dispense</v-list-tile-title>
               <v-list-tile-title v-else>Hold</v-list-tile-title>
             </v-list-tile-content>
             <v-list-tile-action>
-              <v-icon v-if="item.userHold">mdi-play</v-icon>
+              <v-icon v-if="drinkOrder.userHold">mdi-play</v-icon>
               <v-icon v-else>mdi-pause</v-icon>
             </v-list-tile-action>
           </v-list-tile>
           
-          <v-list-tile ripple @click="cancelItem()">
+          <v-list-tile ripple @click="cancel()">
             <v-list-tile-content>
               <v-list-tile-title>Cancel</v-list-tile-title>
             </v-list-tile-content>
@@ -94,7 +94,7 @@
       fixed
       bottom right
       color="primary"
-      @click="addItem"
+      @click="add"
     >
       <v-icon dark>mdi-plus</v-icon>
     </v-btn>
@@ -116,7 +116,7 @@ export default {
   name: 'DrinkOrders',
   data() {
     return {
-      item: {},
+      drinkOrder: {},
       menu: false,
       menuX: 0,
       menuY: 0,
@@ -130,7 +130,7 @@ export default {
   
   computed: {
     ...mapGetters({
-      items: 'drinkOrders/sortedItems'
+      drinkOrders: 'drinkOrders/sortedDrinkOrders'
     }),
     ...mapState({
       loading: state => state.drinkOrders.loading,
@@ -139,7 +139,7 @@ export default {
   },
   
   created() {
-    this.$store.dispatch('drinkOrders/loadWaiting')
+    this.$store.dispatch('drinkOrders/getWaiting')
   },
   
   destroyed() {
@@ -148,37 +148,37 @@ export default {
   
   methods: {
   
-    itemDetail(item) {
-      this.$router.push({name: 'drinkOrderDetail', params: {id: item.id}})
+    gotoDetail(drinkOrder) {
+      this.$router.push({name: 'drinkOrderDetail', params: {id: drinkOrder.id}})
     },
 
-    showMenu(item, e) {
-      this.item = JSON.parse(JSON.stringify(item))
+    showMenu(drinkOrder, e) {
+      this.drinkOrder = JSON.parse(JSON.stringify(drinkOrder))
       this.menuX = e.clientX
       this.menuY = e.clientY
       this.menu = true
     },
   
-    addItem() {
+    add() {
       this.$router.push({name: 'drinksMenu'})
     },
   
-    toggleHoldItem() {
-      this.$socket.emit('dispenser_toggleDrinkOrderHold', this.item.id, (res) => {
+    toggleHold() {
+      this.$socket.emit('drinkOrder_toggleHold', this.drinkOrder.id, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         }
       })
     },
     
-    cancelItem() {
+    cancel() {
       this.$refs.confirm.open('Cancel', 'Are you sure you want to cancel this order?', {rejectText: 'No'}).then(() => {
-        this.$socket.emit('dispenser_cancelDrinkOrder', this.item.id, (res) => {
+        this.$socket.emit('drinkOrder_cancel', this.drinkOrder.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
           }
         })
-      })
+      }, ()=>{})
     },
     
   },

@@ -25,13 +25,18 @@ class Ingredient(BarbotModel):
     def save(self, *args, **kwargs):
         if self.alreadyExists():
             raise ModelError('An ingredient with the same name already exists!')
-        return super().save(*args, **kwargs)
+        if super().save(*args, **kwargs):
+            bus.emit('model/ingredient/saved', self)
+            return True
+        else:
+            return False
     
     # override
     def delete_instance(self, *args, **kwargs):
         if self.drinks.execute():
             raise ModelError('This ingredient is used by at least one drink!')
         super().delete_instance(*args, **kwargs)
+        bus.emit('model/ingredient/deleted', self)
 
     def alreadyExists(self):
         i = Ingredient.select().where(Ingredient.name == self.name).first()

@@ -9,14 +9,14 @@
       <h1 class="pa-3">{{drinkName}}</h1>
       
       <p
-        v-if="item.name"
-        class="px-3 subheading">For: {{item.name}}</p>
+        v-if="drinkOrder.name"
+        class="px-3 subheading">For: {{drinkOrder.name}}</p>
       
       <p
-        v-if="item.userHold"
+        v-if="drinkOrder.userHold"
         class="px-3 subheading">This order is on hold.</p>
       <p
-        v-if="item.ingredientHold"
+        v-if="drinkOrder.ingredientHold"
         class="px-3 subheading">This order cannot be made because of one or more missing ingredients.</p>
       
       <p class="px-3 subheading">Placed: {{createdDate}}</p>
@@ -49,14 +49,14 @@ export default {
   
   computed: {
     drinkName() {
-      return this.item.drink ? this.item.drink.name : ''
+      return this.drinkOrder.drink ? this.drinkOrder.drink.name : ''
     },
     createdDate() {
-      return this.$formatDateTimeString(this.item.createdDate)
+      return this.$formatDateTimeString(this.drinkOrder.createdDate)
     },
     ...mapState({
       loading: state => state.drinkOrders.loading,
-      item: state => state.drinkOrders.item,
+      drinkOrder: state => state.drinkOrders.drinkOrder,
     })
   },
   
@@ -66,7 +66,7 @@ export default {
   
   beforeRouteEnter(to, from, next) {
     next(t => {
-      t.$store.dispatch('drinkOrders/loadById', t.$route.params.id)
+      t.$store.dispatch('drinkOrders/getOne', t.$route.params.id)
     });
   },
   
@@ -76,13 +76,15 @@ export default {
   },
   
   sockets: {
-    drinkOrderCancelled(item) {
-      if (this.item.id && (item.id === this.item.id)) {
+  
+    drinkOrder_cancelled(drinkOrder) {
+      if (this.drinkOrder.id && (drinkOrder.id === this.drinkOrder.id)) {
         window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
       }
     },
-    drinkOrderStarted(item) {
-      if (this.item.id && (item.id === this.item.id)) {
+    
+    drinkOrder_changed(drinkOrder) {
+      if (drinkOrder.startedDate && this.drinkOrder.id && (drinkOrder.id === this.drinkOrder.id)) {
         window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
       }
     }

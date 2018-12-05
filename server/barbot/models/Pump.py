@@ -41,14 +41,17 @@ def _bus_configLoaded():
         
 @bus.on('serial/event')
 def _bus_serialEvent(e):
+    from .Drink import Drink
+
     m = _pumpRunEventPattern.match(e)
     if m:
         pump = Pump.get_or_none(Pump.id == int(m.group(1)) + 1)
         if pump:
             with pump.lock:
-                pump.running = True
                 _logger.info('Pump {} running'.format(pump.name()))
-                bus.emit('model/pump/changed', pump)
+                if not pump.running:
+                    pump.running = True
+                    bus.emit('model/pump/saved', pump)
         return
         
     m = _pumpStopEventPattern.match(e)
@@ -67,21 +70,33 @@ def _bus_serialEvent(e):
                 if pump.lastAmount > 0: # forward
                     if pump.isLoaded(): # primed
                         pump.setState(Pump.READY)
+                        bus.emit('model/ingredient/saved', pump.ingredient)
+                        Drink.rebuildMenu()
+                        
                     elif pump.isReady():
                         pump.amount = units.toOther(units.toML(pump.amount, pump.units) - pump.lastAmount, pump.units)
                         if pump.amount < 0:
                             pump.amount = 0
                         if units.toML(pump.amount, pump.units) < config.getint('pumps', 'ingredientEmptyAmount'):
                             pump.setState(Pump.EMPTY)
+                            Drink.rebuildMenu()
+                        
+                        ingredient = pump.ingredient
+                        ingredient.timesDispensed = ingredient.timesDispensed + 1
+                        ingredient.amountDispensed = ingredient.amountDispensed + pump.lastAmount
+                        ingredient.save()
+                        
                     elif pump.isDirty():
                         pump.setState(Pump.UNUSED)
                         
                 elif pump.lastAmount < 0: # reverse
                     if pump.isReady():
                         pump.setState(Pump.DIRTY)
+                        bus.emit('model/ingredient/saved', pump.ingredient)
+                        Drink.rebuildMenu()
                         
-                pump.save()
-                bus.emit('model/pump/changed', pump)
+                if not pump.save():
+                    bus.emit('model/pump/saved', pump)
 
 def anyPumpsRunning():
     for i, p in _pumpExtras.items():
@@ -91,7 +106,7 @@ def anyPumpsRunning():
     
 class PumpExtra(object):
     allAttributes = ['volume', 'running', 'previousState', 'lock', 'lastAmount', 'timer']
-    dirtyAttributes = ['running', 'lastAmount']
+#    dirtyAttributes = ['running', 'lastAmount']
     
     def __init__(self, pump):
         self.id = pump.id
@@ -104,16 +119,16 @@ class PumpExtra(object):
             self.volume = 0
             
         self.running = False
-        self.previousState = pump.state
+#        self.previousState = pump.state
         self.lock = Lock()
         self.lastAmount = 0
         self.timer = None
         self.isDirty = False
         
-    def __setattr__(self, attr, value):
-        super().__setattr__(attr, value)
-        if attr in PumpExtra.dirtyAttributes:
-            self.isDirty = True
+#    def __setattr__(self, attr, value):
+#        super().__setattr__(attr, value)
+#        if attr in PumpExtra.dirtyAttributes:
+#            self.isDirty = True
         
 
 class Pump(BarbotModel):
@@ -163,16 +178,11 @@ class Pump(BarbotModel):
             if i and self.id != i.id:
                 raise ModelError('That ingredient is already loaded on another pump!')
 
-        # TODO: check if any of this is really needed
-        #emitStateChanged = False
-        #if 'state' in self.dirty_fields:
-        #    emitStateChanged = True
-        if super().save(*args, **kwargs) or self.pumpExtra.isDirty:
-            #bus.emit('model/pump/saved', self)
-            self.pumpExtra.isDirty = False
-        #    if emitStateChanged:
-        #        bus.emit('model/pump/stateChanged', self, self.previousState)
-        #        self.previousState = self.state
+        if super().save(*args, **kwargs):
+            bus.emit('model/pump/saved', self)
+            return True
+        else:
+            return False
         
     # override
     def delete_instance(self, *args, **kwargs):
@@ -194,37 +204,35 @@ class Pump(BarbotModel):
         return self.state == Pump.DIRTY
 
     def setState(self, state):
+        newState = None
         if self.isUnused():
             if state == Pump.LOADED:
-                self.state = Pump.LOADED
-                return
+                newState = state
         elif self.isLoaded():
             if state == Pump.READY:
-                self.state = Pump.READY
-                return
+                newState = state
             elif state == Pump.UNUSED:
-                self.state = Pump.UNUSED
-                return
+                newState = state
         elif self.isReady():
             if state == Pump.EMPTY:
-                self.state = Pump.EMPTY
-                return
+                newState = state
             elif state == Pump.DIRTY:
-                self.state = Pump.DIRTY
-                return
+                newState = state
         elif self.isEmpty():
             if state == Pump.READY:
-                self.state = Pump.READY
-                return
+                newState = state
             elif state == Pump.DIRTY:
-                self.state = Pump.DIRTY
-                return
+                newState = state
         elif self.isDirty():
             if state == Pump.UNUSED:
-                self.state = Pump.UNUSED
+                self.state = state
                 return
-        
-        raise ModelError('Invalid pump state transition: {} to {}', self.state, state)
+
+        if newState:
+#            self.previousState = self.state
+            self.state = newState
+        else:
+            raise ModelError('Invalid pump state transition: {} to {}'.format(self.state, state))
         
     def load(self, ingredient, containerAmount, units, amount):
         if self.isUnused():
@@ -298,13 +306,15 @@ class Pump(BarbotModel):
                     config.getint('pumps', 'speed'),
                     config.getint('pumps', 'acceleration')
                 ))
-                #self.running = True
                 
                 # start a timer to stop the pump
                 self.timer = Timer(config.getfloat('pumps', 'limitRunTime'), self.timerStop)
                 self.timer.start()
                 
-                #self.save()
+                # need to set running here so that dispenser can properly detect it
+                self.running = True
+                bus.emit('model/pump/saved', self)
+                
             except serial.SerialError as e:
                 _logger.error('Pump error: {}'.format(str(e)))
         

@@ -35,7 +35,7 @@ export default {
           a.currentTime = 0
         }
         a.volume = this.volume
-        a.play()
+        a.play().then(()=>{},()=>{})
       }
     },
   },
@@ -48,7 +48,7 @@ export default {
       if (file) {
         this.player.src = this.$socket.io.uri + '/audio/' + file
         this.player.volume = this.volume
-        this.player.play()
+        this.player.play().then(()=>{},()=>{})
         this.playing = true
       }
     },

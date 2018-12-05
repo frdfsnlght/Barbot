@@ -1,7 +1,7 @@
 <template>
   <div>
   
-    <v-dialog v-model="loadDialog" persistent scrollable max-width="480px" @keydown.esc="closeLoad" @keydown.enter.prevent="submitLoad">
+    <v-dialog v-model="loadDialog" persistent scrollable @keydown.esc="closeLoad" @keydown.enter.prevent="submitLoad">
       <v-card>
         <v-card-title>
           <span v-if="!isReload" class="headline">Load Pump {{pump.name}}</span>
@@ -21,6 +21,10 @@
                     :disabled="isReload"
                     :rules="[v => !!v || 'Ingredient is required']"
                   ></select-ingredient>
+                </v-flex>
+                
+                <v-flex xs12 v-if="ingredientHasNoDrinks">
+                  <p>This ingredient is not used in any drinks!</p>
                 </v-flex>
                 
                 <v-flex xs6>
@@ -85,7 +89,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="primeDialog" persistent scrollable max-width="480px" @keydown.esc="closePrime">
+    <v-dialog v-model="primeDialog" persistent scrollable @keydown.esc="closePrime">
       <v-card>
         <v-card-title>
           <span class="headline">Prime Pump {{pump.name}}</span>
@@ -147,7 +151,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="cleanDialog" persistent scrollable max-width="480px" @keydown.esc="closeClean">
+    <v-dialog v-model="cleanDialog" persistent scrollable @keydown.esc="closeClean">
       <v-card>
         <v-card-title>
           <span class="headline">Clean Pump {{pump.name}}</span>
@@ -238,6 +242,7 @@ export default {
       valid: false,
       
       loadDialog: false,
+      ingredientHasNoDrinks: false,    
       loadParams: {},
       isReload: false,
       
@@ -280,13 +285,16 @@ export default {
   watch: {
     loadParamsIngredientId(v) {
       if (v && (! this.isReload)) {
-        this.$store.dispatch('ingredients/loadById', v).then((i) => {
+        this.$store.dispatch('ingredients/getOne', v).then((i) => {
           if (i.lastContainerAmount) {
             this.loadParams.containerAmount = i.lastContainerAmount
             this.loadParams.units = i.lastUnits
             this.loadParams.amount = i.lastAmount
             this.loadParams.percent = Math.round((i.lastAmount / i.lastContainerAmount) * 100)
           }
+          console.dir(i)
+          this.ingredientHasNoDrinks = i.drinks.length == 0
+          console.log('has drinks? ' + this.ingredientHasNoDrinks)
         })
       }
     },
@@ -307,6 +315,7 @@ export default {
     openLoad() {
       bus.$emit('keyboard-install', this.$refs.loadForm)
       this.$refs.loadForm.reset()
+      this.ingredientHasNoDrinks = false
       if (! this.pump.state) {
         this.isReload = false
         this.loadParams = {
@@ -348,6 +357,8 @@ export default {
         this.$store.commit('setError', 'Invalid container amount!')
         return
       }
+      this.loadParams.containerAmount = amount
+      
       this.$socket.emit('pump_load', this.loadParams, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)

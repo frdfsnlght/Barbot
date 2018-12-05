@@ -4,64 +4,65 @@ export default {
     namespaced: true,
     
     state: {
-        items: [],
+        drinks: null,
         loading: false,
-        loadedAll: false,
     },
     
     getters: {
-        sortedItems(state) {
-            return state.items.slice().sort((a, b) => {
-                return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
-            })
+        
+        sortedDrinks(state) {
+            if (state.drinks)
+                return state.drinks.slice().sort((a, b) => {
+                    return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
+                })
+            else
+                return []
         }
     },
   
     mutations: {
+        
         loading(state) {
             state.loading = true
         },
         
-        loadedAll(state, items) {
-            state.items = items
+        setDrinks(state, drinks) {
+            state.drinks = drinks
             state.loading = false
-            state.loadedAll = true
         },
         
         destroy(state) {
-            state.items = []
-            state.loadedAll = false
+            state.drinks = null
         },
         
-        socket_drinkSaved(state, item) {
-            if (state.loadedAll) {
-                let d = state.items.find((e) => { return e.id === item.id })
+        socket_drink_changed(state, drink) {
+            if (state.drinks) {
+                let d = state.drinks.find((e) => { return e.id === drink.id })
                 if (d) {
-                    Object.assign(d, item)
+                    Object.assign(d, drink)
                     this.commit('notify', 'Drink updated', {root: true})
-                    console.log('updated drink ' + item.id)
                 }
             }
         },
 
-        socket_drinkDeleted(state, item) {
-            if (state.loadedAll) {
-                let d = state.items.find((e) => { return e.id === item.id })
+        socket_drink_deleted(state, drink) {
+            if (state.drinks) {
+                let d = state.drinks.find((e) => { return e.id === drink.id })
                 if (d) {
-                    let i = state.items.indexOf(d)
+                    let i = state.drinks.indexOf(d)
                     if (i != -1) {
-                        state.items.splice(i, 1)
+                        state.drinks.splice(i, 1)
                         this.commit('notify', 'Drink deleted', {root: true})
-                        console.log('deleted drink '  + item.id)
                     }
                 }
             }
         },
 
-        socket_drinksMenuUpdated(state) {
-            if (state.loadedAll) {
-                this.dispatch('loadAll')
-                this.commit('notify', 'Drinks menu updated', {root: true})
+        socket_drink_menuChanged(state) {
+            if (state.drinks) {
+                this.dispatch('getAll').then(() => {
+                    this.commit('notify', 'Drinks menu updated', {root: true})
+                })
             }
         },
         
@@ -69,15 +70,21 @@ export default {
     
     actions: {
         
-        loadAll({commit, state}) {
-            if (state.loadedAll) return
-            commit('loading')
-            Vue.prototype.$socket.emit('getDrinksMenu', (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedAll', [])
-                } else {
-                    commit('loadedAll', res.items)
+        getAll({commit, state}) {
+            return new Promise((resolve, reject) => {
+                if (state.drinks)
+                    resolve()
+                else {
+                    commit('loading')
+                    Vue.prototype.$socket.emit('drink_getMenu', (res) => {
+                        if (res.error) {
+                            commit('setError', res.error, {root: true})
+                            reject()
+                        } else {
+                            commit('setDrinks', res.drinks)
+                            resolve(res.drinks)
+                        }
+                    })
                 }
             })
         },

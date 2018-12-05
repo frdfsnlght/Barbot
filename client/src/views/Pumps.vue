@@ -9,25 +9,26 @@
       <v-list two-line>
       
         <v-list-tile
-          v-for="item in items"
-          :key="item.id"
+          v-for="pump in pumps"
+          :key="pump.id"
           avatar
           ripple
+          @click="gotoIngredientDetail(pump)"
         >
           <v-list-tile-avatar>
-            <pump-icon :pump="item"/>
+            <pump-icon :pump="pump"/>
           </v-list-tile-avatar>
           
           <v-list-tile-content>
-            <v-list-tile-title>{{item.name}} : {{itemIngredient(item)}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{itemState(item)}}</v-list-tile-sub-title>
+            <v-list-tile-title>{{pump.name}} : {{pumpIngredient(pump)}}</v-list-tile-title>
+            <v-list-tile-sub-title>{{pumpState(pump)}}</v-list-tile-sub-title>
           </v-list-tile-content>
           
           <v-list-tile-action>
             <v-btn
               icon
               :disabled="disableActions()"
-              @click.stop="showMenu(item, $event)"
+              @click.stop="showMenu(pump, $event)"
             >
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
@@ -46,7 +47,7 @@
         <v-list>
         
           <v-list-tile
-            v-if="!item.state"
+            v-if="!pump.state"
             ripple
             @click="openLoadPump()"
           >
@@ -59,7 +60,7 @@
           </v-list-tile>
 
           <v-list-tile
-            v-if="item.state=='loaded'"
+            v-if="pump.state=='loaded'"
             ripple
             @click="openPrimePump()"
           >
@@ -72,7 +73,7 @@
           </v-list-tile>
 
           <v-list-tile
-            v-if="item.state=='loaded'"
+            v-if="pump.state=='loaded'"
             ripple
             @click="unloadPump()"
           >
@@ -85,7 +86,7 @@
           </v-list-tile>
 
           <v-list-tile
-            v-if="item.state=='ready' || item.state=='empty'"
+            v-if="pump.state=='ready' || pump.state=='empty'"
             ripple
             @click="openLoadPump()"
           >
@@ -98,7 +99,7 @@
           </v-list-tile>
 
           <v-list-tile
-            v-if="item.state=='ready' || item.state=='empty'"
+            v-if="pump.state=='ready' || pump.state=='empty'"
             ripple
             @click="drainPump()"
           >
@@ -111,7 +112,7 @@
           </v-list-tile>
 
           <v-list-tile
-            v-if="item.state=='ready'"
+            v-if="pump.state=='ready'"
             ripple
             @click="openPrimePump()"
           >
@@ -124,7 +125,7 @@
           </v-list-tile>
           
           <v-list-tile
-            v-if="!item.state || item.state=='dirty'"
+            v-if="!pump.state || pump.state=='dirty'"
             ripple
             @click="openCleanPump()"
           >
@@ -139,7 +140,7 @@
         </v-list>
       </v-menu>
       
-      <pump-wizard-dialog ref="pumpWizardDialog" :pump="item"></pump-wizard-dialog>
+      <pump-wizard-dialog ref="pumpWizardDialog" :pump="pump"></pump-wizard-dialog>
       
     </template>
     
@@ -161,7 +162,7 @@ export default {
   name: 'Ingredients',
   data() {
     return {
-      item: {},
+      pump: {},
       menu: false,
       menuX: 0,
       menuY: 0,
@@ -184,7 +185,7 @@ export default {
   
   computed: {
     ...mapGetters({
-      items: 'pumps/sortedItems',
+      pumps: 'pumps/sortedPumps',
       anyPumpRunning: 'pumps/anyPumpRunning',
     }),
     ...mapState({
@@ -203,22 +204,27 @@ export default {
   
   methods: {
   
-    itemIngredient(item) {
-      if (! item.ingredient) return '<no ingredient>'
-      return units.format(item.amount, item.units) + ' ' + item.ingredient.name + ' (' + Math.round((item.amount / item.containerAmount) * 100) + '%)'
+    pumpIngredient(pump) {
+      if (! pump.ingredient) return '<no ingredient>'
+      return units.format(pump.amount, pump.units) + ' ' + pump.ingredient.name + ' (' + Math.round((pump.amount / pump.containerAmount) * 100) + '%)'
     },
     
-    itemState(item) {
-      if (! item.state) return '<unused>'
-      return item.state
+    pumpState(pump) {
+      if (! pump.state) return '<unused>'
+      return pump.state
     },
     
     disableActions() {
       return !(this.isConsole && this.dispenserState == 'setup') || this.anyPumpRunning
     },
 
-    showMenu(item, e) {
-      this.item = item
+    gotoIngredientDetail(pump) {
+      if (! pump.ingredient) return
+      this.$router.push({name: 'ingredientDetail', params: {id: pump.ingredient_id}})
+    },
+    
+    showMenu(pump, e) {
+      this.pump = pump
       this.menuX = e.clientX
       this.menuY = e.clientY
       this.menu = true
@@ -229,7 +235,7 @@ export default {
     },
   
     unloadPump() {
-      this.$socket.emit('pump_unload', this.item.id, (res) => {
+      this.$socket.emit('pump_unload', this.pump.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
@@ -241,7 +247,7 @@ export default {
     },
   
     drainPump() {
-      this.$socket.emit('pump_drain', this.item.id, (res) => {
+      this.$socket.emit('pump_drain', this.pump.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }

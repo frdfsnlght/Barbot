@@ -28,7 +28,7 @@
         </v-list-tile-avatar>
         
         <v-list-tile-content>
-          <v-list-tile-title>{{item.amount | fixedAmount}} {{item.units}} {{item.ingredient.name}}</v-list-tile-title>
+          <v-list-tile-title>{{itemAmount(item)}} {{item.ingredient.name}}</v-list-tile-title>
         </v-list-tile-content>
         
         <v-list-tile-action>
@@ -203,6 +203,10 @@ export default {
   },
   
   methods: {
+
+    itemAmount(item) {
+      return units.format(item.amount, item.units)
+    },
   
     addItem() {
       this.$refs.form.reset()
@@ -280,7 +284,7 @@ export default {
         return
       }
       
-      this.item['ingredient'] = this.$store.getters['ingredients/getOne'](this.item['ingredient_id'])
+      this.item['ingredient'] = this.$store.getters['ingredients/getById'](this.item['ingredient_id'])
       this.item.amount = amount
       this.item.step = step
       this.items.push(JSON.parse(JSON.stringify(this.item)))

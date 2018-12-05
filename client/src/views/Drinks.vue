@@ -29,7 +29,7 @@
 
           <v-list-tile-content>
             <v-list-tile-title>{{drink.primaryName}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{drink.secondaryName}}</v-list-tile-sub-title>
+            <v-list-tile-sub-title>{{drink.secondaryName}} {{ingredientsAvailable(drink.ingredients)}}</v-list-tile-sub-title>
           </v-list-tile-content>
           
           <v-list-tile-action>
@@ -138,6 +138,15 @@ export default {
   
   methods: {
   
+    ingredientsAvailable(ingredients) {
+      let total = ingredients.length
+      let ready = ingredients.filter(i => { return (i.ingredient.isAvailable) }).length
+      if (total == ready)
+        return ''
+      else
+        return '(' + ready + '/' + total + ')'
+    },
+    
     gotoDetail(drink) {
       this.$router.push({name: 'drinkDetail', params: {id: drink.id}})
     },
@@ -157,11 +166,11 @@ export default {
         instructions: undefined,
         glass_id: undefined,
         ingredients: []
-      })
+      }).then(()=>{},()=>{})
     },
     
     editDrink() {
-      this.$refs.drinkDialog.open(this.drink, true)
+      this.$refs.drinkDialog.open(this.drink, true).then(()=>{},()=>{})
     },
     
     deleteDrink() {
@@ -171,7 +180,7 @@ export default {
             this.$store.commit('setError', res.error)
           }
         })
-      })
+      }, ()=>{})
     },
     
   },

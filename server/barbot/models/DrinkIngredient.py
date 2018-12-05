@@ -18,25 +18,13 @@ class DrinkIngredient(BarbotModel):
     units = CharField()
     step = IntegerField(default = 1)
 
-    def set(self, dict):
-        if 'drinkId' in dict:
-            self.drink = int(dict['drinkId'])
-        if 'ingredientId' in dict:
-            self.ingredient = int(dict['ingredientId'])
-        if 'amount' in dict:
-            self.amount = float(dict['amount'])
-        if 'units' in dict:
-            self.units = str(dict['units'])
-        if 'step' in dict:
-            self.step = int(dict['step'])
-    
     def ingredientName(self):
         return str(self.amount) + ' ' + self.units + ' ' + self.ingredient.name
 
     def toDict(self, drink = False, ingredient = False):
         out = {
             'id': self.id,
-            'drinkId': self.drink.id,
+            'drink_id': self.drink.id,
             'ingredient_id': self.ingredient.id,
             'amount': self.amount,
             'units': self.units,

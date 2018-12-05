@@ -42,7 +42,7 @@ export default {
             state.drink = {}
         },
         
-        socket_drink_saved(state, drink) {
+        socket_drink_changed(state, drink) {
             if (state.drinks) {
                 let d = state.drinks.find((e) => { return e.id === drink.id })
                 if (d) {

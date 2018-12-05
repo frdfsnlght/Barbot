@@ -174,7 +174,7 @@ export default {
         this.$refs.parentalCodeDialog.open().then(() => {
           this.cachedParentalCode = this.$refs.parentalCodeDialog.code
           console.log('code is ' + this.cachedParentalCode)
-        })
+        }, ()=>{})
       } else {
         this.$socket.emit('dispenser_startPump', {id: id, parentalCode: this.cachedParentalCode}, (res) => {
           if (res.error) {
@@ -235,7 +235,7 @@ export default {
         ingredients: this.ingredients,
       }).then(() => {
         this.ingredients = []
-      })
+      }, ()=>{})
     },
     
   },
@@ -253,7 +253,7 @@ export default {
   },
   
   sockets: {
-    pumpSaved(pump) {
+    pump_changed(pump) {
       if (this.captureId && (this.captureId == pump.id)) {
         this.captureIngredient(pump.ingredient, pump.lastAmount)
         this.captureId = null

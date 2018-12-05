@@ -4,83 +4,96 @@ export default {
     namespaced: true,
     
     state: {
-        items: [],
+        pumps: null,
         loading: false,
-        loadedAll: false,
     },
     
     getters: {
-        sortedItems(state) {
-            return state.items.slice().sort((a, b) => {
-                return a.id - b.id
-            })
+        
+        sortedPumps(state) {
+            if (state.pumps)
+                return state.pumps.slice().sort((a, b) => {
+                    return a.id - b.id
+                })
+            else
+                return []
         },
         sortedReadyPumps(state) {
-            return state.items.filter(p => { return (p.state == 'ready') }).sort((a, b) => {
-                return a.id - b.id
-            })
+            if (state.pumps)
+                return state.pumps.filter(p => { return (p.state == 'ready') }).sort((a, b) => {
+                    return a.id - b.id
+                })
+            else
+                return []
         },
         anyPumpRunning(state) {
-            let i = state.items.find((e) => { return e.running })
-            return !!i
+            if (state.pumps)
+                return !! state.pumps.find((e) => { return e.running })
+            else
+                return false
         },
         anyPumpReady(state) {
-            let i = state.items.find((e) => { return e.state == 'ready' })
-            return !!i
+            if (state.pumps)
+                return !! state.pumps.find((e) => { return e.state == 'ready' })
+            else
+                return false
         },
         getPump(state) {
             return (id) => {
-                return state.items.find((e) => { return e.id === id })
+                return state.pumps.find((e) => { return e.id === id })
             }
         },
         
     },
   
     mutations: {
+        
         loading(state) {
             state.loading = true
         },
         
-        loadedAll(state, items) {
-            state.items = items
+        setPumps(state, pumps) {
+            state.pumps = pumps
             state.loading = false
-            state.loadedAll = true
         },
         
         destroy(state) {
-            state.items = []
-            state.item = {}
-            state.loadedAll = false
+            state.pumps = null
         },
         
-        socket_pump_changed(state, item) {
-            if (state.loadedAll) {
-                let i = state.items.find((e) => { return e.id === item.id })
+        socket_pump_changed(state, pump) {
+            if (state.pumps) {
+                let i = state.pumps.find((e) => { return e.id === pump.id })
                 if (i) {
-                    Object.assign(i, item)
+                    Object.assign(i, pump)
                 }
             }
         },
         
         socket_pumps(state, pumps) {
-            state.items = pumps
+            state.pumps = pumps
             state.loading = false
-            state.loadedAll = true
         },
         
     },
     
     actions: {
         
-        loadAll({commit, state}) {
-            if (state.loadedAll) return
-            commit('loading')
-            Vue.prototype.$socket.emit('pump_getAll', (res) => {
-                if (res.error) {
-                    commit('setError', res.error, {root: true})
-                    commit('loadedAll', [])
-                } else {
-                    commit('loadedAll', res.items)
+        getAll({commit, state}) {
+            return new Promise((resolve, reject) => {
+                if (state.pumps)
+                    resolve()
+                else {
+                    commit('loading')
+                    Vue.prototype.$socket.emit('pump_getAll', (res) => {
+                        if (res.error) {
+                            commit('setError', res.error, {root: true})
+                            reject()
+                        } else {
+                            commit('loadedAll', res.items)
+                            resolve()
+                        }
+                    })
                 }
             })
         },

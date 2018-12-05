@@ -132,7 +132,6 @@ export default {
     open(drink, edit = false) {
       this.$store.dispatch('glasses/getAll')
       bus.$emit('keyboard-install', this.$refs.form)
-      this.$refs.form.reset()
       this.edit = edit
       this.drink = drink
       this.dialog = true
@@ -164,8 +163,8 @@ export default {
     },
     
     cancel() {
-      this.reject()
       this.close()
+      this.reject()
     },
     
   },

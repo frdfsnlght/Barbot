@@ -96,7 +96,7 @@ export default {
       bus.$emit('keyboard-install', this.$refs.form)
       this.$refs.form.reset()
       this.drink = drink
-      this.order.drinkId = drink.id
+      this.order.drink_id = drink.id
       this.order.userHold = false
       this.order.name = undefined
       this.order.parentalCode = undefined
@@ -114,7 +114,7 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit('dispenser_submitDrinkOrder', this.order, (res) => {
+      this.$socket.emit('drinkOrder_submit', this.order, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)
         } else {

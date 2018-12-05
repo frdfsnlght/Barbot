@@ -6,6 +6,7 @@ from ..db import db, BarbotModel, addModel
 from ..bus import bus
 from ..config import config
 from .Drink import Drink
+from .Pump import Pump
 
 
 _logger = logging.getLogger('Models.DrinkOrder')
@@ -14,6 +15,7 @@ _logger = logging.getLogger('Models.DrinkOrder')
 @bus.on('server/start')
 def _bus_serverStart():
     DrinkOrder.clearSessionIds()
+    
     
 class DrinkOrder(BarbotModel):
     drink = ForeignKeyField(Drink, backref = 'orders', on_delete = 'CASCADE', on_update = 'CASCADE')
@@ -54,37 +56,30 @@ class DrinkOrder(BarbotModel):
     def clearSessionIds():
         DrinkOrder.update(sessionId = None).execute()
         
+    # TODO: need to emit event when order changes state
     @staticmethod
-    def submitFromDict(item):
-        o = DrinkOrder()
-        o.set(item)
-        o.save()
-        return o
-        
-    @staticmethod
-    def cancelById(id):
-        o = DrinkOrder.get(DrinkOrder.id == id, DrinkOrder.startedDate.is_null())
-        o.delete_instance()
-        return o
-        
-    @staticmethod
-    def toggleHoldById(id):
-        o = DrinkOrder.get(DrinkOrder.id == id, DrinkOrder.startedDate.is_null())
-        o.userHold = not o.userHold
-        o.save()
-        return o
+    @db.atomic()
+    def updateDrinkOrders():
+        _logger.info('Updating drink orders')
+        readyPumps = Pump.getReadyPumps()
+        for o in DrinkOrder.getWaiting():
+            if o.drink.isOnMenu == o.ingredientHold:
+                o.ingredientHold = not o.drink.isOnMenu
+                o.save()
+                bus.emit('drinkOrder/changed', o)
 
     # override
     def save(self, *args, **kwargs):
         if super().save(*args, **kwargs):
             bus.emit('model/drinkOrder/saved', self)
+            return True
+        else:
+            return False
         
     # override
     def delete_instance(self, *args, **kwargs):
-    
         if self.isBeingDispensed():
             raise ModelError('This order is currently being dispensed!')
-            
         super().delete_instance(*args, **kwargs)
         bus.emit('model/drinkOrder/deleted', self)
             
@@ -102,22 +97,10 @@ class DrinkOrder(BarbotModel):
     def desc(self):
         return '"{}" for {}'.format(self.drink.name(), self.name if self.name else 'unknown')
         
-    def set(self, dict):
-        if 'drink' in dict:
-            self.drink = dict['drink']
-        elif 'drinkId' in dict:
-            self.drink = int(dict['drinkId'])
-        if 'name' in dict:
-            self.name = str(dict['name'])
-        if 'userHold' in dict:
-            self.userHold = bool(dict['userHold'])
-        if 'sessionId' in dict:
-            self.sessionId = str(dict['sessionId'])
-    
     def toDict(self, drink = False, glass = False):
         out = {
             'id': self.id,
-            'drinkId': self.drink.id,
+            'drink_id': self.drink.id,
             'name': self.name,
             'createdDate': self.createdDate.isoformat(),
             'startedDate': self.startedDate.isoformat() if self.startedDate else None,

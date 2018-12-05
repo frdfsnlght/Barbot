@@ -8,9 +8,15 @@ from ..config import config
 from .. import units
 
 from .Glass import Glass
+from .Pump import Pump
 
 
 _logger = logging.getLogger('Models.Drink')
+
+
+@bus.on('server/start')
+def _bus_serverStart():
+    Drink.rebuildMenu()
 
 
 class Drink(BarbotModel):
@@ -35,13 +41,60 @@ class Drink(BarbotModel):
         from .DrinkIngredient import DrinkIngredient
         return Drink.select(Drink).distinct().join(DrinkIngredient).where(DrinkIngredient.ingredient.in_(list(ingredients))).execute()
 
+    @staticmethod
+    @db.atomic()
+    def rebuildMenu():
+        _logger.info('Rebuilding drinks menu')
+        menuUpdated = False
+        ingredients = Pump.getReadyIngredients()
+        menuDrinks = Drink.getMenuDrinks()
+
+        # trivial case
+        if not ingredients:
+            for drink in menuDrinks:
+                drink.isOnMenu = False
+                drink.save()
+                menuUpdated = True
+            
+        else:
+            for drink in Drink.getDrinksWithIngredients(ingredients):
+                # remove this drink from the existing menu drinks
+                menuDrinks = [d for d in menuDrinks if d.id != drink.id]
+                
+                onMenu = True
+                # check for all the drink's ingredients
+                for di in drink.ingredients:
+                    pump = Pump.getPumpWithIngredientId(di.ingredient_id)
+                    if not pump or pump.state == Pump.EMPTY or units.toML(pump.amount, pump.units) < units.toML(di.amount, di.units):
+                        onMenu = False
+                        break
+                if onMenu != drink.isOnMenu:
+                    drink.isOnMenu = onMenu
+                    drink.save()
+                    menuUpdated = True
+        
+            # any drinks in the original list are no longer on the menu
+            for drink in menuDrinks:
+                drink.isOnMenu = False
+                drink.save()
+                menuUpdated = True
+                
+        bus.emit('drink_menuChanged')
+            
+        from .DrinkOrder import DrinkOrder
+        DrinkOrder.updateDrinkOrders()
+    
     # override
     def save(self, *args, **kwargs):
         if self.alreadyExists():
             raise ModelError('A drink with the same name already exists!')
         if self.is_dirty():
             self.updatedDate = datetime.datetime.now()
-        return super().save(*args, **kwargs)
+            super().save(*args, **kwargs)
+            bus.emit('model/drink/saved', self)
+            return True
+        else:
+            return False
         
     # override
     def delete_instance(self, *args, **kwargs):
@@ -49,6 +102,7 @@ class Drink(BarbotModel):
             if o.isWaiting():
                 raise ModelError('This drink has a pending order!')
         super().delete_instance(*args, **kwargs)
+        bus.emit('model/drink/deleted', self)
 
     def alreadyExists(self):
         d = Drink.select().where(Drink.primaryName == self.primaryName, Drink.secondaryName == self.secondaryName).first()
@@ -57,50 +111,45 @@ class Drink(BarbotModel):
     def name(self):
         return self.primaryName + (('/' + self.secondaryName) if self.secondaryName else '')
         
-    def setIngredients(self, ingredients):
-        from .DrinkIngredient import DrinkIngredient
+    def setIngredients(self, drinkIngredients):
 
-        for i in ingredients:
-            if 'step' not in i:
-                i['step'] = 1
-                
         # don't allow more than 4 ingredients in the same step
-        if len(ingredients) >= 4:
-            for step in {i['step'] for i in ingredients}:
-                stepIngs = [i for i in ingredients if i['step'] == step]
+        if len(drinkIngredients) >= 4:
+            for step in {di.step for di in drinkIngredients}:
+                stepIngs = [di for di in drinkIngredients if di.step == step]
                 if len(stepIngs) > 4:
                     raise ModelError('There can not be more than 4 ingredients in the same step!')
 
         # don't allow more ingredients than configured
         totalMLs = 0
-        for i in ingredients:
-            totalMLs = totalMLs + units.toML(float(i['amount']), i['units'])
+        for di in drinkIngredients:
+            totalMLs = totalMLs + units.toML(float(di.amount), di.units)
+        # TODO: move this config value to someplace else
         if totalMLs > config.getint('client', 'drinkSizeLimit'):
             raise ModelError('Drink ingredients exceed configured limit!')
             
         isAlcoholic = False
         
         # update/remove ingredients
-        for di in self.ingredients:
-            i = next((ingredient for ingredient in ingredients if ingredient['ingredient_id'] == di.ingredient.id), None)
-            if i:
-                di.set(i)
-                di.save()
-                isAlcoholic = isAlcoholic | di.ingredient.isAlcoholic
-                #_logger.info('updating ' + str(di.id))
-                ingredients.remove(i)
+        for i in self.ingredients:
+            found = next((di for di in drinkIngredients if di.ingredient_id == i.ingredient_id), None)
+            if found:
+                i.amount = found.amount
+                i.units = found.units
+                i.step = found.step
+                i.save()
+                isAlcoholic = isAlcoholic or i.ingredient.isAlcoholic
+                #_logger.debug('updating ' + str(di.id))
+                drinkIngredients.remove(found)
             else:
-                di.delete_instance()
-                _logger.info('deleted ' + str(di.id))
+                i.delete_instance()
+                #_logger.debug('deleted ' + str(i.id))
             
         # add new ingredients
-        for ingredient in ingredients:
-            di = DrinkIngredient()
-            di.drink = self.id
-            di.set(ingredient)
+        for di in drinkIngredients:
             di.save()
-            isAlcoholic = isAlcoholic | di.ingredient.isAlcoholic
-            _logger.info('add ingredient ' + str(ingredient['ingredient_id']))
+            isAlcoholic = isAlcoholic or di.ingredient.isAlcoholic
+            #_logger.debug('add ingredient {}'.format(di.ingredient_id))
     
         self.isAlcoholic = isAlcoholic
     
