@@ -12,7 +12,9 @@ from . import core
 from . import dispenser
 from . import wifi
 from . import audio
+from . import lights
 from . import alerts
+from . import settings
 
 from .models.Drink import Drink
 from .models.DrinkIngredient import DrinkIngredient
@@ -107,7 +109,7 @@ def userIsAdmin():
     return 'user' in session and session['user'].isAdmin
 
 def checkAdmin(clientOpt):
-    b = config.getboolean('client', clientOpt)
+    b = settings.getboolean(clientOpt)
     return userIsAdmin() if b else True
     
 def validateParams(params, rules):
@@ -138,14 +140,13 @@ def _socket_default_error_handler(e):
 def _socket_connect():
     global _consoleSessionId
     _logger.info('Connection opened from {}'.format(request.remote_addr))
-    emit('options', _buildOptions())
-    emit('units', _buildUnits())
+    emit('settings', settings.export())
+    emit('units', units.export())
     drinkOrder = dispenser.drinkOrder
     if drinkOrder:
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
     emit('dispenser_state', {'state': dispenser.state, 'drinkOrder': drinkOrder})
     emit('dispenser_glass', dispenser.glass)
-    emit('dispenser_parentalCode', True if dispenser.getParentalCode() else False)
     emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])
     emit('wifi_state', wifi.state)
     emit('alerts_changed', alerts.getAll())
@@ -265,20 +266,20 @@ def _socket_dispenser_stopHold():
     except dispenser.DispenserError as e:
         return error(e)
 
-@socket.on('dispenser_startDispense')
-def _socket_dispenser_startDispense():
-    _logger.debug('recv dispenser_startDispense')
+@socket.on('dispenser_startManual')
+def _socket_dispenser_startManul():
+    _logger.debug('recv dispenser_startManual')
     try:
-        dispenser.startDispense()
+        dispenser.startManual()
         return success()
     except dispenser.DispenserError as e:
         return error(e)
 
-@socket.on('dispenser_stopDispense')
-def _socket_dispenser_stopDispense():
-    _logger.debug('recv dispenser_stopDispense')
+@socket.on('dispenser_stopManual')
+def _socket_dispenser_stopManual():
+    _logger.debug('recv dispenser_stopManual')
     try:
-        dispenser.stopDispense()
+        dispenser.stopManual()
         return success()
     except dispenser.DispenserError as e:
         return error(e)
@@ -290,19 +291,23 @@ def _socket_dispenser_setControl(ctl):
     return success()
     
 @socket.on('dispenser_startPump')
+@validate({
+    'id': [int, True],
+    'parentalCode': [str, False]
+})
 def _socket_dispenser_startPump(params):
     _logger.debug('recv dispenser_startPump')
     try:
-        dispenser.startPump(params)
+        dispenser.startPump(params['id'], params['parentalCode'] if 'parentalCode' in params else False)
         return success()
     except dispenser.DispenserError as e:
         return error(e)
     
 @socket.on('dispenser_stopPump')
-def _socket_dispenser_stopPump():
+def _socket_dispenser_stopPump(id):
     _logger.debug('recv dispenser_stopPump')
     try:
-        dispenser.stopPump()
+        dispenser.stopPump(id)
         return success()
     except dispenser.DispenserError as e:
         return error(e)
@@ -626,8 +631,7 @@ def _socket_drinkOrder_submit(params):
         if not drink:
             return error('Drink not found!')
         if drink.isAlcoholic:
-            # TODO: this should be in settings
-            code = getParentalCode()
+            code = settings.get('parentalCode')
             if code:
                 if 'parentalCode' not in params:
                     return error('Parental code required!')
@@ -743,6 +747,7 @@ def _socket_pump_prime(id):
         if not pump.isLoaded():
             return error('Invalid pump state!')
             
+        bus.emit('lights/play', 'setupDispense')
         pump.prime()
         return success()
         
@@ -760,6 +765,7 @@ def _socket_pump_drain(id):
         if not (pump.isReady() or pump.isEmpty() or pump.isUnused() or pump.isDirty()):
             return error('Invalid pump state!')
             
+        bus.emit('lights/play', 'setupDispense')
         pump.drain()
         return success()
 
@@ -777,49 +783,34 @@ def _socket_pump_clean(id):
         if not (pump.isEmpty() or pump.isUnused() or pump.isDirty()):
             return error('Invalid pump state!')
             
+        bus.emit('lights/play', 'setupDispense')
         pump.clean()
         return success()
 
     except ModelError as e:
         return error(e)
         
-@socket.on('pump_start')
-@requireDispenserState(dispenser.ST_SETUP)
-def _socket_pump_start(id):
-    _logger.debug('recv pump_start')
+
+#-------------------------------
+# settings
+#
+
+@socket.on('settings_set')
+@validate({
+    'key': [str, True],
+    'value': [(str, bool, int, float), True],
+})
+def socket_settings_set(params):
+    _logger.debug('recv settings_set')
     try:
-        pump = Pump.get_or_none(Pump.id == id)
-        if not pump:
-            return error('Pump not found!')
-            
-        pump.start(0, forward = True)
+        settings.set(params['key'], params['value'])
         return success()
-
-    except ModelError as e:
+    except ValueError as e:
         return error(e)
-    
-@socket.on('pump_stop')
-@requireDispenserState(dispenser.ST_SETUP)
-def _socket_pump_stop(id):
-    _logger.debug('recv pump_stop')
-    try:
-        pump = Pump.get_or_none(Pump.id == id)
-        if not pump:
-            return error('Pump not found!')
-            
-        pump.stop()
-        return success()
-
-    except ModelError as e:
-        return error(e)
-    
-
-
-
-
         
-    
-    
+#-------------------------------
+# alerts
+#     
     
 @socket.on('alerts_clear')
 def socket_alerts_clear():
@@ -839,8 +830,12 @@ def socket_alerts_clear():
     
 @bus.on('config/reloaded')
 def _but_config_reloaded():
-    socket.emit('clientOptions', _buildOptions())
-    socket.emit('units', _buildUnits())
+    socket.emit('units', units.export())
+    
+@bus.on('settings/loaded')
+@bus.on('settings/changed')
+def _but_settings_loaded():
+    socket.emit('settings', settings.export())
     
 @bus.on('serial/event')
 def _bus_serial_event(e):
@@ -976,23 +971,3 @@ def _bus_model_pump_saved(p):
     socket.emit('pump_changed', p.toDict(ingredient = True))
     
 
-    
-def _buildOptions():
-    opts = dict(config.items('client'))
-    for k, v in opts.items():
-        if _booleanPattern.match(v):
-            opts[k] = config.getboolean('client', k)
-        elif _intPattern.match(v):
-            opts[k] = config.getint('client', k)
-        elif _floatPattern.match(v):
-            opts[k] = config.getfloat('client', k)
-    return opts
-            
-def _buildUnits():
-    u = {
-        'default': units.default,
-        'order': units.order,
-        'conversions': units.conversions,
-    }
-    return u
-    

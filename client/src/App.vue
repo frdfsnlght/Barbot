@@ -194,10 +194,10 @@ export default {
   
   computed: {
     title () {
-      return this.options.appTitle + (this.pageTitle ? (": " + this.pageTitle) : "");
+      return this.settings.appTitle + (this.pageTitle ? (": " + this.pageTitle) : "");
     },
     ...mapState([
-      'options',
+      'settings',
       'isConsole',
       'user',
     ]),
@@ -308,10 +308,7 @@ export default {
     },
     
     checkAdmin(opt) {
-      console.log('check ' + opt)
-      console.dir(this.$store.state.options)
-      console.dir(this.$store.state.user)
-      if ((! this.$store.state.options[opt]) || this.$store.state.user.isAdmin)
+      if ((! this.settings[opt]) || this.user.isAdmin)
         return new Promise((res) => { res() })
       return this.$refs.loginDialog.open()
     },

@@ -352,14 +352,14 @@ export default {
     },
     
     onLogout() {
-      if (! ((store.state.options.settingsRequiresAdmin == false) || store.state.user.isAdmin))
+      if (! ((store.state.settings.settingsRequiresAdmin == false) || store.state.user.isAdmin))
         this.$router.replace({name: 'home'})
     },
     
   },
 
   beforeRouteEnter(to, from, next) {
-    if (! ((store.state.options.settingsRequiresAdmin == false) || store.state.user.isAdmin))
+    if (! ((store.state.settings.settingsRequiresAdmin == false) || store.state.user.isAdmin))
       next({name: 'home'})
     else
       next(t => {

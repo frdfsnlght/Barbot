@@ -42,7 +42,8 @@ def _bus_configLoaded():
 @bus.on('serial/event')
 def _bus_serialEvent(e):
     from .Drink import Drink
-
+    from .. import dispenser
+    
     m = _pumpRunEventPattern.match(e)
     if m:
         pump = Pump.get_or_none(Pump.id == int(m.group(1)) + 1)
@@ -52,6 +53,7 @@ def _bus_serialEvent(e):
                 if not pump.running:
                     pump.running = True
                     bus.emit('model/pump/saved', pump)
+                    
         return
         
     m = _pumpStopEventPattern.match(e)
@@ -68,6 +70,7 @@ def _bus_serialEvent(e):
                 _logger.info('Pump {} stopped, {:.2f} mL ({} steps)'.format(pump.name(), pump.lastAmount, steps))
                 
                 if pump.lastAmount > 0: # forward
+                
                     if pump.isLoaded(): # primed
                         pump.setState(Pump.READY)
                         bus.emit('model/ingredient/saved', pump.ingredient)
@@ -88,8 +91,9 @@ def _bus_serialEvent(e):
                         
                     elif pump.isDirty():
                         pump.setState(Pump.UNUSED)
-                        
+
                 elif pump.lastAmount < 0: # reverse
+                
                     if pump.isReady():
                         pump.setState(Pump.DIRTY)
                         bus.emit('model/ingredient/saved', pump.ingredient)
@@ -98,6 +102,12 @@ def _bus_serialEvent(e):
                 if not pump.save():
                     bus.emit('model/pump/saved', pump)
 
+            if dispenser.inSetup() and not anyPumpsRunning():
+                bus.emit('lights/play', 'setupDispenseIdle')
+            elif dispenser.inManual() and not anyPumpsRunning():
+                bus.emit('lights/play', 'manualDispenseIdle')
+            
+                    
 def anyPumpsRunning():
     for i, p in _pumpExtras.items():
         if p.running:

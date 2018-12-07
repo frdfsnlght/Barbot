@@ -86,7 +86,7 @@ def _processLine(line):
         
     m = _eventPattern.match(line)
     if m:
-        bus.emit('serial/event', m.group(1))
+        bus.emit('serial/event', m.group(1), threads = True)
         return
         
     m = _messagePattern.match(line)

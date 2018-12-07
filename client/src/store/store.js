@@ -3,7 +3,6 @@ import Vuex from 'vuex'
 
 import dispenser from './modules/dispenser'
 import alerts from './modules/alerts'
-import audio from './modules/audio'
 import wifi from './modules/wifi'
 import drinkOrders from './modules/drinkOrders'
 import glasses from './modules/glasses'
@@ -18,7 +17,6 @@ export default new Vuex.Store({
     modules: {
         dispenser: dispenser,
         alerts: alerts,
-        audio: audio,
         wifi: wifi,
         drinkOrders: drinkOrders,
         ingredients: ingredients,
@@ -30,7 +28,7 @@ export default new Vuex.Store({
     
     state: {
         connected: false,
-        options: {},
+        settings: {},
         units: {},
         error: false,
         notification: false,
@@ -48,11 +46,11 @@ export default new Vuex.Store({
             state.connected = false
         },
         
-        socket_options(state, options) {
-            state.options = options
-            if (! options.autoConsole) {
-                if (options.isConsole !== state.isConsole) {
-                    state.isConsole = options.isConsole
+        socket_settings(state, settings) {
+            state.settings = settings
+            if (! settings.autoConsole) {
+                if (settings.isConsole !== state.isConsole) {
+                    state.isConsole = settings.isConsole
                     console.log('Client is now ' + (state.isConsole ? '' : 'NOT ') + 'running as console.')
                 }
             }

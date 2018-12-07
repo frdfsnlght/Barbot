@@ -292,9 +292,7 @@ export default {
             this.loadParams.amount = i.lastAmount
             this.loadParams.percent = Math.round((i.lastAmount / i.lastContainerAmount) * 100)
           }
-          console.dir(i)
           this.ingredientHasNoDrinks = i.drinks.length == 0
-          console.log('has drinks? ' + this.ingredientHasNoDrinks)
         })
       }
     },
@@ -422,7 +420,7 @@ export default {
     },
 
     startPump() {
-      this.$socket.emit('pump_start', this.pump.id, (res) => {
+      this.$socket.emit('dispenser_startPump', {'id': this.pump.id}, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }
@@ -430,7 +428,7 @@ export default {
     },
     
     stopPump() {
-      this.$socket.emit('pump_stop', this.pump.id, (res) => {
+      this.$socket.emit('dispenser_stopPump', this.pump.id, (res) => {
         if (res.error) {
             this.$store.commit('setError', res.error)
         }

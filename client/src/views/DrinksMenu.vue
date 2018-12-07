@@ -106,6 +106,7 @@ export default {
     ]),
     ...mapState({
       loading: state => state.drinksMenu.loading,
+      dispenserState: state => state.dispenser.state,
     })
   },
   
@@ -130,6 +131,13 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(t => {
       t.$store.dispatch('drinksMenu/getAll')
+      if (t.isConsole && t.dispenserState == 'manual') {
+        t.$socket.emit('dispenser_stopManual', (res) => {
+          if (res.error) {
+            t.$store.commit('setError', res.error)
+          }
+        })
+      }
     });
   },
   

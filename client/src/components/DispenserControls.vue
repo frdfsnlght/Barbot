@@ -5,7 +5,7 @@
     <v-layout column justify-space-between fill-height>
       <v-layout column justify-center fill-height class="text-xs-center pa-3">
   
-        <div v-if="dispenserState == 'setup' || dispenserState == 'pause' || dispenserState == 'dispense'">
+        <div v-if="dispenserState == 'setup' || dispenserState == 'pause' || dispenserState == 'manual'">
           <p class="display-1">
             Please wait...
           </p>
@@ -143,7 +143,7 @@
         
         <template v-else>
 
-          <div v-if="dispenserState == 'run' || dispenserState == 'dispense'">
+          <div v-if="dispenserState == 'run' || dispenserState == 'manual'">
             <p class="title">
               Dispensing...
             </p>

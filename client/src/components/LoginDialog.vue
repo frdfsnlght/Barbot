@@ -113,7 +113,6 @@ export default {
       return new Promise((resolve, reject) => {
         this.$socket.emit('logout', (res) => {
           if (res.error) {
-            console.error(res.error)
             reject()
           } else {
             this.$store.commit('setUser', false)

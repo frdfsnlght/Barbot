@@ -7,6 +7,7 @@ from .config import config
 from .db import db, ModelError
 from . import serial
 from . import units
+from . import settings
 from .models.Drink import Drink
 from .models.DrinkOrder import DrinkOrder
 from .models.DrinkIngredient import DrinkIngredient
@@ -16,7 +17,7 @@ from .models.Pump import Pump, anyPumpsRunning
 ST_WAIT = 'wait'
 ST_SETUP = 'setup'
 ST_HOLD = 'hold'
-ST_DISPENSE = 'dispense'
+ST_MANUAL = 'manual'
 
 ST_DISPENSE_START = 'start'
 ST_DISPENSE_RUN = 'run'
@@ -35,12 +36,13 @@ _logger = logging.getLogger('Dispenser')
 _exitEvent = Event()
 _thread = None
 _requestSetup = False
-_requestDispense = False
+_requestManual = False
 _requestHold = False
 _dispenserEvent = Event()
 _lastDrinkOrderCheckTime = time.time()
 _lastIdleAudioCheckTime = time.time()
 _control = None
+_runningPumps = []
 _pump = None
 
 glass = False
@@ -86,8 +88,11 @@ def inSetup():
 def inHold():
     return state == ST_HOLD
     
-def inDispense():
-    return state == ST_DISPENSE
+def inManual():
+    return state == ST_MANUAL
+    
+def isDispensing():
+    return not (inWait() or inSetup() or inHold() or inManual())
     
 def startSetup():
     global _requestSetup
@@ -99,13 +104,13 @@ def stopSetup():
     global _requestSetup
     _requestSetup = False
     
-def startDispense():
-    global _requestDispense
-    _requestDispense = True
+def startManual():
+    global _requestManual
+    _requestManual = True
     
-def stopDispense():
-    global _requestDispense
-    _requestDispense = False
+def stopManual():
+    global _requestManual
+    _requestManual = False
 
 def startHold():
     global _requestHold
@@ -120,57 +125,52 @@ def setControl(ctl):
     _control = ctl
     _dispenserEvent.set()
         
-def startPump(params):
-    global _pump
-    if state != ST_DISPENSE:
-        raise DispenserError('Invalid dispenser state!')
-    if _pump:
-        stopPump()
-    
-    if 'id' not in params:
-        raise DispenserError('pump Id is required!')
-    id = params['id']
+def startPump(id, parentalCode = False):
     pump = Pump.get_or_none(Pump.id == id)
     if not pump:
         raise ValueError('Invalid pump Id!')
-
-    if pump.ingredient.isAlcoholic:
-        code = getParentalCode()
-        if code:
-            if 'parentalCode' not in params:
-                raise DispenserError('Parental code is required!')
-            if params['parentalCode'] != code:
-                raise DispenserError('Invalid parental code!')
-                
-    _pump = pump
-    _pump.start(forward = True)
-
-def stopPump():
-    global _pump
-    if not _pump: return
-    _pump.stop()
-    _pump = None
-
-def setParentalCode(code):
-    if not code:
-        try:
-            os.remove(config.getpath('dispenser', 'parentalCodeFile'))
-        except IOError:
-            pass
-    else:
-        open(config.getpath('dispenser', 'parentalCodeFile'), 'w').write(code)
-    bus.emit('dispenser/parentalCode', True if code else False)
-
-def validateParentalCode(code):
-    return code == getParentalCode()
-
-def getParentalCode():
-    try:
-        return open(config.getpath('dispenser', 'parentalCodeFile')).read().rstrip()
-    except IOError:
-        return False
-
+    if id in _runningPumps:
+        stopPump(id)
     
+    if state == ST_MANUAL:
+
+        if pump.ingredient.isAlcoholic:
+            code = settings.get('parentalCode')
+            if code:
+                if not parentalCode:
+                    raise DispenserError('Parental code is required!')
+                if parentalCode != code:
+                    raise DispenserError('Invalid parental code!')
+ 
+        if not _runningPumps:
+            bus.emit('lights/play', 'manualDispense')
+
+    elif state == ST_SETUP:
+        if not _runningPumps:
+            bus.emit('lights/play', 'setupDispense')
+    
+    else:
+        raise DispenserError('Invalid dispenser state!')
+
+    pump.start(forward = True)
+    _runningPumps.append(id)
+        
+def stopPump(id):
+    if id not in _runningPumps: return
+    pump = Pump.get_or_none(Pump.id == id)
+    if not pump:
+        raise ValueError('Invalid pump Id!')
+    
+    _runningPumps.remove(id)
+    pump.stop()
+    
+#    if state == ST_MANUAL:
+#        if not _runningPumps:
+#            bus.emit('lights/play', 'manualDispenseIdle')
+#    elif state == ST_SETUP:
+#        if not _runningPumps:
+#            bus.emit('lights/play', 'setupDispenserIdle')
+
 def _threadLoop():
     global _lastDrinkOrderCheckTime, state
     _logger.info('Dispenser thread started')
@@ -180,25 +180,28 @@ def _threadLoop():
             if _requestSetup:
                 state = ST_SETUP
                 bus.emit('dispenser/state', state, None)
+                bus.emit('lights/play', 'setupDispenseIdle')
                 while _requestSetup and not _exitEvent.is_set():
                     time.sleep(1)
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
-                # TODO: move this to when pump stops?
-                Drink.rebuildMenu()
+                bus.emit('lights/play', None)
                 
-            if _requestDispense:
-                state = ST_DISPENSE
+            if _requestManual:
+                state = ST_MANUAL
                 bus.emit('dispenser/state', state, None)
-                while _requestDispense and not _exitEvent.is_set():
+                bus.emit('lights/play', 'manualDispenseIdle')
+                while _requestManual and not _exitEvent.is_set():
                     time.sleep(0.1)
-                    if _pump and not glass:
-                        stopPump()
+                    if _runningPumps and not glass:
+                        for id in _runningPumps[:]:
+                            stopPump(id)
                         _logger.warning('Glass removed while dispensing')
                         bus.emit('audio/play', 'glassRemovedDispense', console = True)
                         
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
+                bus.emit('lights/play', None)
                 
             if _requestHold:
                 state = ST_HOLD
@@ -239,7 +242,7 @@ def _checkIdle():
         
         DrinkOrder.deleteOldCompleted(config.getint('dispenser', 'maxDrinkOrderAge'))
         
-        if random.random() <= config.getfloat('dispenser', 'idleAudioChance'):
+        if settings.getboolean('enableIdleAudio') and random.random() <= config.getfloat('dispenser', 'idleAudioChance'):
             bus.emit('audio/play', 'idle', console = True)
     
 def _dispenseDrinkOrder(o):

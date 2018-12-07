@@ -92,6 +92,8 @@ export default {
                             reject()
                         } else {
                             commit('setDrinks', res.drinks)
+                            console.log('drinks:')
+                            console.table(JSON.parse(JSON.stringify(res.drinks)))
                             resolve(res.drinks)
                         }
                     })

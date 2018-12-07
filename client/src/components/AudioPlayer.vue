@@ -20,12 +20,14 @@ export default {
   
   computed: {
     ...mapState({
-      volume: state => state.audio.volume,
+      isConsole: state => state.isConsole,
+      volume: state => state.settings.volume,
     }),
   },
   
   watch: {
     volume() {
+      if (! this.isConsole) return
       if (this.suppressVolumeBing)
         this.suppressVolumeBing = false
       else {
@@ -47,7 +49,7 @@ export default {
       let file = this.queue.shift()
       if (file) {
         this.player.src = this.$socket.io.uri + '/audio/' + file
-        this.player.volume = this.volume
+        this.player.volume = this.isConsole ? this.volume : 1
         this.player.play().then(()=>{},()=>{})
         this.playing = true
       }

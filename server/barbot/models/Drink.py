@@ -6,6 +6,7 @@ from ..db import db, BarbotModel, ModelError, addModel
 from ..bus import bus
 from ..config import config
 from .. import units
+from .. import settings
 
 from .Glass import Glass
 from .Pump import Pump
@@ -49,6 +50,8 @@ class Drink(BarbotModel):
         ingredients = Pump.getReadyIngredients()
         menuDrinks = Drink.getMenuDrinks()
 
+        #print('current menu: {}'.format([d.name() for d in menuDrinks]))
+        
         # trivial case
         if not ingredients:
             for drink in menuDrinks:
@@ -57,27 +60,40 @@ class Drink(BarbotModel):
                 menuUpdated = True
             
         else:
+            #print('ingredients: {}'.format([i.name for i in ingredients]))
+            
             for drink in Drink.getDrinksWithIngredients(ingredients):
+                #print('consider drink {}'.format(drink.name()))
+                
                 # remove this drink from the existing menu drinks
                 menuDrinks = [d for d in menuDrinks if d.id != drink.id]
                 
                 onMenu = True
                 # check for all the drink's ingredients
                 for di in drink.ingredients:
+                    #print('looking for {}'.format(di.ingredient.name))
                     pump = Pump.getPumpWithIngredientId(di.ingredient_id)
                     if not pump or pump.state == Pump.EMPTY or units.toML(pump.amount, pump.units) < units.toML(di.amount, di.units):
+                        #print('  not available')
                         onMenu = False
                         break
+                    #print('  found it on pump {}'.format(pump.name()))
                 if onMenu != drink.isOnMenu:
                     drink.isOnMenu = onMenu
                     drink.save()
                     menuUpdated = True
+                    
+                    #if drink.isOnMenu:
+                    #    print('added to menu')
+                    #else:
+                    #    print('removed from menu')
         
             # any drinks in the original list are no longer on the menu
             for drink in menuDrinks:
                 drink.isOnMenu = False
                 drink.save()
                 menuUpdated = True
+                #print('{} removed from menu'.format(drink.name()))
                 
         bus.emit('drink_menuChanged')
             
@@ -125,7 +141,7 @@ class Drink(BarbotModel):
         for di in drinkIngredients:
             totalMLs = totalMLs + units.toML(float(di.amount), di.units)
         # TODO: move this config value to someplace else
-        if totalMLs > config.getint('client', 'drinkSizeLimit'):
+        if totalMLs > settings.getint('drinkSizeLimit'):
             raise ModelError('Drink ingredients exceed configured limit!')
             
         isAlcoholic = False

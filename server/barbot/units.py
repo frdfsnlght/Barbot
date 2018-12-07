@@ -47,3 +47,10 @@ def format(otherAmount, otherUnits, appendUnits = True):
     if appendUnits:
         str = str + ' ' + otherUnits
     return str
+
+def export():
+    return {
+        'default': default,
+        'order': order,
+        'conversions': conversions,
+    }

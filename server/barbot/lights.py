@@ -21,6 +21,8 @@ SEGMENTS_MAIN = '0'
 SEGMENTS_ALL = '1:2:3:4'
 
 
+lightsOn = False
+
 _logger = logging.getLogger('Lights')
 
 
@@ -39,12 +41,16 @@ def _bus_play(patternName):
             playPattern(pattern)
         
 def setColor(segments, color):
+    global lightsOn
     if config.getboolean('lights', 'enabled'):
         _sendCommand('LC{},{}'.format(segments, color))
+        lightsOn = color != COLOR_OFF
     
 def playPattern(pattern):
+    global lightsOn
     if config.getboolean('lights', 'enabled'):
         _sendCommand('LP{}'.format(pattern))
+        lightsOn = True
     
 def savePattern(slot, pattern):
     if config.getboolean('lights', 'enabled'):

@@ -1,6 +1,5 @@
 
 import sys, os, time, logging, subprocess, re, time
-from threading import Thread, Event
 
 from .config import config
 from .bus import bus
@@ -19,44 +18,34 @@ _wifiNetworkCellPattern = re.compile(r"(?i)(?s)Quality=(\d+)/(\d+).*Signal level
 
 state = False
 _logger = logging.getLogger('Wifi')
-_exitEvent = Event()
-_thread = None
+_enableCheck = True
+_lastCheckTime = 0
 _scannedNetworks = []
 _wpaSupplicantHeader = []
 _wpaSupplicantNetworks = []
 
 
-@bus.on('server/stop')
-def _bus_serverStop():
-    _exitEvent.set()
-    
 @bus.on('server/start')
 def _startThread():
-    global _thread, state
-    _exitEvent.clear()
+    global _enableCheck, state
     if not config.getint('wifi', 'checkInterval'):
         logging.info('Wifi checking disabled')
+        enableCheck = False
         return
     state = _getState()
     if not state:
         logging.info('Wifi not available')
+        _enableCheck = False
         return
-    
-    _thread = Thread(target = _threadLoop, name = 'WifiThread')
-    _thread.daemon = True
-    _thread.start()
 
-def _threadLoop():
-    _logger.info('Wifi thread started')
-    try:
-        while not _exitEvent.is_set():
-            _updateState()
-            _readWPASupplicant(config.getpath('wifi', 'wpaSupplicantFile'))
-            _exitEvent.wait(config.getint('wifi', 'checkInterval'))
-    except Exception as e:
-        _logger.exception(str(e))
-    _logger.info('Wifi thread stopped')
-    alerts.add('Wifi thread stopped!')
+@bus.on('server/tick')
+def _bus_serverTick():
+    global _lastCheckTime
+    if not _enableCheck: return
+    if (time.time() - _lastCheckTime) > config.getfloat('wifi', 'checkInterval'):
+        _lastCheckTime = time.time()
+        _updateState()
+        _readWPASupplicant(config.getpath('wifi', 'wpaSupplicantFile'))
     
 def _readWPASupplicant(path):
     global _wpaSupplicantHeader, _wpaSupplicantNetworks

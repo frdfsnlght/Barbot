@@ -38,10 +38,10 @@ export default {
   computed: {
     volume: {
       get() {
-        return this.$store.state.audio.volume
+        return this.$store.state.settings.volume
       },
       set(v) {
-        this.$socket.emit('audio_setVolume', v, (res) => {
+        this.$socket.emit('settings_set', {'key': 'volume', 'value': v}, (res) => {
           if (res.error)
             this.$store.commit('setError', res.error)
         })

@@ -87,14 +87,23 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
-      this.$socket.emit(this.validate ? 'dispenser_validateParentalCode' : 'dispenser_setParentalCode', this.code, (res) => {
-        if (res.error) {
-          this.$store.commit('setError', res.error)          
-        } else {
+      if (this.validate) {
+        if (this.code != this.$store.settings.parentalCode)
+          this.$store.commit('setError', 'Invalid parental code!')
+        else {
           this.close()
           this.resolve()
         }
-      })
+      } else {
+        this.$socket.emit('settings_set', {'key': 'parentalCode', 'value': this.code}, (res) => {
+          if (res.error) {
+            this.$store.commit('setError', res.error)          
+          } else {
+            this.close()
+            this.resolve()
+          }
+        })
+      }
     },
 
     cancel() {

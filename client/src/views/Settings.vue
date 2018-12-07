@@ -32,16 +32,168 @@
         @click="setParentalCode()"
       >
         <v-list-tile-avatar>
-          <v-icon v-if="parentalCode">mdi-lock</v-icon>
+          <v-icon v-if="settings.parentalCode">mdi-lock</v-icon>
           <v-icon v-else>mdi-lock-open</v-icon>
         </v-list-tile-avatar>
         <v-list-tile-content>
           <v-list-tile-title>Parental lock</v-list-tile-title>
-          <v-list-tile-sub-title v-if="parentalCode">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-if="settings.parentalCode">Active</v-list-tile-sub-title>
           <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
         </v-list-tile-content>
         <v-list-tile-action>
-          <v-switch v-model="parentalCode" readonly></v-switch>
+          <v-switch v-model="settings.parentalCode" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('enableLocalAudio')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.enableLocalAudio">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Local audio</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.enableLocalAudio">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.enableLocalAudio" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('enableRemoteAudio')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.enableRemoteAudio">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Remote audio</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.enableRemoteAudio">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.enableRemoteAudio" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('enableIdleAudio')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.enableIdleAudio">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Idle audio</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.enableIdleAudio">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.enableIdleAudio" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('restartRequiresAdmin')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.restartRequiresAdmin">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Restart requires admin</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.restartRequiresAdmin">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.restartRequiresAdmin" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('restartXRequiresAdmin')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.restartXRequiresAdmin">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Restart X requires admin</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.restartXRequiresAdmin">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.restartXRequiresAdmin" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('shutdownRequiresAdmin')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.shutdownRequiresAdmin">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Shutdown requires admin</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.shutdownRequiresAdmin">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.shutdownRequiresAdmin" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('settingsRequiresAdmin')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.settingsRequiresAdmin">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Settings requires admin</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.settingsRequiresAdmin">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.settingsRequiresAdmin" readonly></v-switch>
+        </v-list-tile-action>
+      </v-list-tile>
+      
+      <v-list-tile
+        avatar
+        ripple
+        @click="toggleSetting('dispenserSetupRequiresAdmin')"
+      >
+        <v-list-tile-avatar>
+          <v-icon v-if="settings.dispenserSetupRequiresAdmin">mdi-lock</v-icon>
+          <v-icon v-else>mdi-lock-open</v-icon>
+        </v-list-tile-avatar>
+        <v-list-tile-content>
+          <v-list-tile-title>Pump setup requires admin</v-list-tile-title>
+          <v-list-tile-sub-title v-if="settings.dispenserSetupRequiresAdmin">Active</v-list-tile-sub-title>
+          <v-list-tile-sub-title v-else>Disabled</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-switch v-model="settings.dispenserSetupRequiresAdmin" readonly></v-switch>
         </v-list-tile-action>
       </v-list-tile>
       
@@ -81,9 +233,11 @@ export default {
   },
   
   computed: {
+    ...mapState([
+      'settings',
+    ]),
     ...mapState({
       wifiState: state => state.wifi.state,
-      parentalCode: state => state.dispenser.parentalCode,
     })
   },
   
@@ -94,25 +248,32 @@ export default {
     },
   
     setParentalCode() {
-      if (this.parentalCode) {
-        this.$socket.emit('dispenser_setParentalCode', false, (res) => {
+      if (this.settings.parentalCode) {
+        this.$socket.emit('settings_set', {'key': 'parentalCode', 'value': ''}, (res) => {
           if (res.error)
-            this.$store.commit('setError', res.error)          
+            this.$store.commit('setError', res.error)
         })
       } else {
         this.$refs.parentalCodeDialog.open()
       }
     },
   
+    toggleSetting(key) {
+      this.$socket.emit('settings_set', {'key': key, 'value': !this.settings[key]}, (res) => {
+        if (res.error)
+          this.$store.commit('setError', res.error)
+      })
+    },
+    
     onLogout() {
-      if (! ((store.state.options.settingsRequiresAdmin == false) || store.state.user.isAdmin))
+      if (! ((store.state.settings.settingsRequiresAdmin == false) || store.state.user.isAdmin))
         this.$router.replace({name: 'home'})
     },
     
   },
   
   beforeRouteEnter(to, from, next) {
-    if (! ((store.state.options.settingsRequiresAdmin == false) || store.state.user.isAdmin))
+    if (! ((store.state.settings.settingsRequiresAdmin == false) || store.state.user.isAdmin))
       next({name: 'home'})
     else
       next(true)

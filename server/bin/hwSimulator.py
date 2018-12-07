@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, os, time, argparse, serial, re
+import sys, os, time, argparse, serial, re, datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -101,7 +101,7 @@ def loopButton():
             send('*POWER-REQUEST')
 
 def processCommand(cmd):
-    print('<- {}'.format(cmd))
+    print('{:%Y-%m-%d %X,%f} <- {}'.format(datetime.datetime.now(), cmd))
     
     m = re.match(r"[A-Z].*\~([0-9A-F]{2})", cmd)
     if m:
@@ -304,7 +304,7 @@ def readDelim(str, delim = ','):
     
 def send(str):
     port.write((str + '\n').encode('ascii'))
-    print('-> {}'.format(str))
+    print('{:%Y-%m-%d %X,%f} -> {}'.format(datetime.datetime.now(), str))
     
 def sendError(str):
     send('!' + str)

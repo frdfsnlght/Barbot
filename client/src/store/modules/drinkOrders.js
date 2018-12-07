@@ -55,16 +55,16 @@ export default {
                 let o = state.drinkOrders.find((e) => { return e.id === drinkOrder.id })
                 if (o) {
                     if (drinkOrder.startedDate) {
-                        let i = state.items.indexOf(o)
+                        let i = state.drinkOrders.indexOf(o)
                         if (i != -1) {
-                            state.items.splice(i, 1)
+                            state.drinkOrders.splice(i, 1)
                         }
                     } else {
                         Object.assign(o, drinkOrder)
                     }
                 } else {
                     if (drinkOrder.startedDate) return
-                    state.items.push(drinkOrder)
+                    state.drinkOrders.push(drinkOrder)
                     this.commit('notify', 'Drink order submitted', {root: true})
                 }
             }
@@ -125,8 +125,8 @@ export default {
                         commit('setError', res.error, {root: true})
                         reject()
                     } else {
-                        commit('setOne', res.item)
-                        resolve(res.item)
+                        commit('setOne', res.drinkOrder)
+                        resolve(res.drinkOrder)
                     }
                 })
             })

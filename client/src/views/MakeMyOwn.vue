@@ -29,11 +29,11 @@
             large
             block
             class="mb-3"
-            :disabled="!dispenserGlass || (anyPumpRunning && dispensingId != pump.id)"
+            :disabled="!dispenserGlass || (anyPumpRunning && !runningPumps.includes(pump.id))"
             @mousedown="startPump(pump.id)"
             @touchstart="startPump(pump.id)"
-            @mouseup="stopPump()"
-            @touchend="stopPump()"
+            @mouseup="stopPump(pump.id)"
+            @touchend="stopPump(pump.id)"
           >
             <alcoholic-icon :alcoholic="pump.ingredient.isAlcoholic" class="mr-3"/>
             {{pump.ingredient.name}}
@@ -64,15 +64,15 @@
               dense
             >
               <v-list-tile
-                v-for="item in sortedIngredients"
-                :key="item.id"
+                v-for="ingredient in sortedIngredients"
+                :key="ingredient.id"
               >
                 <v-list-tile-avatar>
-                  <v-icon>mdi-numeric-{{item.step}}-box-outline</v-icon>
+                  <v-icon>mdi-numeric-{{ingredient.step}}-box-outline</v-icon>
                 </v-list-tile-avatar>
                 
                 <v-list-tile-content>
-                  <v-list-tile-title>{{item.amount | fixedAmount}} {{item.units}} {{item.ingredient.name}}</v-list-tile-title>
+                  <v-list-tile-title>{{ingredientAmount(ingredient)}} {{ingredient.units}} {{ingredient.ingredient.name}}</v-list-tile-title>
                 </v-list-tile-content>
                 
               </v-list-tile>
@@ -103,10 +103,9 @@ export default {
   name: 'MakeMyOwn',
   data() {
     return {
-      dispensingId: null,
-      captureId: null,
-      cachedParentalCode: false,
+      runningPumps: [],
       ingredients: [],
+      parentalCodeValidated: false,
     }
   },
   
@@ -138,63 +137,49 @@ export default {
       isConsole: state => state.isConsole,
       dispenserState: state => state.dispenser.state,
       dispenserGlass: state => state.dispenser.glass,
-      dispenserParentalCode: state => state.dispenser.parentalCode,
+      parentalCode: state => state.settings.parentalCode,
     })
   },
   
   watch: {
   
     dispenserState(v) {
-      if (v != 'dispense')
+      if (v != 'manual')
         this.$router.replace({name: 'home'})
     },
   
-    dispenserGlass(v) {
-      if (v && this.dispensingId) {
-        this.$socket.emit('dispenser_stopPump', (res) => {
-          if (res.error) {
-              this.$store.commit('setError', res.error)
-          } else
-            this.dispensingId = null
-        })
-      }
-    },
-    
   },
   
   methods: {
     
+    ingredientAmount(ingredient) {
+      return units.format(ingredient.amount, ingredient.units)
+    },
+    
     startPump(id) {
-      if (this.dispensingId != id) {
-        if (this.dispensingId != null)
-          this.stopDispense(this.dispensingId)
-      }
+      if (this.runningPumps.includes(id)) return
+      
       let pump = this.getPump(id)
-      if (this.dispenserParentalCode && pump.ingredient.isAlcoholic && ! this.cachedParentalCode) {
+      if (this.parentalCode && pump.ingredient.isAlcoholic && ! this.parentalCodeValidated) {
         this.$refs.parentalCodeDialog.open().then(() => {
-          this.cachedParentalCode = this.$refs.parentalCodeDialog.code
-          console.log('code is ' + this.cachedParentalCode)
+          this.parentalCodeValidated = true
         }, ()=>{})
       } else {
-        this.$socket.emit('dispenser_startPump', {id: id, parentalCode: this.cachedParentalCode}, (res) => {
+        this.$socket.emit('dispenser_startPump', {id: id, parentalCode: this.parentalCode}, (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
-          } else
-            this.dispensingId = id
+          }
         })
       }
     },
     
-    stopPump() {
-      if (this.dispensingId != null) {
-        this.captureId = this.dispensingId
-        this.$socket.emit('dispenser_stopPump', (res) => {
-          if (res.error) {
-              this.$store.commit('setError', res.error)
-          } else
-            this.dispensingId = null
-        })
-       }
+    stopPump(id) {
+      if (! this.runningPumps.includes(id)) return
+      this.$socket.emit('dispenser_stopPump', id, (res) => {
+        if (res.error) {
+          this.$store.commit('setError', res.error)
+        }
+      })
     },
     
     captureIngredient(ingredient, amount) {
@@ -221,8 +206,6 @@ export default {
       } else {
         ing.amount += amount
       }
-      
-      console.dir(this.ingredients)
     },
     
     addDrink() {
@@ -243,7 +226,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(t => {
       if (t.isConsole) {
-        t.$socket.emit('dispenser_startDispense', (res) => {
+        t.$socket.emit('dispenser_startManual', (res) => {
           if (res.error) {
             t.$store.commit('setError', res.error)
           }
@@ -253,12 +236,19 @@ export default {
   },
   
   sockets: {
+  
     pump_changed(pump) {
-      if (this.captureId && (this.captureId == pump.id)) {
-        this.captureIngredient(pump.ingredient, pump.lastAmount)
-        this.captureId = null
+      if (pump.running) {
+        if (! this.runningPumps.includes(pump.id))
+          this.runningPumps.push(pump.id)
+      } else {
+        if (this.runningPumps.includes(pump.id)) {
+          this.runningPumps = this.runningPumps.filter(function(id) { return id != pump.id })
+          this.captureIngredient(pump.ingredient, pump.lastAmount)
+        }
       }
     }
+    
   },  
   
 }

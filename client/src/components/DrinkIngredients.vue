@@ -197,7 +197,7 @@ export default {
       })
     },
     ...mapState({
-      drinkSizeLimit: state => state.options.drinkSizeLimit,
+      drinkSizeLimit: state => state.settings.drinkSizeLimit,
     }),
     
   },
@@ -289,7 +289,6 @@ export default {
       this.item.step = step
       this.items.push(JSON.parse(JSON.stringify(this.item)))
       this.closeDialog()
-      console.dir(this.items)
       this.$emit('input', this.items)
    },
    

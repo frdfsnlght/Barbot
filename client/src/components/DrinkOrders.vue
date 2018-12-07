@@ -134,7 +134,6 @@ export default {
     }),
     ...mapState({
       loading: state => state.drinkOrders.loading,
-      dispenserState: state => state.dispenser.state,
     })
   },
   

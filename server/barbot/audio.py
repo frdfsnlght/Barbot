@@ -6,6 +6,7 @@ from queue import Queue, Empty
 from .bus import bus
 from . import alerts
 from .config import config
+from . import settings
 
 
 _audioFileName = 'audio.yaml'
@@ -16,7 +17,8 @@ _thread = None
 _audioConfig = None
 _audioFile = os.path.join(config.getpath('audio', 'audioDir'), _audioFileName)
 
-_lastModifiedTime = None
+_lastConfigCheckTime = 0
+_lastConfigModifiedTime = None
 _playQueue = Queue()
 _clips = {}
 
@@ -34,6 +36,14 @@ def _bus_serverStart():
 def _bus_serverStop():
     _exitEvent.set()
 
+@bus.on('server/tick')
+def _bus_serverTick():
+    global _lastConfigCheckTime
+    if (time.time() - _lastConfigCheckTime) > config.getfloat('audio', 'fileCheckInterval'):
+        _lastConfigCheckTime = time.time()
+        if os.path.isfile(_audioFile) and os.path.getmtime(_audioFile) > _lastConfigModifiedTime:
+            _load()
+    
 @bus.on('config/loaded')
 def _bus_configLoaded():
     global _audioFile
@@ -49,23 +59,12 @@ def _threadLoop():
     _logger.info('Audio thread started')
     try:
         while not _exitEvent.is_set():
-            timeout = config.getfloat('audio', 'fileCheckInterval')
-            try:
-                item = _playQueue.get(block = True, timeout = timeout)
-                _playClip(item)
-            except Empty:
-                _checkConfig()
+            item = _playQueue.get(block = True)
+            _playClip(item)
     except Exception as e:
         _logger.exception(str(e))
     _logger.info('Audio thread stopped')
     alerts.add('Audio thread stopped!')
-
-def _checkConfig():
-    t = 0
-    if os.path.isfile(_audioFile):
-        t = os.path.getmtime(_audioFile)
-    if t > _lastModifiedTime:
-        _load()
 
 def _playClip(item):
     clipName = item['clip']
@@ -87,6 +86,8 @@ def _on_audioPlay(clip, console = False, sessionId = False, broadcast = False):
     if not console and not sessionId and not broadcast:
         _logger.warning('No destination for audio!')
         return
+    if console and not settings.getboolean('enableLocalAudio'): return
+    if (sessionId or broadcast) and not settings.getboolean('enableRemoteAudio'): return
     _playQueue.put_nowait({
         'clip': clip,
         'console': console,
@@ -105,20 +106,21 @@ def getVolume():
         return 1
     
 def _load():
-    global _lastModifiedTime, _audioConfig, _clips
+    global _lastConfigModifiedTime, _audioConfig, _clips
     
     _audioConfig = {}
-    _lastModifiedTime = 0
     
     if os.path.isfile(_audioFile):
         try:
             with open(_audioFile) as f:
                 _audioConfig = yaml.load(f)
-            _lastModifiedTime = os.path.getmtime(_audioFile)
+            _lastConfigModifiedTime = os.path.getmtime(_audioFile)
         except Error as e:
             _logger.error('Error while loading audio configuration: {}'.format(e))
             return
-
+    else:
+        return
+        
     if 'tts' not in _audioConfig or not isinstance(_audioConfig['tts'], dict):
         _audioConfig['tts'] = {}
     if 'effects' not in _audioConfig or not isinstance(_audioConfig['effects'], list):

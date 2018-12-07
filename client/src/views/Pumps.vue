@@ -259,14 +259,14 @@ export default {
     },
   
     onLogout() {
-      if (! ((this.$store.state.options.dispenserSetupRequiresAdmin == false) || this.$store.state.user.isAdmin))
+      if (! ((store.state.settings.dispenserSetupRequiresAdmin == false) || store.state.user.isAdmin))
         this.$router.replace({name: 'home'})
     },
     
   },
   
   beforeRouteEnter(to, from, next) {
-    if (! ((store.state.options.dispenserSetupRequiresAdmin == false) || store.state.user.isAdmin))
+    if (! ((store.state.settings.dispenserSetupRequiresAdmin == false) || store.state.user.isAdmin))
       next({name: 'home'})
     else
       next(t => {

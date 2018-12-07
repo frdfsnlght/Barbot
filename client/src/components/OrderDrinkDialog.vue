@@ -33,7 +33,7 @@
                 ></v-checkbox>
               </v-flex>
               
-              <v-flex xs12  v-if="drink.isAlcoholic && parentalLock">
+              <v-flex xs12  v-if="drink.isAlcoholic && parentalCode">
                 <v-text-field
                   label="Code"
                   v-model="order.parentalCode"
@@ -86,7 +86,7 @@ export default {
   
   computed: {
     ...mapState({
-      parentalLock: state => state.parentalLock,
+      parentalCode: state => state.settings.parentalCode,
     })
   },
   

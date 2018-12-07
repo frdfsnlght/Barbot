@@ -27,6 +27,7 @@ import barbot.wifi
 import barbot.lights
 import barbot.audio
 import barbot.dispenser
+import barbot.settings
 
 from barbot.db import initializeDB
 import barbot.core
@@ -82,6 +83,7 @@ def startServer():
     # wait for the end
     while not exitEvent.is_set():
         exitEvent.wait(1)
+        bus.emit('server/tick')
         
     bus.emit('server/stop')
     #time.sleep(3)

@@ -57,8 +57,8 @@ export default {
           }
         })
       }
-      if (t.isConsole && t.dispenserState == 'dispense') {
-        t.$socket.emit('dispenser_stopDispense', (res) => {
+      if (t.isConsole && t.dispenserState == 'manual') {
+        t.$socket.emit('dispenser_stopManual', (res) => {
           if (res.error) {
             t.$store.commit('setError', res.error)
           }

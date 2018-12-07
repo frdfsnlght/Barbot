@@ -7,8 +7,7 @@ var/*.log
 var/*.log.*
 var/*.db*
 var/*.pid
-var/parentalCode
-var/volume
+var/settings.ini
 var/glass
 etc/config.ini
 content
