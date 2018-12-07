@@ -53,7 +53,20 @@
           >
             <v-toolbar-title>Ingredients</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn v-if="ingredients" icon @click="addDrink()">
+            <v-btn
+              v-if="ingredients"
+              :disabled="anyPumpRunning"
+              icon
+              @click="clearIngredients()"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>      
+            <v-btn
+              v-if="ingredients"
+              :disabled="anyPumpRunning"
+              icon
+              @click="addDrink()"
+            >
               <v-icon>mdi-cup-water</v-icon>
             </v-btn>      
           </v-toolbar>
@@ -180,6 +193,10 @@ export default {
           this.$store.commit('setError', res.error)
         }
       })
+    },
+    
+    clearIngredients() {
+      this.ingredients = []
     },
     
     captureIngredient(ingredient, amount) {
