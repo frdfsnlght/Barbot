@@ -29,7 +29,7 @@ import barbot.audio
 import barbot.dispenser
 import barbot.settings
 
-from barbot.db import initializeDB
+from barbot.db import initializeDB, db
 import barbot.core
 
 from barbot.app import app
@@ -87,6 +87,8 @@ def startServer():
         
     bus.emit('server/stop')
     #time.sleep(3)
+    
+    db.close()
     
     logger.info('Server stopped')
 

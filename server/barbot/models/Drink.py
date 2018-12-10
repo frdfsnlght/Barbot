@@ -27,10 +27,12 @@ class Drink(BarbotModel):
     instructions = TextField(null = True)
     isFavorite = BooleanField(default = False)
     isAlcoholic = BooleanField(default = True)
+    numIngredients = IntegerField(default = 0)
+    
     isOnMenu = BooleanField(default = False)
+    numIngredientsAvailable = IntegerField(null = True)
+    
     timesDispensed = IntegerField(default = 0)
-    createdDate = DateTimeField(default = datetime.datetime.now)
-    updatedDate = DateTimeField(default = datetime.datetime.now)
     source = CharField(default = 'local')
     
     @staticmethod
@@ -50,7 +52,7 @@ class Drink(BarbotModel):
         ingredients = Pump.getReadyIngredients()
         menuDrinks = Drink.getMenuDrinks()
 
-        #print('current menu: {}'.format([d.name() for d in menuDrinks]))
+        print('current menu: {}'.format([d.name() for d in menuDrinks]))
         
         # trivial case
         if not ingredients:
@@ -60,52 +62,64 @@ class Drink(BarbotModel):
                 menuUpdated = True
             
         else:
-            #print('ingredients: {}'.format([i.name for i in ingredients]))
+            print('ingredients: {}'.format([i.name for i in ingredients]))
             
             for drink in Drink.getDrinksWithIngredients(ingredients):
-                #print('consider drink {}'.format(drink.name()))
+                print(drink.name())
                 
                 # remove this drink from the existing menu drinks
                 menuDrinks = [d for d in menuDrinks if d.id != drink.id]
                 
                 onMenu = True
+                availableIngredients = 0
                 # check for all the drink's ingredients
                 for di in drink.ingredients:
-                    #print('looking for {}'.format(di.ingredient.name))
                     pump = Pump.getPumpWithIngredientId(di.ingredient_id)
-                    if not pump or pump.state == Pump.EMPTY or units.toML(pump.amount, pump.units) < units.toML(di.amount, di.units):
-                        #print('  not available')
+                    if pump and pump.state == Pump.READY and units.toML(pump.amount, pump.units) >= units.toML(di.amount, di.units):
+                        print('  {} found on pump {}'.format(di.ingredient.name, pump.name()))
+                        availableIngredients = availableIngredients + 1
+                    else:
+                        print('  {} not available'.format(di.ingredient.name))
                         onMenu = False
-                        break
-                    #print('  found it on pump {}'.format(pump.name()))
-                if onMenu != drink.isOnMenu:
+                        
+                if onMenu != drink.isOnMenu or availableIngredients != drink.numIngredientsAvailable:
                     drink.isOnMenu = onMenu
+                    drink.numIngredientsAvailable = availableIngredients
                     drink.save()
                     menuUpdated = True
                     
-                    #if drink.isOnMenu:
-                    #    print('added to menu')
-                    #else:
-                    #    print('removed from menu')
+                    print('  {} of {} ingredients found'.format(drink.numIngredientsAvailable, drink.numIngredients))
+                    if drink.isOnMenu:
+                        print('  Added to menu')
+                    else:
+                        print('  Removed from menu')
+                else:
+                    print('  {} of {} ingredients found'.format(drink.numIngredientsAvailable, drink.numIngredients))
+                    if drink.isOnMenu:
+                        print('  Stays on menu')
+                    else:
+                        print('  Stays off menu')
         
             # any drinks in the original list are no longer on the menu
             for drink in menuDrinks:
                 drink.isOnMenu = False
                 drink.save()
                 menuUpdated = True
-                #print('{} removed from menu'.format(drink.name()))
+                print('{} removed from menu'.format(drink.name()))
                 
-        bus.emit('drink_menuChanged')
+        if menuUpdated:
+            print('menu was updated')
+            bus.emit('drink_menuChanged')
+            from .DrinkOrder import DrinkOrder
+            DrinkOrder.updateDrinkOrders()
+        else:
+            print('menu was not updated')
             
-        from .DrinkOrder import DrinkOrder
-        DrinkOrder.updateDrinkOrders()
-    
     # override
     def save(self, *args, **kwargs):
         if self.alreadyExists():
             raise ModelError('A drink with the same name already exists!')
         if self.is_dirty():
-            self.updatedDate = datetime.datetime.now()
             super().save(*args, **kwargs)
             bus.emit('model/drink/saved', self)
             return True
@@ -127,6 +141,7 @@ class Drink(BarbotModel):
     def name(self):
         return self.primaryName + (('/' + self.secondaryName) if self.secondaryName else '')
         
+    @db.atomic()
     def setIngredients(self, drinkIngredients):
 
         # don't allow more than 4 ingredients in the same step
@@ -145,6 +160,7 @@ class Drink(BarbotModel):
             raise ModelError('Drink ingredients exceed configured limit!')
             
         isAlcoholic = False
+        numIngredients = 0
         
         # update/remove ingredients
         for i in self.ingredients:
@@ -155,6 +171,7 @@ class Drink(BarbotModel):
                 i.step = found.step
                 i.save()
                 isAlcoholic = isAlcoholic or i.ingredient.isAlcoholic
+                numIngredients = numIngredients + 1
                 #_logger.debug('updating ' + str(di.id))
                 drinkIngredients.remove(found)
             else:
@@ -165,10 +182,12 @@ class Drink(BarbotModel):
         for di in drinkIngredients:
             di.save()
             isAlcoholic = isAlcoholic or di.ingredient.isAlcoholic
+            numIngredients = numIngredients + 1
             #_logger.debug('add ingredient {}'.format(di.ingredient_id))
     
         self.isAlcoholic = isAlcoholic
-    
+        self.numIngredients = numIngredients
+        
     def toDict(self, glass = False, ingredients = False):
         out = {
             'id': self.id,
@@ -178,10 +197,10 @@ class Drink(BarbotModel):
             'instructions': self.instructions,
             'isFavorite': self.isFavorite,
             'isAlcoholic': self.isAlcoholic,
+            'numIngredients': self.numIngredients,
             'isOnMenu': self.isOnMenu,
+            'numIngredientsAvailable': self.numIngredientsAvailable,
             'timesDispensed': self.timesDispensed,
-            'createdDate': self.createdDate.isoformat(),
-            'updatedDate': self.updatedDate.isoformat(),
             'name': self.name(),
         }
         if glass:

@@ -1,5 +1,6 @@
 
 from peewee import SqliteDatabase, Model, logging
+from playhouse.migrate import *
 
 from .config import config
 from .app import app
@@ -9,7 +10,7 @@ _logger = logging.getLogger('DB')
 
 
 models = []
-version = 1
+version = 2
 
 db = SqliteDatabase(config.getpath('db', 'dbFile'), pragmas = {
     'journal_mode': 'wal',  # allow readers and writers to co-exist
@@ -68,6 +69,46 @@ def initializeDB():
     # do upgrades here
     #
     
-    v.version = version
-    v.save()
+    if v.version == 1:
+        _upgrade_1to2(v)
+    
     _logger.info('Database upgrade complete')
+
+#@db.atomic()
+def _upgrade_1to2(v):
+    from .models.Drink import Drink
+    
+    db.execute_sql('pragma foreign_keys=off')
+    
+    with db.atomic() as transaction:
+        db.execute_sql('alter table drink rename TO drink_old')
+        db.create_tables([Drink])
+        db.execute_sql('insert into drink (primaryName, secondaryName, glass_id, instructions, isFavorite, isAlcoholic, isOnMenu, timesDispensed, source, numIngredients) ' +
+                       'select primaryName, secondaryName, glass_id, instructions, isFavorite, isAlcoholic, isOnMenu, timesDispensed, source, 0 from drink_old')
+        db.execute_sql('drop table drink_old')
+        
+        for drink in Drink.select():
+            drink.numIngredients = drink.ingredients.select().count()
+            drink.save()
+            
+        v.version = 2
+        v.save()
+        
+    db.execute_sql('pragma foreign_keys=on')
+
+    
+#    migrator = SqliteMigrator(db)
+ 
+#    drink_numIngredients = IntegerField(default = 0)
+#    drink_numIngredientsAvailable = IntegerField(null = True)
+    
+#    migrate(
+#        migrator.drop_column('drink', 'createdDate'),
+#        migrator.drop_column('drink', 'updatedDate'),
+#        migrator.add_column('drink', 'numIngredients', drink_numIngredients),
+#        migrator.add_column('drink', 'numIngredientsAvailable', drink_numIngredientsAvailable),
+#    )
+
+    _logger.info('Upgraded database from version 1 to 2')
+    
+    

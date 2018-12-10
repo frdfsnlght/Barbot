@@ -21,6 +21,10 @@ export default {
     value: {
       type: Number,
     },
+    manageIngredientsStore: {
+      type: Boolean,
+      default: true
+    },
   },
   
   data: function() {
@@ -45,11 +49,13 @@ export default {
   },
   
   mounted() {
-    this.$store.dispatch('ingredients/getAll')
+    if (this.manageIngredientsStore)
+      this.$store.dispatch('ingredients/getAll')
   },
   
   destroyed() {
-    this.$store.commit('ingredients/destroy')
+    if (this.manageIngredientsStore)
+      this.$store.commit('ingredients/destroy')
   },
   
 }

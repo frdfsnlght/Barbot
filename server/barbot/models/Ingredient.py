@@ -42,7 +42,26 @@ class Ingredient(BarbotModel):
         i = Ingredient.select().where(Ingredient.name == self.name).first()
         return i if i and self.id != i.id else None
     
-    def toDict(self, drinks = False):
+    @db.atomic()
+    def setAlternatives(self, ingredientAlternatives):
+
+        for ia in ingredientAlternatives:
+            if ia.alternative_id == self.id:
+                raise ModelError('Ingredient can\'t be it\'s own alternative!')
+    
+        # update/remove ingredients
+        for i in self.alternatives:
+            found = next((ia for ia in ingredientAlternatives if ia.alternative_id == i.alternative_id), None)
+            if found:
+                ingredientAlternatives.remove(found)
+            else:
+                i.delete_instance()
+            
+        # add new ingredients
+        for ia in ingredientAlternatives:
+            ia.save()
+    
+    def toDict(self, drinks = False, alternatives = False):
         pump = self.pump.first()
         out = {
             'id': self.id,
@@ -57,14 +76,19 @@ class Ingredient(BarbotModel):
         }
         if drinks:
             out['drinks'] = [di.toDict(drink = True) for di in self.drinks]
+        if alternatives:
+            out['alternatives'] = [alt.toDict(alternative = True) for alt in self.alternatives]
+        
         return out
         
-    def export(self, stats = False):
+    def export(self, alternatives = False, stats = False):
         out = {
             'id': self.id,
             'name': self.name,
             'isAlcoholic': self.isAlcoholic,
         }
+        if alternatives:
+            out['alternatives'] = [alt.export() for alt in self.alternatives]
         if stats:
             out['timesDispensed'] = self.timesDispensed
             out['amountDispensed'] = self.amountDispensed

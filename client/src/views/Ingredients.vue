@@ -86,61 +86,8 @@
       </v-btn>
     </template>
     
-    <v-dialog v-model="dialog" persistent scrollable @keydown.esc="closeDialog" @keydown.enter.prevent="saveIngredient">
-      <v-card>
-        <v-card-title>
-          <span
-            v-if="edit"
-            class="headline"
-          >Edit Ingredient</span>
-          <span
-            v-else
-            class="headline"
-          >Add Ingredient</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="form" v-model="valid" lazy-validation>
-            <v-container grid-list-md>
-              <v-layout wrap>
-              
-                <v-flex xs12>
-                  <v-text-field
-                    label="Name"
-                    v-model="ingredient.name"
-                    :rules="[v => !!v || 'Name is required']"
-                    required
-                    autofocus
-                    :data-kbUCWords="true"
-                    tabindex="1"
-                  ></v-text-field>
-                </v-flex>
-                
-                <v-flex xs12>
-                  <v-checkbox
-                    label="Is this ingredient alcoholic?"
-                    v-model="ingredient.isAlcoholic"
-                    required
-                  ></v-checkbox>
-                </v-flex>
-                
-              </v-layout>
-            </v-container>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            flat
-            @click="closeDialog()">close</v-btn>
-          <v-btn
-            :disabled="!valid"
-            flat
-            @click="saveIngredient()">save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <confirm ref="confirm"></confirm>
+    <ingredient-dialog ref="ingredientDialog"/>
       
   </v-card>
         
@@ -152,26 +99,27 @@ import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
 import AlcoholicIcon from '../components/AlcoholicIcon'
-import bus from '../bus'
+import IngredientDialog from '../components/IngredientDialog'
 
 export default {
   name: 'Ingredients',
+  
   data() {
     return {
       ingredient: {},
-      dialog: false,
-      edit: false,
-      valid: true,
       menu: false,
       menuX: 0,
       menuY: 0,
     }
   },
+  
   components: {
     Loading,
     Confirm,
     AlcoholicIcon,
+    IngredientDialog,
   },
+  
   created() {
     this.$emit('show-page', 'Ingredients')
   },
@@ -192,7 +140,6 @@ export default {
     },
   
     showMenu(ingredient, e) {
-      this.$refs.form.reset()
       this.ingredient = JSON.parse(JSON.stringify(ingredient))
       this.menuX = e.clientX
       this.menuY = e.clientY
@@ -200,37 +147,16 @@ export default {
     },
   
     addIngredient() {
-      this.$refs.form.reset()
-      this.ingredient = {
+      this.$refs.ingredientDialog.open({
         id: undefined,
-        name: undefined
-      }
-      this.edit = false
-      bus.$emit('keyboard-install', this.$refs.form)
-      this.dialog = true
+        name: undefined,
+        isAlcoholic: false,
+        alternatives: []
+      }).then(()=>{},()=>{})
     },
     
     editIngredient() {
-      this.edit = true
-      bus.$emit('keyboard-install', this.$refs.form)
-      this.dialog = true
-    },
-    
-    closeDialog() {
-      this.dialog = false
-      this.ingredient = {}
-      bus.$emit('keyboard-remove', this.$refs.form)
-    },
-    
-    saveIngredient() {
-      if (! this.$refs.form.validate()) return
-      this.$socket.emit('ingredient_save', this.ingredient, (res) => {
-        if (res.error) {
-          this.$store.commit('setError', res.error)
-        } else {
-          this.closeDialog()
-        }
-      })
+      this.$refs.ingredientDialog.open(this.ingredient, true).then(()=>{},()=>{})
     },
     
     deleteIngredient() {

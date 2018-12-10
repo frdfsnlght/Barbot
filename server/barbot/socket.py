@@ -21,6 +21,7 @@ from .models.DrinkIngredient import DrinkIngredient
 from .models.DrinkOrder import DrinkOrder
 from .models.Glass import Glass
 from .models.Ingredient import Ingredient
+from .models.IngredientAlternative import IngredientAlternative
 from .models.Pump import Pump
 from .models.User import User
 
@@ -423,7 +424,7 @@ def _socket_glass_delete(id):
 @socket.on('ingredient_getAll')
 def _socket_ingredient_getAll():
     _logger.debug('recv ingredient_getAll')
-    return success(ingredients = [i.toDict() for i in Ingredient.select()])
+    return success(ingredients = [i.toDict(alternatives = True) for i in Ingredient.select()])
 
 @socket.on('ingredient_getOne')
 def _socket_ingredient_getOne(id):
@@ -431,7 +432,7 @@ def _socket_ingredient_getOne(id):
     ingredient = Ingredient.get_or_none(Ingredient.id == id)
     if not ingredient:
         return error('Ingredient not found!')
-    return success(ingredient = ingredient.toDict(drinks = True))
+    return success(ingredient = ingredient.toDict(drinks = True, alternatives = True))
     
 @socket.on('ingredient_save')
 @validate({
@@ -443,6 +444,7 @@ def _socket_ingredient_getOne(id):
     'lastContainerAmount': [(float, int), False],
     'lastAmount': [(float, int), False],
     'lastUnits': [str, False],
+    'alternatives': [list, False],
 })
 def _socket_ingredient_save(params):
     _logger.debug('recv ingredient_save')
@@ -469,7 +471,33 @@ def _socket_ingredient_save(params):
         if 'lastUnits' in params:
             ingredient.lastUnits = params['lastUnits']
             
+            
+        if 'alternatives' in params:
+            if ingredient.get_id() is None:
+                ingredient.save()
+
+            ingredientAlternatives = []
+            for alt in params['alternatives']:
+                try:
+                    validateParams(alt, {
+                        'alternative_id': [int, True],
+                    })
+                except ValidationError as e:
+                    return error(e)
+                    
+                alternative = Ingredient.get_or_none(Ingredient.id == alt['alternative_id'])
+                if not alternative:
+                    return error('Ingredient {} not found!'.format(alt['alternative_id']))
+                    
+                ingredientAlternative = IngredientAlternative()
+                ingredientAlternative.ingredient = ingredient
+                ingredientAlternative.alternative = alternative
+                ingredientAlternatives.append(ingredientAlternative)
+                
+            ingredient.setAlternatives(ingredientAlternatives)
+            
         ingredient.save()
+        Drink.rebuildMenu()
         return success()
         
     except ModelError as e:
@@ -939,6 +967,7 @@ def _bus_model_ingredient_deleted(i):
 
 @bus.on('model/drink/saved')
 def _bus_model_drink_saved(d):
+    if not socket.server: return
     _logger.debug('emit drink_changed')
     socket.emit('drink_changed', d.toDict(glass = True, ingredients = True))
 

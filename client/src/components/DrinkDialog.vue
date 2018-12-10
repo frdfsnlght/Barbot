@@ -1,6 +1,6 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="cancel" @keydown.enter.prevent="submit">
+  <v-dialog v-model="dialog" persistent scrollable @keydown.esc="cancel" @keydown.enter.prevent="submit">
     <v-card>
       <v-card-title>
         <span
@@ -104,7 +104,7 @@ import DrinkIngredients from './DrinkIngredients'
 import bus from '../bus'
 
 export default {
-  name: 'OrderDrinkDialog',
+  name: 'DrinkDialog',
   
   data() {
     return {

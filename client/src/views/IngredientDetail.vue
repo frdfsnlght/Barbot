@@ -27,6 +27,34 @@
         <p class="subheading">Amount dispensed: {{amountDispensedML}} ml / {{amountDispensedOZ}} oz</p>
         <p class="subheading">Times dispensed: {{timesDispensed}}</p>
         
+        <h2>Alternatives</h2>
+
+        <p
+          v-if="!hasAlternatives"
+          class="subheading"
+        >This ingredient has no alternatives.</p>
+        
+        <v-list dense v-else>
+
+          <v-list-tile
+            v-for="ia in sortedAlternatives"
+            :key="ia.alternative.id"
+            ripple
+            avatar
+            @click="gotoIngredientDetail(ia.alternative_id)"
+          >
+            <v-list-tile-avatar>
+              <alcoholic-icon :alcoholic="ia.alternative.isAlcoholic"/>
+            </v-list-tile-avatar>
+            
+            <v-list-tile-content>
+              <v-list-tile-title>{{ia.alternative.name}}</v-list-tile-title>
+            </v-list-tile-content>
+
+          </v-list-tile>
+          
+        </v-list>
+        
         <h2>Drinks</h2>
 
         <p
@@ -106,6 +134,15 @@ export default {
             ((this.ingredient.lastAmount / this.ingredient.lastContainerAmount) * 100).toFixed() + '% full ' +
             '(' + units.format(this.ingredient.lastAmount, this.ingredient.lastUnits) + ')'
     },
+    hasAlternatives() {
+      return this.ingredient.alternatives && this.ingredient.alternatives.length > 0
+    },
+    sortedAlternatives() {
+      if (! this.hasAlternatives) return []
+      return this.ingredient.alternatives.slice().sort((a, b) => {
+        return a.alternative.name.localeCompare(b.alternative.name, 'en', {'sensitivity': 'base'})
+      })
+    },
     hasDrinks() {
       return this.ingredient.drinks && this.ingredient.drinks.length > 0
     },
@@ -123,6 +160,11 @@ export default {
   
   methods: {
     
+    gotoIngredientDetail(id) {
+      this.$router.push({name: 'ingredientDetail', params: {id: id}})
+    },
+    
+    
     gotoDrinkDetail(id) {
       this.$router.push({name: 'drinkDetail', params: {id: id}})
     },
@@ -133,6 +175,11 @@ export default {
     next(t => {
       t.$store.dispatch('ingredients/getOne', t.$route.params.id)
     });
+  },
+  
+  beforeRouteUpdate(to, from, next) {
+    this.$store.dispatch('ingredients/getOne', to.params.id)
+    next()
   },
   
   beforeRouteLeave(to, from, next) {

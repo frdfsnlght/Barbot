@@ -163,8 +163,14 @@ class Pump(BarbotModel):
         return Pump.select().where(Pump.state == Pump.READY).execute()
 
     @staticmethod
-    def getReadyIngredients():
-        return Ingredient.select().join(Pump).where(Pump.state == Pump.READY).execute()
+    def getReadyIngredients(alternatives = True):
+        ingredients = Ingredient.select().join(Pump).where(Pump.state == Pump.READY).execute()
+        if alternatives:
+            for ingredient in ingredients[:]:
+                for alt in ingredient.alternatives.select():
+                    if not next(i for i in ngredients if i.id == alt.alternative_id):
+                        ingredients.append(alt.alternative)
+        return ingredients
         
     @staticmethod
     def getPumpWithIngredientId(id):

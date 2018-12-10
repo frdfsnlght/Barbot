@@ -105,11 +105,10 @@ import DrinkDialog from '../components/DrinkDialog'
 
 export default {
   name: 'Drinks',
+  
   data() {
     return {
       drink: {},
-      edit: false,
-      valid: true,
       menu: false,
       menuX: 0,
       menuY: 0,

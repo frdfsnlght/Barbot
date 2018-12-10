@@ -24,8 +24,8 @@ class DrinkIngredient(BarbotModel):
     def toDict(self, drink = False, ingredient = False):
         out = {
             'id': self.id,
-            'drink_id': self.drink.id,
-            'ingredient_id': self.ingredient.id,
+            'drink_id': self.drink_id,
+            'ingredient_id': self.ingredient_id,
             'amount': self.amount,
             'units': self.units,
             'step': self.step,
