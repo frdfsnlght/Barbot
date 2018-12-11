@@ -13,6 +13,7 @@ from .Pump import Pump
 
 
 _logger = logging.getLogger('Models.Drink')
+_menu = {}
 
 
 @bus.on('server/start')
@@ -29,15 +30,13 @@ class Drink(BarbotModel):
     isAlcoholic = BooleanField(default = True)
     numIngredients = IntegerField(default = 0)
     
-    isOnMenu = BooleanField(default = False)
-    numIngredientsAvailable = IntegerField(null = True)
-    
     timesDispensed = IntegerField(default = 0)
     source = CharField(default = 'local')
     
     @staticmethod
     def getMenuDrinks():
-        return Drink.select().where(Drink.isOnMenu == True).execute()
+        ids = [id for id in _menu.keys() if _menu[id]['onMenu']]
+        return Drink.select().where(Drink.id.in_(ids)).execute()
 
     @staticmethod
     def getDrinksWithIngredients(ingredients):
@@ -45,75 +44,54 @@ class Drink(BarbotModel):
         return Drink.select(Drink).distinct().join(DrinkIngredient).where(DrinkIngredient.ingredient.in_(list(ingredients))).execute()
 
     @staticmethod
-    @db.atomic()
     def rebuildMenu():
+        global _menu
         _logger.info('Rebuilding drinks menu')
-        menuUpdated = False
+        newMenu = {}
         ingredients = Pump.getReadyIngredients()
-        menuDrinks = Drink.getMenuDrinks()
-
-        print('current menu: {}'.format([d.name() for d in menuDrinks]))
         
-        # trivial case
-        if not ingredients:
-            for drink in menuDrinks:
-                drink.isOnMenu = False
-                drink.save()
-                menuUpdated = True
-            
-        else:
-            print('ingredients: {}'.format([i.name for i in ingredients]))
+        if ingredients:
             
             for drink in Drink.getDrinksWithIngredients(ingredients):
-                print(drink.name())
-                
-                # remove this drink from the existing menu drinks
-                menuDrinks = [d for d in menuDrinks if d.id != drink.id]
+                #print(drink.name())
                 
                 onMenu = True
                 availableIngredients = 0
                 # check for all the drink's ingredients
                 for di in drink.ingredients:
-                    pump = Pump.getPumpWithIngredientId(di.ingredient_id)
-                    if pump and pump.state == Pump.READY and units.toML(pump.amount, pump.units) >= units.toML(di.amount, di.units):
-                        print('  {} found on pump {}'.format(di.ingredient.name, pump.name()))
+                    pump = Pump.getPumpWithIngredient(di.ingredient)
+                    if pump and units.toML(pump.amount, pump.units) >= units.toML(di.amount, di.units):
+                        #if di.ingredient_id == pump.ingredient_id:
+                        #    print('  {} found on pump {}'.format(pump.ingredient_id, pump.name()))
+                        #else:
+                        #    print('  {} (alt) found on pump {}'.format(pump.ingredient_id, pump.name()))
                         availableIngredients = availableIngredients + 1
                     else:
-                        print('  {} not available'.format(di.ingredient.name))
+                        #print('  {} not available'.format(di.ingredient_id))
                         onMenu = False
                         
-                if onMenu != drink.isOnMenu or availableIngredients != drink.numIngredientsAvailable:
-                    drink.isOnMenu = onMenu
-                    drink.numIngredientsAvailable = availableIngredients
-                    drink.save()
-                    menuUpdated = True
-                    
-                    print('  {} of {} ingredients found'.format(drink.numIngredientsAvailable, drink.numIngredients))
-                    if drink.isOnMenu:
-                        print('  Added to menu')
-                    else:
-                        print('  Removed from menu')
-                else:
-                    print('  {} of {} ingredients found'.format(drink.numIngredientsAvailable, drink.numIngredients))
-                    if drink.isOnMenu:
-                        print('  Stays on menu')
-                    else:
-                        print('  Stays off menu')
-        
-            # any drinks in the original list are no longer on the menu
-            for drink in menuDrinks:
-                drink.isOnMenu = False
-                drink.save()
-                menuUpdated = True
-                print('{} removed from menu'.format(drink.name()))
+                newMenu[drink.id] = {
+                    'onMenu': onMenu,
+                    'missingIngredients': drink.numIngredients - availableIngredients,
+                }
                 
-        if menuUpdated:
-            print('menu was updated')
+                #print('  {} of {} ingredients found'.format(availableIngredients, drink.numIngredients))
+                #if onMenu:
+                #    print('  On menu')
+                #else:
+                #    print('  Not on menu')
+        
+        #print('old menu: {}'.format(_menu))
+        #print('new menu: {}'.format(newMenu))
+        
+        if _menu != newMenu:
+            _menu = newMenu
+            #print('menu updated')
             bus.emit('drink_menuChanged')
             from .DrinkOrder import DrinkOrder
             DrinkOrder.updateDrinkOrders()
-        else:
-            print('menu was not updated')
+        #else:
+        #    print('menu not updated')
             
     # override
     def save(self, *args, **kwargs):
@@ -140,6 +118,14 @@ class Drink(BarbotModel):
     
     def name(self):
         return self.primaryName + (('/' + self.secondaryName) if self.secondaryName else '')
+        
+    def isOnMenu(self):
+        if self.id not in _menu: return False
+        return _menu[self.id]['onMenu']
+        
+    def missingIngredients(self):
+        if self.id not in _menu: return self.numIngredients
+        return _menu[self.id]['missingIngredients']
         
     @db.atomic()
     def setIngredients(self, drinkIngredients):
@@ -188,7 +174,7 @@ class Drink(BarbotModel):
         self.isAlcoholic = isAlcoholic
         self.numIngredients = numIngredients
         
-    def toDict(self, glass = False, ingredients = False):
+    def toDict(self, glass = False, ingredients = False, ingredientAlternatives = False):
         out = {
             'id': self.id,
             'primaryName': self.primaryName,
@@ -198,25 +184,27 @@ class Drink(BarbotModel):
             'isFavorite': self.isFavorite,
             'isAlcoholic': self.isAlcoholic,
             'numIngredients': self.numIngredients,
-            'isOnMenu': self.isOnMenu,
-            'numIngredientsAvailable': self.numIngredientsAvailable,
             'timesDispensed': self.timesDispensed,
             'name': self.name(),
+            'isOnMenu': self.isOnMenu(),
+            'missingIngredients': self.missingIngredients(),
         }
         if glass:
             out['glass'] = self.glass.toDict()
         if ingredients:
-            out['ingredients'] = [di.toDict(ingredient = True) for di in self.ingredients]
+            out['ingredients'] = [di.toDict(ingredient = True, ingredientAlternatives = ingredientAlternatives) for di in self.ingredients]
         return out
     
     def export(self, stats = False):
         out = {
             'primaryName': self.primaryName,
-            'secondaryName': self.secondaryName,
-            'glass_id': self.glass_id,
-            'instructions': self.instructions,
-            'ingredients': []
+            'glass': '{} {} {}'.format(self.glass.size, self.glass.units, self.glass.type),
+            'ingredients': [],
         }
+        if self.secondaryName:
+            out['secondaryName'] = self.secondaryName
+        if self.instructions:
+            out['instructions'] = self.instructions
         if stats:
             out['isFavorite'] = self.isFavorite
             out['timesDispensed'] = self.timesDispensed

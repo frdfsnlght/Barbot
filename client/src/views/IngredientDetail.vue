@@ -34,21 +34,21 @@
           class="subheading"
         >This ingredient has no alternatives.</p>
         
-        <v-list dense v-else>
+        <v-list v-else>
 
           <v-list-tile
-            v-for="ia in sortedAlternatives"
-            :key="ia.alternative.id"
+            v-for="alt in ingredient.alternatives"
+            :key="alt.id"
             ripple
             avatar
-            @click="gotoIngredientDetail(ia.alternative_id)"
+            @click="gotoIngredientDetail(alt.id)"
           >
             <v-list-tile-avatar>
-              <alcoholic-icon :alcoholic="ia.alternative.isAlcoholic"/>
+              <alcoholic-icon :alcoholic="alt.isAlcoholic"/>
             </v-list-tile-avatar>
             
             <v-list-tile-content>
-              <v-list-tile-title>{{ia.alternative.name}}</v-list-tile-title>
+              <v-list-tile-title>{{alt.name}}</v-list-tile-title>
             </v-list-tile-content>
 
           </v-list-tile>
@@ -65,19 +65,19 @@
         <v-list v-else>
 
           <v-list-tile
-            v-for="di in sortedDrinks"
-            :key="di.drink.id"
+            v-for="drink in sortedDrinks"
+            :key="drink.id"
             ripple
             avatar
-            @click="gotoDrinkDetail(di.drink_id)"
+            @click="gotoDrinkDetail(drink.id)"
           >
             <v-list-tile-avatar>
-              <v-icon v-if="di.drink.isFavorite">mdi-heart</v-icon>
-              <alcoholic-icon :alcoholic="di.drink.isAlcoholic"/>
+              <v-icon v-if="drink.isFavorite">mdi-heart</v-icon>
+              <alcoholic-icon :alcoholic="drink.isAlcoholic"/>
             </v-list-tile-avatar>
 
             <v-list-tile-content>
-              <v-list-tile-title>{{di.drink.name}}</v-list-tile-title>
+              <v-list-tile-title>{{drink.name}}</v-list-tile-title>
             </v-list-tile-content>
             
           </v-list-tile>
@@ -137,19 +137,13 @@ export default {
     hasAlternatives() {
       return this.ingredient.alternatives && this.ingredient.alternatives.length > 0
     },
-    sortedAlternatives() {
-      if (! this.hasAlternatives) return []
-      return this.ingredient.alternatives.slice().sort((a, b) => {
-        return a.alternative.name.localeCompare(b.alternative.name, 'en', {'sensitivity': 'base'})
-      })
-    },
     hasDrinks() {
       return this.ingredient.drinks && this.ingredient.drinks.length > 0
     },
     sortedDrinks() {
       if (! this.hasDrinks) return []
       return this.ingredient.drinks.slice().sort((a, b) => {
-        return a.drink.name.localeCompare(b.drink.name, 'en', {'sensitivity': 'base'})
+        return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
       })
     },
     ...mapState({

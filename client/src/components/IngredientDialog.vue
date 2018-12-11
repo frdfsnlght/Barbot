@@ -107,6 +107,7 @@ export default {
     
     submit() {
       if (! this.$refs.form.validate()) return
+      
       this.$socket.emit('ingredient_save', this.ingredient, (res) => {
         if (res.error) {
           this.$store.commit('setError', res.error)

@@ -21,6 +21,14 @@ class Ingredient(BarbotModel):
     
     source = CharField(default = 'local')
     
+    @staticmethod
+    def expandAlternatives(ingredients):
+        for ingredient in ingredients[:]:
+            for alt in ingredient.prioritizedAlternatives():
+                if next((i for i in ingredients if i.id == alt.alternative_id), None) is None:
+                    ingredients.append(alt.alternative)
+        return ingredients
+        
     # override
     def save(self, *args, **kwargs):
         if self.alreadyExists():
@@ -49,17 +57,39 @@ class Ingredient(BarbotModel):
             if ia.alternative_id == self.id:
                 raise ModelError('Ingredient can\'t be it\'s own alternative!')
     
+        alternativesChanged = False
+        
         # update/remove ingredients
         for i in self.alternatives:
             found = next((ia for ia in ingredientAlternatives if ia.alternative_id == i.alternative_id), None)
             if found:
+                i.priority = found.priority
+                if i.save():
+                    alternativesChanged = True
                 ingredientAlternatives.remove(found)
             else:
                 i.delete_instance()
+                alternativesChanged = True
             
         # add new ingredients
         for ia in ingredientAlternatives:
             ia.save()
+            alternativesChanged = True
+        
+        if alternativesChanged:
+            bus.emit('model/ingredient/saved', self)
+        
+    def prioritizedAlternatives(self):
+        from .IngredientAlternative import IngredientAlternative
+        return self.alternatives.order_by(IngredientAlternative.priority)
+        
+    def allDrinks(self):
+        drinks = [di.drink for di in self.drinks]
+        for alt in self.alternatives:
+            for di in alt.alternative.drinks:
+                if not next((d for d in drinks if d.id == di.drink_id), None):
+                    drinks.append(di.drink)
+        return drinks
     
     def toDict(self, drinks = False, alternatives = False):
         pump = self.pump.first()
@@ -75,20 +105,21 @@ class Ingredient(BarbotModel):
             'lastUnits': self.lastUnits,
         }
         if drinks:
-            out['drinks'] = [di.toDict(drink = True) for di in self.drinks]
+            out['drinks'] = [drink.toDict() for drink in self.allDrinks()]
         if alternatives:
-            out['alternatives'] = [alt.toDict(alternative = True) for alt in self.alternatives]
+            out['alternatives'] = [alt.toDict() for alt in self.prioritizedAlternatives()]
         
         return out
         
     def export(self, alternatives = False, stats = False):
         out = {
-            'id': self.id,
             'name': self.name,
             'isAlcoholic': self.isAlcoholic,
         }
         if alternatives:
-            out['alternatives'] = [alt.export() for alt in self.alternatives]
+            alts = [alt.alternative.name for alt in self.prioritizedAlternatives()]
+            if alts:
+                out['alternatives'] = alts
         if stats:
             out['timesDispensed'] = self.timesDispensed
             out['amountDispensed'] = self.amountDispensed

@@ -56,15 +56,13 @@ class DrinkOrder(BarbotModel):
     def clearSessionIds():
         DrinkOrder.update(sessionId = None).execute()
         
-    # TODO: need to emit event when order changes state
     @staticmethod
     @db.atomic()
     def updateDrinkOrders():
         _logger.info('Updating drink orders')
-        readyPumps = Pump.getReadyPumps()
         for o in DrinkOrder.getWaiting():
-            if o.drink.isOnMenu == o.ingredientHold:
-                o.ingredientHold = not o.drink.isOnMenu
+            if o.drink.isOnMenu() == o.ingredientHold:
+                o.ingredientHold = not o.drink.isOnMenu()
                 o.save()
                 bus.emit('drinkOrder/changed', o)
 

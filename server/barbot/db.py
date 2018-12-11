@@ -10,7 +10,7 @@ _logger = logging.getLogger('DB')
 
 
 models = []
-version = 2
+version = 1
 
 db = SqliteDatabase(config.getpath('db', 'dbFile'), pragmas = {
     'journal_mode': 'wal',  # allow readers and writers to co-exist
@@ -69,32 +69,31 @@ def initializeDB():
     # do upgrades here
     #
     
-    if v.version == 1:
-        _upgrade_1to2(v)
+    #if v.version == 1:
+    #    _upgrade_1to2(v)
     
     _logger.info('Database upgrade complete')
 
-#@db.atomic()
-def _upgrade_1to2(v):
-    from .models.Drink import Drink
-    
-    db.execute_sql('pragma foreign_keys=off')
-    
-    with db.atomic() as transaction:
-        db.execute_sql('alter table drink rename TO drink_old')
-        db.create_tables([Drink])
-        db.execute_sql('insert into drink (primaryName, secondaryName, glass_id, instructions, isFavorite, isAlcoholic, isOnMenu, timesDispensed, source, numIngredients) ' +
-                       'select primaryName, secondaryName, glass_id, instructions, isFavorite, isAlcoholic, isOnMenu, timesDispensed, source, 0 from drink_old')
-        db.execute_sql('drop table drink_old')
-        
-        for drink in Drink.select():
-            drink.numIngredients = drink.ingredients.select().count()
-            drink.save()
-            
-        v.version = 2
-        v.save()
-        
-    db.execute_sql('pragma foreign_keys=on')
+#def _upgrade_1to2(v):
+#    from .models.Drink import Drink
+#    
+#    db.execute_sql('pragma foreign_keys=off')
+#    
+#    with db.atomic() as transaction:
+#        db.execute_sql('alter table drink rename TO drink_old')
+#        db.create_tables([Drink])
+#        db.execute_sql('insert into drink (primaryName, secondaryName, glass_id, instructions, isFavorite, isAlcoholic, isOnMenu, timesDispensed, source, numIngredients) ' +
+#                       'select primaryName, secondaryName, glass_id, instructions, isFavorite, isAlcoholic, isOnMenu, timesDispensed, source, 0 from drink_old')
+#        db.execute_sql('drop table drink_old')
+#        
+#        for drink in Drink.select():
+#            drink.numIngredients = drink.ingredients.select().count()
+#            drink.save()
+#            
+#        v.version = 2
+#        v.save()
+#        
+#    db.execute_sql('pragma foreign_keys=on')
 
     
 #    migrator = SqliteMigrator(db)
@@ -109,6 +108,6 @@ def _upgrade_1to2(v):
 #        migrator.add_column('drink', 'numIngredientsAvailable', drink_numIngredientsAvailable),
 #    )
 
-    _logger.info('Upgraded database from version 1 to 2')
+#    _logger.info('Upgraded database from version 1 to 2')
     
     

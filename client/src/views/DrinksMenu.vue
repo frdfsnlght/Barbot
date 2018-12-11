@@ -61,7 +61,7 @@
         </v-list-tile>
       </v-list>
 
-      <order-drink-dialog ref="orderDrinkDialog"></order-drink-dialog>
+      <order-drink-dialog ref="orderDrinkDialog"/>
 
     </template>
     

@@ -38,16 +38,16 @@
             :key="di.ingredient.id"
             ripple
             avatar
-            @click="gotoIngredientDetail(di.ingredient_id)"
+            @click="gotoIngredientDetail(di.ingredient.id)"
           >
             <v-list-tile-avatar>
               <alcoholic-icon :alcoholic="di.ingredient.isAlcoholic"/>
-              <v-icon v-if="di.ingredient.isAvailable">mdi-gas-station</v-icon>
+              <v-icon v-if="ingredientIsAvailable(di)">mdi-gas-station</v-icon>
               <v-icon>mdi-numeric-{{di.step}}-box-outline</v-icon>
             </v-list-tile-avatar>
             
             <v-list-tile-content>
-              <v-list-tile-title>{{ingredientAmount(di)}} {{di.ingredient.name}}</v-list-tile-title>
+              <v-list-tile-title>{{ingredientTitle(di)}}</v-list-tile-title>
             </v-list-tile-content>
 
           </v-list-tile>
@@ -112,35 +112,58 @@ export default {
   },
   
   computed: {
+  
     timesDispensed() {
       return this.drink.timesDispensed || 0
     },
+    
     glassName() {
       return this.drink.glass ? this.drink.glass.name : ''
     },
+    
     hasIngredients() {
       return this.drink.ingredients && this.drink.ingredients.length > 0
     },
+    
     sortedIngredients() {
       if (! this.hasIngredients) return []
       return this.drink.ingredients.slice().sort((a, b) => {
-        if (a.ingredient.step < b.ingredient.step) return -1
-        if (a.ingredient.step > b.ingredient.step) return 1
+        let ord = a.ingredient.step - b.ingredient.step
+        if (ord != 0) return ord
         return a.ingredient.name.localeCompare(b.ingredient.name, 'en', {'sensitivity': 'base'})
       })
     },
+
     ...mapState({
       loading: state => state.drinks.loading,
       drink: state => state.drinks.drink,
     })
+    
   },
   
   methods: {
 
-    ingredientAmount(drinkIngredient) {
-      return units.format(drinkIngredient.amount, drinkIngredient.units)
+    ingredientIsAvailable(di) {
+      if (di.ingredient.isAvailable) return true
+      for (let i = 0; i < di.ingredient.alternatives.length; i++) {
+        if (di.ingredient.alternatives[i].isAvailable) return true
+      }
+      return false
     },
-  
+    
+    ingredientTitle(di) {
+      let title = units.format(di.amount, di.units) + ' ' + di.ingredient.name
+      if (di.ingredient.isAvailable) return title
+      for (let i = 0; i < di.ingredient.alternatives.length; i++) {
+        if (di.ingredient.alternatives[i].isAvailable) {
+          title += ' (using ' + di.ingredient.alternatives[i].name + ')'
+          return title
+        }
+      }
+      return title
+    },
+    
+
     gotoIngredientDetail(id) {
       this.$router.push({name: 'ingredientDetail', params: {id: id}})
     },

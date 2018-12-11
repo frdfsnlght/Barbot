@@ -19,32 +19,40 @@
       avatar
       dense
     >
+    
+<draggable v-model="alternatives">
+    
       <v-list-tile
-        v-for="item in sortedItems"
-        :key="item.id"
+        v-for="alternative in alternatives"
+        :key="alternative.id"
       >
-      
+     
+                
         <v-list-tile-avatar>
-          <alcoholic-icon :alcoholic="item.alternative.isAlcoholic"/>
+          <v-icon>mdi-reorder-horizontal</v-icon>
+          <alcoholic-icon :alcoholic="alternative.isAlcoholic"/>
         </v-list-tile-avatar>
         
         <v-list-tile-content>
-          <v-list-tile-title>{{item.alternative.name}}</v-list-tile-title>
+          <v-list-tile-title>{{alternative.name}}</v-list-tile-title>
         </v-list-tile-content>
         
         <v-list-tile-action>
           <v-btn
             icon
-            @click="deleteItem(item)"
+            @click="deleteAlternative(alternative)"
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </v-list-tile-action>
     
       </v-list-tile>
+      
+</draggable>
+    
     </v-list>
     
-    <v-dialog v-model="dialog" persistent scrollable @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
+    <v-dialog v-model="dialog" persistent scrollable @keydown.esc="closeDialog" @keydown.enter.prevent="saveAlternative">
       <v-card>
         <v-card-title>
           <span
@@ -60,7 +68,7 @@
                 <v-flex xs12>
                   <select-ingredient
                     :manageIngredientsStore="false"
-                    v-model="item.alternative_id"
+                    v-model="alternative.id"
                     required
                     autofocus
                     :rules="[v => !!v || 'Ingredient is required']"
@@ -81,7 +89,7 @@
           <v-btn
             :disabled="!valid"
             flat
-            @click="saveItem()">save</v-btn>
+            @click="saveAlternative()">save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -94,6 +102,7 @@
 
 import SelectIngredient from '../components/SelectIngredient'
 import AlcoholicIcon from '../components/AlcoholicIcon'
+import draggable from 'vuedraggable';
 import bus from '../bus'
 
 
@@ -114,31 +123,28 @@ export default {
   
   data: function() {
     return {
-      items: this.value, // only sets initial value!
-      item: {},
+      alternatives: this.value, // only sets initial value!
+      alternative: {},
       dialog: false,
       valid: true,
+      targetAlternativeId: null,
     }
   },
   
   components: {
     SelectIngredient,
     AlcoholicIcon,
+    draggable,
   },
   
   watch: {
+  
     value: function(v) {
-      this.items = v  // update when prop changes!
-    }
-  },
-  
-  computed: {
-  
-    sortedItems() {
-      if (! this.items) return []
-      return this.items.slice().sort((a, b) => {
-        return a.alternative.name.localeCompare(b.alternative.name, 'en', {'sensitivity': 'base'})
-      })
+      this.alternatives = v  // update when prop changes!
+    },
+    
+    alternatives: function(v) {
+      this.$emit('input', v)
     },
     
   },
@@ -147,11 +153,9 @@ export default {
 
     addItem() {
       this.$refs.form.reset()
-      this.item = {
-        id: null,
-        alternative_id: undefined,
+      this.alternative = {
+        id: null
       }
-      this.editIndex = -1
       bus.$emit('keyboard-install', this.$refs.form)
       this.dialog = true
     },
@@ -159,35 +163,33 @@ export default {
     closeDialog() {
       this.dialog = false
       bus.$emit('keyboard-remove', this.$refs.form)
-      this.item = {}
+      this.alternative = {}
     },
 
-    saveItem() {
+    saveAlternative() {
       if (! this.$refs.form.validate()) return
 
       // don't allow ingredient to be it's own alternative
-      if (this.ingredient.id == this.item.alternative_id) {
+      if (this.ingredient.id == this.alternative.id) {
         this.$store.commit('setError', 'An ingredient can\'t be it\'s own alternative!')
         return
       }
       
       // don't allow duplicate ingredients
-      if (this.items.find(item => item.alternative_id === this.item.alternative_id)) {
+      if (this.alternatives.find(alternative => alternative.id === this.alternative.id)) {
         this.$store.commit('setError', 'This ingredient is already an alternative!')
         return
       }
         
-      this.item['alternative'] = this.$store.getters['ingredients/getById'](this.item['alternative_id'])
-      this.items.push(JSON.parse(JSON.stringify(this.item)))
+      let alt = this.$store.getters['ingredients/getById'](this.alternative.id)
+      this.alternatives.push(JSON.parse(JSON.stringify(alt)))
       this.closeDialog()
-      this.$emit('input', this.items)
-   },
+    },
    
-    deleteItem(item) {
-      let idx = this.items.indexOf(item)
+    deleteAlternative(alternative) {
+      let idx = this.alternatives.indexOf(alternative)
       if (idx == -1) return
-      this.items.splice(idx, 1)
-      this.$emit('input', this.items)
+      this.alternatives.splice(idx, 1)
     },
     
   },

@@ -1,25 +1,22 @@
 glasses:
-- id: 1
-  size: 12
+- size: 12
   units: oz
   type: Highball
   description: >
     Tall, chimney-shaped glasses are good for gin-and-tonics,
-    vodka and club sodas, and whiskey and gingers — but also
+    vodka and club sodas, and whiskey and gingers - but also
     can be repurposed for tiki drinks made with crushed ice.
-- id: 2
-  size: 2
+- size: 2
   units: oz
   type: Shot glass
   description: Standard shot glass.
-- id: 3
-  size: 6
+- size: 6
   units: oz
   type: Coupe glass
   description: >
-    Good for cocktails served "up," meaning it’s been shaken or
-    stirred with ice and then served chilled, without ice — like
-    a Martini. The stem means you don’t heat up the cocktail
+    Good for cocktails served "up," meaning it's been shaken or
+    stirred with ice and then served chilled, without ice - like
+    a Martini. The stem means you don't heat up the cocktail
     with your hand as you sip it.
 - id: 4
   size: 8
@@ -28,7 +25,7 @@ glasses:
   description: >
     Used for anything neat, any spirit on the rocks, though also
     used for stirred, chilled, spirituous cocktails served "down,"
-    meaning it’s served chilled, but in a glass without a stem.
+    meaning it's served chilled, but in a glass without a stem.
 - id: 5
   size: 12
   units: oz
@@ -42,6 +39,10 @@ ingredients:
 
 # Alcoholic
 
+- name: Absolute Vodka
+  isAlcoholic: true
+  alternatives:
+    - Vodka
 - name: Vodka
   isAlcoholic: true
 - name: Gin
@@ -102,7 +103,7 @@ drinks:
 
 - primaryName: Rum and Coke
   secondaryName: Traditional
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 2.0
     units: oz
@@ -115,7 +116,7 @@ drinks:
   instructions: Pour the rum into a highball glass filled with ice and top with cola.
 
 - primaryName: Spiced Rum and Coke
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 3.0
     units: oz
@@ -128,7 +129,7 @@ drinks:
   instructions: Pour the rum into a highball glass filled with ice and top with cola.
 
 - primaryName: Swedish Lemonade
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 2.0
     units: oz
@@ -145,7 +146,7 @@ drinks:
   instructions: Half vodka, half sweet and sour, and a dash of cranberry juice for color. On the rocks is better.
 
 - primaryName: Kamikaze
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.0
     units: oz
@@ -162,7 +163,7 @@ drinks:
     Strain into chilled glass.
   
 - primaryName: Caipirinha
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 2.0
     units: oz
@@ -175,7 +176,7 @@ drinks:
     ingredient: Sugar Syrup
 
 - primaryName: Caipiroska
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 2.0
     units: oz
@@ -188,7 +189,7 @@ drinks:
     ingredient: Sugar Syrup
 
 - primaryName: Margarita
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.0
     units: oz
@@ -201,7 +202,7 @@ drinks:
     ingredient: Lime Juice
 
 - primaryName: Mai Tai
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.0
     units: oz
@@ -229,7 +230,7 @@ drinks:
     step: 2
 
 - primaryName: Whiskey and Coke
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.5
     units: oz
@@ -239,7 +240,7 @@ drinks:
     ingredient: Coca Cola
 
 - primaryName: Whiskey and Ginger Ale
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.5
     units: oz
@@ -249,7 +250,7 @@ drinks:
     ingredient: Ginger Ale
 
 - primaryName: Incredible Hulk
-  glass_id: 2
+  glass: 2 oz Shot glass
   ingredients:
   - amount: 0.5
     units: oz
@@ -259,7 +260,7 @@ drinks:
     ingredient: Hpnotiq
 
 - primaryName: Blue Coco Mojito
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.5
     units: oz
@@ -287,7 +288,7 @@ drinks:
     step: 2
 
 - primaryName: Sunsicle
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.5
     units: oz
@@ -316,7 +317,7 @@ drinks:
 
 - primaryName: Sunsicle
   secondaryName: Simplified
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.5
     units: oz
@@ -332,7 +333,7 @@ drinks:
     step: 2
 
 - primaryName: Sex On The Beach
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 1.5
     units: oz
@@ -360,7 +361,7 @@ drinks:
     Shake well and pour drink into Highball glass.
 
 - primaryName: Shirley Temple
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 0.167
     units: oz
@@ -377,7 +378,7 @@ drinks:
     Garnish with a Lime Wedge and a Maraschino Cherry.
 
 - primaryName: Candy Cane Twist
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 1.5
     units: oz
@@ -407,7 +408,7 @@ drinks:
     garnish with small peppermint candy cane.
 
 - primaryName: Rudolph the Red Nose Reindeer
-  glass_id: 4
+  glass: 8 oz Single Rocks glass
   ingredients:
   - amount: 0.5
     units: oz
@@ -429,7 +430,7 @@ drinks:
     Mix ingredients together in glass with ice. Stir and serve.
 
 - primaryName: John Daly
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 1.5
     units: oz
@@ -445,7 +446,7 @@ drinks:
     Gently stir and garnish with a lemon slice.
 
 - primaryName: Long Island Iced Tea
-  glass_id: 1
+  glass: 12 oz Highball
   ingredients:
   - amount: 1.0
     units: oz

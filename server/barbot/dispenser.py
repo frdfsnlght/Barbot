@@ -300,9 +300,10 @@ def _dispenseDrinkOrder(o):
         pumps = []
         
         # start the pumps
+        
         for di in ingredients:
             ingredient = di.ingredient
-            pump = ingredient.pump.first()
+            pump = Pump.getPumpWithIngredient(ingredient)
             amount = units.toML(di.amount, di.units)
             pump.start(amount, forward = True)
             pumps.append(pump)

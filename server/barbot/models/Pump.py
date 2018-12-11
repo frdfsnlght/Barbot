@@ -69,12 +69,14 @@ def _bus_serialEvent(e):
                 pump.lastAmount = float(steps) / config.getfloat('pumps', 'stepsPerML')
                 _logger.info('Pump {} stopped, {:.2f} mL ({} steps)'.format(pump.name(), pump.lastAmount, steps))
                 
+                rebuildMenu = False
+                
                 if pump.lastAmount > 0: # forward
                 
                     if pump.isLoaded(): # primed
                         pump.setState(Pump.READY)
                         bus.emit('model/ingredient/saved', pump.ingredient)
-                        Drink.rebuildMenu()
+                        rebuildMenu = True
                         
                     elif pump.isReady():
                         pump.amount = units.toOther(units.toML(pump.amount, pump.units) - pump.lastAmount, pump.units)
@@ -82,7 +84,7 @@ def _bus_serialEvent(e):
                             pump.amount = 0
                         if units.toML(pump.amount, pump.units) < config.getint('pumps', 'ingredientEmptyAmount'):
                             pump.setState(Pump.EMPTY)
-                            Drink.rebuildMenu()
+                            rebuildMenu = True
                         
                         ingredient = pump.ingredient
                         ingredient.timesDispensed = ingredient.timesDispensed + 1
@@ -92,15 +94,18 @@ def _bus_serialEvent(e):
                     elif pump.isDirty():
                         pump.setState(Pump.UNUSED)
 
-                elif pump.lastAmount < 0: # reverse
-                
-                    if pump.isReady():
-                        pump.setState(Pump.DIRTY)
-                        bus.emit('model/ingredient/saved', pump.ingredient)
-                        Drink.rebuildMenu()
+#                elif pump.lastAmount < 0: # reverse
+#                
+#                    if pump.isReady():
+#                        pump.setState(Pump.DIRTY)
+#                        bus.emit('model/ingredient/saved', pump.ingredient)
+#                        rebuildMenu = True
                         
                 if not pump.save():
                     bus.emit('model/pump/saved', pump)
+
+                if rebuildMenu:
+                    Drink.rebuildMenu()
 
             if dispenser.inSetup() and not anyPumpsRunning():
                 bus.emit('lights/play', 'setupDispenseIdle')
@@ -164,17 +169,24 @@ class Pump(BarbotModel):
 
     @staticmethod
     def getReadyIngredients(alternatives = True):
-        ingredients = Ingredient.select().join(Pump).where(Pump.state == Pump.READY).execute()
+        ingredients = list(Ingredient.select().join(Pump).where(Pump.state == Pump.READY).execute())
+        #print('base ingredients: {}'.format([(i.id, i.name) for i in ingredients]))
         if alternatives:
-            for ingredient in ingredients[:]:
-                for alt in ingredient.alternatives.select():
-                    if not next(i for i in ngredients if i.id == alt.alternative_id):
-                        ingredients.append(alt.alternative)
+            ingredients = Ingredient.expandAlternatives(ingredients)
+            #print('expanded ingredients: {}'.format([(i.id, i.name) for i in ingredients]))
         return ingredients
         
     @staticmethod
-    def getPumpWithIngredientId(id):
-        return Pump.select().where((Pump.state == Pump.READY) & (Pump.ingredient_id == id)).first()
+    def getPumpWithIngredient(ingredient, alternatives = True):
+        pump = ingredient.pump.first()
+        if pump and pump.state == Pump.READY:
+            return pump
+        if alternatives:
+            for alt in ingredient.prioritizedAlternatives():
+                pump = alt.alternative.pump.first()
+                if pump and pump.state == Pump.READY:
+                    return pump
+        return None
     
     # override
     def save(self, *args, **kwargs):
@@ -279,6 +291,7 @@ class Pump(BarbotModel):
         self.start(amount, forward = True)
         
     def drain(self):
+        from .Drink import Drink
         amount = self.volume * config.getfloat('pumps', 'drainFactor')
         self.start(amount, forward = False)
         if not self.isUnused():
@@ -293,6 +306,7 @@ class Pump(BarbotModel):
             self.amount = 0
             self.units = 'ml'
             self.save()
+            Drink.rebuildMenu()
 
     def clean(self):
         amount = self.volume * config.getfloat('pumps', 'cleanFactor')

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, os, argparse, yaml
+import sys, os, argparse, yaml, re
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -11,12 +11,18 @@ config = barbot.config.load()
 import barbot.units
 barbot.units.load()
 
+import barbot.settings
+barbot.settings.load()
+
 from barbot.db import db, initializeDB, ModelError
 from barbot.models.Glass import Glass
 from barbot.models.Ingredient import Ingredient
+from barbot.models.IngredientAlternative import IngredientAlternative
 from barbot.models.DrinkIngredient import DrinkIngredient
 from barbot.models.Drink import Drink
 
+
+glassPattern = re.compile(r"([\d\.]+) (\w+) (.*)")
 
 args = None
 
@@ -50,7 +56,7 @@ def doExport(args):
         
     data = {}
     data['glasses'] = [glass.export() for glass in glasses]
-    data['ingredients'] = [ingredient.export(stats = args.stats) for ingredient in ingredients]
+    data['ingredients'] = [ingredient.export(stats = args.stats, alternatives = True) for ingredient in ingredients]
     data['drinks'] = [drink.export(stats = args.stats) for drink in drinks]
     
     print('Writing {}...'.format(args.file))
@@ -108,7 +114,7 @@ def importGlasses(glasses):
             g.size = glass['size']
             g.units = glass['units']
             if 'description' in glass:
-                g.description = glass['description']
+                g.description = glass['description'].strip()
             g.source = args.source
             og = g.alreadyExists()
             if og:
@@ -152,6 +158,30 @@ def importIngredients(ingredients):
             ingredient['local_id'] = i.id
         except ModelError as e:
             raise DBAdminError('Ingredient "{}": {}'.format(ingredient['name'], str(e)))
+            
+    # import alternatives
+    for ingredient in ingredients:
+        try:
+            if 'alternatives' in ingredient:
+                i = Ingredient.get_or_none(Ingredient.id == ingredient['local_id'])
+                if not i:
+                    raise ValueError('not found')
+                alts = []
+                for alternative in ingredient['alternatives']:
+                    alt = Ingredient.get_or_none(Ingredient.name == alternative)
+                    if not alt:
+                        raise ValueError('alternative {} not found'.format(alternative))
+                    ia = IngredientAlternative()
+                    ia.ingredient = i
+                    ia.alternative = alt
+                    ia.priority = len(alts)
+                    alts.append(ia)
+                i.setAlternatives(alts)
+        except ValueError as e:
+            raise DBAdminError('Ingredient "{}": {}'.format(ingredient['name'], str(e)))
+        except ModelError as e:
+            raise DBAdminError('Ingredient "{}": {}'.format(ingredient['name'], str(e)))
+    
     return count
     
 def importDrinks(drinks, glasses, ingredients):
@@ -163,10 +193,27 @@ def importDrinks(drinks, glasses, ingredients):
             if 'secondaryName' in drink:
                 d.secondaryName = drink['secondaryName']
             if 'instructions' in drink:
-                d.instructions = drink['instructions']
+                d.instructions = drink['instructions'].strip()
         
-            glass = [glass for glass in glasses if glass['id'] == drink['glass_id']][0]
-            d.glass_id = glass['local_id']
+            if 'glass' in drink:
+                match = glassPattern.match(drink['glass'])
+                if not match:
+                    raise ValueError('glass "{}" format not recognized'.format(drink['glass']))
+#                print(match.group(1))
+#                print(match.group(2))
+#                print(match.group(3))
+                
+#                for g in Glass.select():
+#                    print('{} {} {}'.format(g.size, g.units, g.type))
+                
+                glass = Glass.get_or_none(Glass.type == match.group(3), Glass.size == match.group(1), Glass.units == match.group(2))
+                if not glass:
+                    raise ValueError('glass "{}" not found'.format(drink['glass']))
+                d.glass_id = glass.id
+                
+            else:
+                glass = [glass for glass in glasses if glass['id'] == drink['glass_id']][0]
+                d.glass_id = glass['local_id']
             
             if args.stats:
                 if 'isFavorite' in drink:
@@ -181,21 +228,43 @@ def importDrinks(drinks, glasses, ingredients):
 
             d.save()
                 
+            ingredients = []
+            
             for drinkIngredient in drink['ingredients']:
+                di = DrinkIngredient()
+                di.drink_id = d.id
+                
                 if 'ingredient' in drinkIngredient:
                     ingredient = Ingredient.get_or_none(Ingredient.name == drinkIngredient['ingredient'])
                     if not ingredient:
                         raise DBAdminError('Drink "{}": ingredient "{}" not found!'.format(drink['primaryName'], drinkIngredient['ingredient']))
-                    drinkIngredient['ingredientId'] = ingredient.id
+                    di.ingredient_id = ingredient.id
                 else:
                     ingredient = [ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']][0]
-                    drinkIngredient['ingredientId'] = ingredient['local_id']
+                    di.ingredient_id = ingredient['local_id']
+                    
+                if 'amount' not in drinkIngredient:
+                    raise ValueError('ingredient {} requires an amount'.format(di.ingredient.name))
+                di.amount = float(drinkIngredient['amount'])
                 
-            d.setIngredients(drink['ingredients'])
+                if 'units' not in drinkIngredient:
+                    raise ValueError('ingredient {} requires units'.format(di.ingredient.name))
+                di.units = drinkIngredient['units']
+                
+                if 'step' in drinkIngredient:
+                    di.step = drinkIngredient['step']
+                else:
+                    di.step = 1
+                    
+                ingredients.append(di)
+                
+            d.setIngredients(ingredients)
             
             d.save()
             count = count + 1
             
+        except ValueError as e:
+            raise DBAdminError('Drink "{}": {}'.format(drink['primaryName'], str(e)))
         except ModelError as e:
             raise DBAdminError('Drink "{}": {}'.format(drink['primaryName'], str(e)))
         

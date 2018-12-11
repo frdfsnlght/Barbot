@@ -7,16 +7,26 @@ export default {
         drinks: null,
         drink: {},
         loading: false,
+        
+        sortBy: 'name',
     },
     
     getters: {
         
         sortedDrinks(state) {
-            if (state.drinks)
-                return state.drinks.slice().sort((a, b) => {
-                    return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
-                })
-            else
+            if (state.drinks) {
+                if (state.sortBy == 'name')
+                    return state.drinks.slice().sort((a, b) => {
+                        return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
+                    })
+                else if (state.sortBy == 'missingIngredients')
+                    return state.drinks.slice().sort((a, b) => {
+                        let ord = a.missingIngredients - b.missingIngredients
+                        if (ord != 0) return ord
+                        return a.name.localeCompare(b.name, 'en', {'sensitivity': 'base'})
+                    })
+                    
+            } else
                 return []
         }
     },
@@ -40,6 +50,10 @@ export default {
         destroy(state) {
             state.drink = null
             state.drink = {}
+        },
+        
+        setSortBy(state, sortBy) {
+            state.sortBy = sortBy
         },
         
         socket_drink_changed(state, drink) {
@@ -92,8 +106,6 @@ export default {
                             reject()
                         } else {
                             commit('setDrinks', res.drinks)
-                            console.log('drinks:')
-                            console.table(JSON.parse(JSON.stringify(res.drinks)))
                             resolve(res.drinks)
                         }
                     })
@@ -110,7 +122,7 @@ export default {
                         reject()
                     } else {
                         commit('setDrink', res.drink)
-                        resolve()
+                        resolve(res.drink)
                     }
                 })
             })

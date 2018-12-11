@@ -54,14 +54,15 @@ class Glass(BarbotModel):
         return out
         
     def export(self):
-        return {
-            'id': self.id,
+        out = {
             'type': self.type,
             'size': self.size,
-            'units': self.units,
-            'description': self.description,
+            'units': self.units
         }
-        
+        if self.description:
+            out['description'] = self.description
+        return out
+
     class Meta:
         database = db
         only_save_dirty = True

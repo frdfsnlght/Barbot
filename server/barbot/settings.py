@@ -15,15 +15,6 @@ _lastSettingsCheckTime = 0
 _lastSettingsModifiedTime = None
 
 
-@bus.on('server/start')
-def _bus_serverStart():
-    global _settings
-    _settings = configparser.ConfigParser(
-        interpolation = None,
-    )
-    _settings.optionxform = str    # preserve option case
-    _load()
-    
 @bus.on('server/tick')
 def _bus_serverTick():
     global _lastSettingsCheckTime
@@ -31,11 +22,19 @@ def _bus_serverTick():
         _lastSettingsCheckTime = time.time()
         file = config.getpath('settings', 'settingsFile')
         if os.path.isfile(file) and os.path.getmtime(file) > _lastSettingsModifiedTime:
-            _load()
+            load()
 
+@bus.on('server/start')
 @bus.on('config/loaded')
-def _load():
-    global _lastSettingsModifiedTime
+def load():
+    global _settings, _lastSettingsModifiedTime
+
+    if not _settings:
+        _settings = configparser.ConfigParser(
+            interpolation = None,
+        )
+        _settings.optionxform = str    # preserve option case
+    
     file = config.getpath('settings', 'settingsFile')
     _settings.clear()
     if os.path.isfile(file):

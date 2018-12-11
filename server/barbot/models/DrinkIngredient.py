@@ -21,7 +21,7 @@ class DrinkIngredient(BarbotModel):
     def ingredientName(self):
         return str(self.amount) + ' ' + self.units + ' ' + self.ingredient.name
 
-    def toDict(self, drink = False, ingredient = False):
+    def toDict(self, drink = False, ingredient = False, ingredientAlternatives = False):
         out = {
             'id': self.id,
             'drink_id': self.drink_id,
@@ -33,12 +33,12 @@ class DrinkIngredient(BarbotModel):
         if drink:
             out['drink'] = self.drink.toDict()
         if ingredient:
-            out['ingredient'] = self.ingredient.toDict()
+            out['ingredient'] = self.ingredient.toDict(alternatives = ingredientAlternatives)
         return out
         
     def export(self):
         return {
-            'ingredient_id': self.ingredient_id,
+            'ingredient': self.ingredient.name,
             'amount': self.amount,
             'units': self.units,
             'step': self.step,

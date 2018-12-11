@@ -471,32 +471,31 @@ def _socket_ingredient_save(params):
         if 'lastUnits' in params:
             ingredient.lastUnits = params['lastUnits']
             
-            
+        ingredient.save()
+         
         if 'alternatives' in params:
-            if ingredient.get_id() is None:
-                ingredient.save()
 
             ingredientAlternatives = []
             for alt in params['alternatives']:
                 try:
                     validateParams(alt, {
-                        'alternative_id': [int, True],
+                        'id': [int, True],
                     })
                 except ValidationError as e:
                     return error(e)
                     
-                alternative = Ingredient.get_or_none(Ingredient.id == alt['alternative_id'])
+                alternative = Ingredient.get_or_none(Ingredient.id == alt['id'])
                 if not alternative:
                     return error('Ingredient {} not found!'.format(alt['alternative_id']))
                     
                 ingredientAlternative = IngredientAlternative()
                 ingredientAlternative.ingredient = ingredient
                 ingredientAlternative.alternative = alternative
+                ingredientAlternative.priority = len(ingredientAlternatives)
                 ingredientAlternatives.append(ingredientAlternative)
-                
+
             ingredient.setAlternatives(ingredientAlternatives)
             
-        ingredient.save()
         Drink.rebuildMenu()
         return success()
         
@@ -535,7 +534,7 @@ def _socket_drink_getOne(id):
     drink = Drink.get_or_none(Drink.id == id)
     if not drink:
         return error('Drink not found!')
-    return success(drink = drink.toDict(glass = True, ingredients = True))
+    return success(drink = drink.toDict(glass = True, ingredients = True, ingredientAlternatives = True))
     
 @socket.on('drink_save')
 @validate({
@@ -899,10 +898,6 @@ def _bus_dispenser_state(state, drinkOrder):
 def _bus_dispenser_glass(ready):
     socket.emit('dispenser_glass', ready)
 
-@bus.on('dispenser/parentalCode')
-def _bus_dispenser_parentalCode(locked):
-    socket.emit('dispenser_parentalCode', locked)
-    
 #-------------------------------
 # wifi
 #
@@ -954,7 +949,7 @@ def _bus_model_glass_deleted(g):
 @bus.on('model/ingredient/saved')
 def _bus_model_ingredient_saved(i):
     _logger.debug('emit ingredient_changed')
-    socket.emit('ingredient_changed', i.toDict(drinks = True))
+    socket.emit('ingredient_changed', i.toDict(drinks = True, alternatives = True))
 
 @bus.on('model/ingredient/deleted')
 def _bus_model_ingredient_deleted(i):

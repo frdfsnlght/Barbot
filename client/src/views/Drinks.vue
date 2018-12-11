@@ -13,7 +13,45 @@
     
     <template v-else>
     
+      <v-list>
+      
+        <v-list-group
+          prepend-icon="mdi-sort"
+          v-model="showSort"
+          no-action
+        >
+          <v-list-tile slot="activator">
+            <v-list-tile-content>
+              <v-list-tile-title>Sort by ...</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+
+          <v-list-tile @click="sortByName">
+            <v-list-tile-content>
+              <v-list-tile-title>Name</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon v-if="sortBy == 'name'">mdi-check</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+          
+          <v-list-tile @click="sortByMissingIngredients">
+            <v-list-tile-content>
+              <v-list-tile-title>Missing ingredients</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon v-if="sortBy == 'missingIngredients'">mdi-check</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+          
+        </v-list-group>
+
+      </v-list>
+        
+      <v-divider v-if="!showSort"/>
+      
       <v-list two-line>
+        
         <v-list-tile
           v-for="drink in drinks"
           :key="drink.id"
@@ -28,8 +66,8 @@
           </v-list-tile-avatar>
 
           <v-list-tile-content>
-            <v-list-tile-title>{{drink.primaryName}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{drink.secondaryName}} {{ingredientsAvailable(drink.ingredients)}}</v-list-tile-sub-title>
+            <v-list-tile-title>{{drinkTitle(drink)}}</v-list-tile-title>
+            <v-list-tile-sub-title>{{drinkSubtitle(drink)}}</v-list-tile-sub-title>
           </v-list-tile-content>
           
           <v-list-tile-action>
@@ -52,7 +90,18 @@
         offset-y
       >
         <v-list>
-        
+
+          <v-list-tile
+            v-if="drink.missingIngredients == 0"
+            ripple @click="orderDrink()">
+            <v-list-tile-content>
+              <v-list-tile-title>Order</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>mdi-cup-water</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+          
           <v-list-tile ripple @click="editDrink()">
             <v-list-tile-content>
               <v-list-tile-title>Edit</v-list-tile-title>
@@ -88,9 +137,10 @@
       </v-btn>
     </template>
     
-    <confirm ref="confirm"></confirm>
+    <confirm ref="confirm"/>
     <drink-dialog ref="drinkDialog"/>
-    
+    <order-drink-dialog ref="orderDrinkDialog"/>
+
   </v-card>
         
 </template>
@@ -102,6 +152,7 @@ import Loading from '../components/Loading'
 import Confirm from '../components/Confirm'
 import AlcoholicIcon from '../components/AlcoholicIcon'
 import DrinkDialog from '../components/DrinkDialog'
+import OrderDrinkDialog from '../components/OrderDrinkDialog'
 
 export default {
   name: 'Drinks',
@@ -112,6 +163,7 @@ export default {
       menu: false,
       menuX: 0,
       menuY: 0,
+      showSort: false,
     }
   },
   
@@ -120,6 +172,7 @@ export default {
     Confirm,
     AlcoholicIcon,
     DrinkDialog,
+    OrderDrinkDialog,
   },
   
   created() {
@@ -127,23 +180,40 @@ export default {
   },
   
   computed: {
+  
     ...mapGetters({
       drinks: 'drinks/sortedDrinks',
     }),
     ...mapState({
       loading: state => state.drinks.loading,
+      sortBy: state => state.drinks.sortBy,
     })
   },
   
   methods: {
-  
-    ingredientsAvailable(ingredients) {
-      let total = ingredients.length
-      let ready = ingredients.filter(i => { return (i.ingredient.isAvailable) }).length
-      if (total == ready)
-        return ''
-      else
-        return '(' + ready + '/' + total + ')'
+
+    sortByName() {
+      this.$store.commit('drinks/setSortBy', 'name')
+      this.showSort = false
+    },
+    
+    sortByMissingIngredients() {
+      this.$store.commit('drinks/setSortBy', 'missingIngredients')
+      this.showSort = false
+    },
+    
+    drinkTitle(drink) {
+      let title = drink.primaryName
+      if (drink.secondaryName)
+        title += ', ' + drink.secondaryName
+      return title
+    },
+    
+    drinkSubtitle(drink) {
+      if (drink.missingIngredients == 0) return 'available to order'
+      let subtitle = 'missing ' + drink.missingIngredients + ' of ' + drink.numIngredients + ' ingredient'
+      if (drink.numIngredients > 1) subtitle += 's'
+      return subtitle
     },
     
     gotoDetail(drink) {
@@ -180,6 +250,10 @@ export default {
           }
         })
       }, ()=>{})
+    },
+    
+    orderDrink() {
+      this.$refs.orderDrinkDialog.open(this.drink).then(()=>{}, ()=>{})
     },
     
   },
