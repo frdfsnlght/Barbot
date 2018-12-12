@@ -5,6 +5,7 @@
     :items="unitsList"
     label="Units"
     v-model="units"
+    :data-kbHide="true"
   ></v-select>
 
 </template>

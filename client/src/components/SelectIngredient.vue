@@ -7,6 +7,7 @@
     item-text="name"
     item-value="id"
     v-model="id"
+    :data-kbHide="true"
   ></v-select>
           
 </template>
