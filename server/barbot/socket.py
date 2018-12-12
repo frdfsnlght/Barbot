@@ -842,8 +842,8 @@ def socket_alerts_clear():
 # misc
 #
     
-@bus.on('config/reloaded')
-def _but_config_reloaded():
+@bus.on('config/loaded')
+def _but_config_loaded():
     socket.emit('units', units.export())
     
 @bus.on('settings/loaded')
