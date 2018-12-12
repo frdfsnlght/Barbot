@@ -245,7 +245,11 @@ def importDrinks(drinks, glasses, ingredients):
                     
                 if 'amount' not in drinkIngredient:
                     raise ValueError('ingredient {} requires an amount'.format(di.ingredient.name))
-                di.amount = float(drinkIngredient['amount'])
+                if drinkIngredient['amount'] == '1/4': di.amount = 0.25
+                elif drinkIngredient['amount'] == '1/2': di.amount = 0.5
+                elif drinkIngredient['amount'] == '3/4': di.amount = 0.75
+                else:
+                    di.amount = float(drinkIngredient['amount'])
                 
                 if 'units' not in drinkIngredient:
                     raise ValueError('ingredient {} requires units'.format(di.ingredient.name))
