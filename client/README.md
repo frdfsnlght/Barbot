@@ -22,12 +22,6 @@ npm run lint
 ```
 
 ## TODO
-* About page
-    * attribution for icons?
-    * git commit hash/date
-    * vue build date
-    * copyright notice
-    
 * change fonts to fonts-awesome svg?
 * Browser changes:
     * Allow autoplay: chrome://flags/#autoplay-policy
