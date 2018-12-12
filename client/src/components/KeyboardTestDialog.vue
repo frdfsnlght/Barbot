@@ -1,6 +1,6 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable max-width="480px">
+  <v-dialog v-model="dialog" persistent scrollable>
     <v-card>
       <v-card-title>
         Keyboard Test

@@ -20,39 +20,38 @@
       dense
     >
     
-<draggable v-model="alternatives">
+      <draggable v-model="alternatives">
     
-      <v-list-tile
-        v-for="alternative in alternatives"
-        :key="alternative.id"
-      >
-     
-                
-        <v-list-tile-avatar>
-          <v-icon>mdi-reorder-horizontal</v-icon>
-          <alcoholic-icon :alcoholic="alternative.isAlcoholic"/>
-        </v-list-tile-avatar>
+        <v-list-tile
+          v-for="alternative in alternatives"
+          :key="alternative.id"
+        >
         
-        <v-list-tile-content>
-          <v-list-tile-title>{{alternative.name}}</v-list-tile-title>
-        </v-list-tile-content>
-        
-        <v-list-tile-action>
-          <v-btn
-            icon
-            @click="deleteAlternative(alternative)"
-          >
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
-        </v-list-tile-action>
-    
-      </v-list-tile>
+          <v-list-tile-avatar>
+            <v-icon>mdi-reorder-horizontal</v-icon>
+            <alcoholic-icon :alcoholic="alternative.isAlcoholic"/>
+          </v-list-tile-avatar>
+          
+          <v-list-tile-content>
+            <v-list-tile-title>{{alternative.name}}</v-list-tile-title>
+          </v-list-tile-content>
+          
+          <v-list-tile-action>
+            <v-btn
+              icon
+              @click="deleteAlternative(alternative)"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </v-list-tile-action>
       
-</draggable>
+        </v-list-tile>
+      
+      </draggable>
     
     </v-list>
     
-    <v-dialog v-model="dialog" persistent scrollable @keydown.esc="closeDialog" @keydown.enter.prevent="saveAlternative">
+    <v-dialog v-model="dialog" persistent scrollable>
       <v-card>
         <v-card-title>
           <span
@@ -60,7 +59,7 @@
           >Add Alternative</span>
         </v-card-title>
         
-        <v-card-text>
+        <v-card-text @keydown.esc.prevent="closeDialog" @keydown.enter.prevent="saveAlternative">
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-container grid-list-md>
               <v-layout wrap>

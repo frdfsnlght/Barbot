@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat>
+  <v-card flat style="height: 93vh; overflow-y: auto;">
     
     <v-list two-line>
       
@@ -62,17 +62,13 @@
     <v-dialog
       v-model="connectNewDialog"
       persistent
-      scrollable
-      max-width="400px"
-      @keydown.esc="connectNewDialog = false"
-      @keydown.enter.prevent="connectToNewNetwork()"
     >
       <v-card>
         <v-card-title>
           <span v-if="!network.scanned" class="headline">Add Network</span>
           <span v-else class="headline">{{network.ssid}}</span>
         </v-card-title>
-        <v-card-text>
+        <v-card-text @keydown.esc.prevent="connectNewDialog = false" @keydown.enter.prevent="connectToNewNetwork">
           <v-form ref="connectForm" v-model="valid" lazy-validation>
             <v-container grid-list-md>
               <v-layout wrap>
@@ -130,10 +126,8 @@
     <v-dialog
       v-model="connectOrForgetDialog"
       persistent
-      scrollable
-      max-width="400px"
-      @keydown.esc="connectOrForgetDialog = false"
-      @keydown.enter="connectToSavedNetwork()"
+      @keydown.esc.prevent="connectOrForgetDialog = false"
+      @keydown.enter.prevent="connectToSavedNetwork"
     >
       <v-card>
         <v-toolbar dark color="primary" dense flat>
@@ -158,9 +152,9 @@
 
     <v-dialog
       v-model="disconnectDialog"
-      max-width="400px"
-      @keydown.esc="disconnectDialog = false"
-      @keydown.enter="disconnectFromNetwork()"
+      persistent
+      @keydown.esc.prevent="disconnectDialog = false"
+      @keydown.enter.prevent="disconnectFromNetwork"
     >
       <v-card>
         <v-toolbar dark color="primary" dense flat>
@@ -183,8 +177,8 @@
       </v-card>
     </v-dialog>
 
-    <loading v-if="networksLoading"></loading>
-    <confirm ref="confirm"></confirm>
+    <loading v-if="networksLoading"/>
+    <confirm-dialog ref="confirmDialog"/>
 
   </v-card>
         
@@ -194,7 +188,7 @@
 
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../../components/Loading'
-import Confirm from '../../components/Confirm'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import store from '../../store/store'
 import bus from '../../bus'
 import WifiSignalIcon from '../../components/WifiSignalIcon'
@@ -219,7 +213,7 @@ export default {
   
   components: {
     Loading,
-    Confirm,
+    ConfirmDialog,
     WifiSignalIcon,
   },
   
@@ -290,7 +284,7 @@ export default {
     },
 
     forgetNetwork() {
-      this.$refs.confirm.open(this.network.ssid, 'Forget this network?').then(() => {
+      this.$refs.confirmDialog.open(this.network.ssid, 'Forget this network?').then(() => {
         this.$socket.emit('wifi_forgetNetwork', this.network.ssid, (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)

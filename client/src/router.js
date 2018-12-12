@@ -68,5 +68,9 @@ export default new Router({
     path: '/makeMyOwn',
     name: 'makeMyOwn',
     component: () => import(/* webpackChunkName: "makeMyOwn" */ './views/MakeMyOwn.vue'),
+  }, {
+    path: '/about',
+    name: 'about',
+    component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
   }]
 })

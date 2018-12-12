@@ -85,6 +85,15 @@
                 <v-icon>mdi-power</v-icon>
               </v-list-tile-action>
             </v-list-tile>
+            
+            <v-divider/>
+            
+            <v-list-tile @click="gotoAbout()">
+              <v-list-tile-title>About</v-list-tile-title>
+              <v-list-tile-action>
+                <v-icon>mdi-information</v-icon>
+              </v-list-tile-action>
+            </v-list-tile>
           </template>
         </v-list-group>
         
@@ -146,7 +155,7 @@
     <connecting-dialog/>
     <error-dialog/>
     <notifier/>
-    <confirm ref="confirm"/>
+    <confirm-dialog ref="confirmDialog"/>
     <login-dialog ref="loginDialog"/>
     <audio-player ref="audioPlayer"/>
     <keyboard-overlay v-if="isConsole"/>
@@ -159,7 +168,7 @@
 import { mapState } from 'vuex'
 import bus from './bus'
 import HTMLTitle from './components/HTMLTitle'
-import Confirm from './components/Confirm'
+import ConfirmDialog from './components/ConfirmDialog'
 import ConnectingDialog from './components/ConnectingDialog'
 import ErrorDialog from './components/ErrorDialog'
 import Notifier from './components/Notifier'
@@ -181,7 +190,7 @@ export default {
   
   components: {
     'html-title': HTMLTitle,
-    Confirm,
+    ConfirmDialog,
     ConnectingDialog,
     ErrorDialog,
     Notifier,
@@ -249,6 +258,11 @@ export default {
       }, ()=>{})
     },
 
+    gotoAbout() {
+      this.drawer = false
+      this.$router.push({name: 'about'})
+    },
+    
     checkRestartX() {
       this.drawer = false
       this.checkAdmin('restartXRequiresAdmin').then(this.restartX, ()=>{})
@@ -277,7 +291,7 @@ export default {
     },
     
     restart() {
-      this.$refs.confirm.open('Restart', 'Are you sure you want to restart the system?').then(() => {
+      this.$refs.confirmDialog.open('Restart', 'Are you sure you want to restart the system?').then(() => {
         this.$socket.emit('core_restart', (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)
@@ -287,7 +301,7 @@ export default {
     },
     
     shutdown() {
-      this.$refs.confirm.open('Shutdown', 'Are you sure you want to shutdown the system?').then(() => {
+      this.$refs.confirmDialog.open('Shutdown', 'Are you sure you want to shutdown the system?').then(() => {
         this.$socket.emit('core_shutdown', (res) => {
           if (res.error) {
               this.$store.commit('setError', res.error)

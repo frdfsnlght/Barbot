@@ -3,7 +3,7 @@
   <v-container fluid fill-height pa-0>
     <v-layout column justify-start fill-height>
     
-      <v-flex style="min-height: 60vh; overflow-y: auto">
+      <v-flex style="height: 60vh; overflow-y: auto">
       
         <p
           v-if="!dispenserGlass"
@@ -41,7 +41,7 @@
         </div>
       </v-flex>
       
-      <v-flex fill-height>
+      <v-flex style="height: 30vh;">
       
         <v-card flat>
               
@@ -71,7 +71,7 @@
             </v-btn>      
           </v-toolbar>
       
-          <div style="max-height: 27vh; overflow-y: auto">
+          <div style="max-height: 25vh; overflow-y: auto">
             <v-list
               avatar
               dense

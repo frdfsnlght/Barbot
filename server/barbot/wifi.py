@@ -162,8 +162,39 @@ def _getState():
         'quality': m.group(2) + '/' + m.group(3),
         'signal': int(m.group(4)),
         'bars': int(4.9 * float(m.group(2)) / float(m.group(3))),
-        'connected': True
+        'connected': True,
+        'ipAddresses': False,
+        'shortHostname': False,
+        'longHostname': False,
     }
+    
+    try:
+        out = subprocess.run(['hostname', '-I'],
+            stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT,
+            universal_newlines = True)
+        state['ipAddresses'] = out.stdout.splitlines(False)
+    except IOError as e:
+        _logger.error(e)
+        
+    try:
+        out = subprocess.run(['hostname', '-s'],
+            stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT,
+            universal_newlines = True)
+        state['shortHostname'] = out.stdout
+    except IOError as e:
+        _logger.error(e)
+        
+    try:
+        out = subprocess.run(['hostname', '-f'],
+            stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT,
+            universal_newlines = True)
+        state['longHostname'] = out.stdout
+    except IOError as e:
+        _logger.error(e)
+    
     return state
 
 def _scanNetworks():

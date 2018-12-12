@@ -1,6 +1,6 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable @keydown.esc="cancel" @keydown.enter.prevent="submit">
+  <v-dialog v-model="dialog" persistent scrollable>
     <v-card>
       <v-card-title>
         <span
@@ -13,7 +13,7 @@
         >Add Ingredient</span>
       </v-card-title>
       
-      <v-card-text>
+      <v-card-text @keydown.esc.prevent="cancel" @keydown.enter.prevent="submit">
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container grid-list-md>
             <v-layout wrap>

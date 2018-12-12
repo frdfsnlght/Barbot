@@ -73,11 +73,11 @@ def requireAdmin(f):
             return error('Permission denied!')
     return wrapped
     
-def requireDispenserState(state):
+def requireDispenserState(*states):
     def wrap(f):
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
-            if dispenser.state == state:
+            if dispenser.state in states:
                 return f(*args, **kwargs)
             else:
                 return error('Invalid dispenser state!')
@@ -148,6 +148,7 @@ def _socket_connect():
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
     emit('dispenser_state', {'state': dispenser.state, 'drinkOrder': drinkOrder})
     emit('dispenser_glass', dispenser.glass)
+    emit('dispenser_hold', dispenser.hold)
     emit('pumps', [pump.toDict(ingredient = True) for pump in Pump.getAllPumps()])
     emit('wifi_state', wifi.state)
     emit('alerts_changed', alerts.getAll())
@@ -313,20 +314,6 @@ def _socket_dispenser_stopPump(id):
     except dispenser.DispenserError as e:
         return error(e)
 
-@socket.on('dispenser_setParentalCode')
-def _socket_dispenser_setParentalCode(code):
-    _logger.debug('recv dispenser_setParentalCode')
-    dispenser.setParentalCode(code)
-    return success()
-    
-@socket.on('dispenser_validateParentalCode')
-def _socket_dispenser_validateParentalCode(code):
-    _logger.debug('recv dispenser_validateParentalCode')
-    if dispenser.validateParentalCode(code):
-        return success()
-    else:
-        return error('Invalid Parental Code')
-    
 #-------------------------------
 # wifi
 #
@@ -897,6 +884,10 @@ def _bus_dispenser_state(state, drinkOrder):
 @bus.on('dispenser/glass')
 def _bus_dispenser_glass(ready):
     socket.emit('dispenser_glass', ready)
+
+@bus.on('dispenser/hold')
+def _bus_dispenser_hold(hold):
+    socket.emit('dispenser_hold', hold)
 
 #-------------------------------
 # wifi

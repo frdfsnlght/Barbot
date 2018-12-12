@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat>
+  <v-card flat style="height: 93vh; overflow-y: auto;">
     
     <template v-if="isConsole && anyPumpReady">
     

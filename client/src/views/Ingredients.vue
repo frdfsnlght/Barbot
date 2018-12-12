@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat>
+  <v-card flat style="height: 93vh; overflow-y: auto;">
     
     <loading v-if="loading"></loading>
     
@@ -86,7 +86,7 @@
       </v-btn>
     </template>
     
-    <confirm ref="confirm"></confirm>
+    <confirm-dialog ref="confirmDialog"/>
     <ingredient-dialog ref="ingredientDialog"/>
       
   </v-card>
@@ -97,7 +97,7 @@
 
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
-import Confirm from '../components/Confirm'
+import ConfirmDialog from '../components/ConfirmDialog'
 import AlcoholicIcon from '../components/AlcoholicIcon'
 import IngredientDialog from '../components/IngredientDialog'
 
@@ -115,7 +115,7 @@ export default {
   
   components: {
     Loading,
-    Confirm,
+    ConfirmDialog,
     AlcoholicIcon,
     IngredientDialog,
   },
@@ -160,7 +160,7 @@ export default {
     },
     
     deleteIngredient() {
-      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.ingredient.name + '"?').then(() => {
+      this.$refs.confirmDialog.open('Delete', 'Are you sure you want to delete "' + this.ingredient.name + '"?').then(() => {
         this.$socket.emit('ingredient_delete', this.ingredient.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)

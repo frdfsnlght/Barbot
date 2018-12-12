@@ -11,7 +11,7 @@
           </p>
         </div>
         
-        <div v-else-if="dispenserState == 'hold'">
+        <div v-else-if="dispenserHold">
           <p class="display-1">
             Drink orders are on hold
           </p>
@@ -178,7 +178,6 @@
 <script>
 
 import { mapState, mapGetters } from 'vuex'
-import Confirm from './Confirm'
 import PumpIcon from './PumpIcon'
 
 
@@ -191,7 +190,6 @@ export default {
   },
   
   components: {
-    Confirm,
     PumpIcon,
   },
   
@@ -206,6 +204,7 @@ export default {
       dispenserState: state => state.dispenser.state,
       dispenserDrinkOrder: state => state.dispenser.drinkOrder,
       dispenserGlass: state => state.dispenser.glass,
+      dispenserHold: state => state.dispenser.hold,
     }),
   },
   
@@ -228,7 +227,7 @@ export default {
     },
   
     toggleDispenserHold() {
-      if (this.dispenserState == 'hold') {
+      if (this.dispenserHold) {
         this.$socket.emit('dispenser_stopHold', (res) => {
             if (res.error) {
                 this.$store.commit('setError', res.error)

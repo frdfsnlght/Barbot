@@ -21,7 +21,7 @@
     
     <template v-else>
     
-      <div style="max-height: 27vh; overflow-y: auto">
+      <div style="max-height: 47vh; overflow-y: auto;">
         <v-list two-line>
           <v-list-tile
             v-for="drinkOrder in drinkOrders"
@@ -99,7 +99,7 @@
       <v-icon dark>mdi-plus</v-icon>
     </v-btn>
     
-    <confirm ref="confirm"></confirm>
+    <confirm-dialog ref="confirmDialog"/>
     
   </v-card>
           
@@ -109,7 +109,7 @@
 
 import { mapState, mapGetters } from 'vuex'
 import Loading from './Loading'
-import Confirm from './Confirm'
+import ConfirmDialog from './ConfirmDialog'
 
 
 export default {
@@ -125,7 +125,7 @@ export default {
   
   components: {
     Loading,
-    Confirm
+    ConfirmDialog
   },
   
   computed: {
@@ -171,7 +171,7 @@ export default {
     },
     
     cancel() {
-      this.$refs.confirm.open('Cancel', 'Are you sure you want to cancel this order?', {rejectText: 'No'}).then(() => {
+      this.$refs.confirmDialog.open('Cancel', 'Are you sure you want to cancel this order?', {rejectText: 'No'}).then(() => {
         this.$socket.emit('drinkOrder_cancel', this.drinkOrder.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)

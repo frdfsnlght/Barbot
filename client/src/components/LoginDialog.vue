@@ -1,12 +1,12 @@
 <template>
 
-  <v-dialog v-model="dialog" persistent scrollable max-width="300px" @keydown.esc="cancel" @keydown.enter.prevent="login">
+  <v-dialog v-model="dialog" persistent scrollable>
     <v-card>
       <v-card-title>
         <span class="headline">Login</span>
       </v-card-title>
       
-      <v-card-text>
+      <v-card-text @keydown.esc.prevent="cancel" @keydown.enter.prevent="login">
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container grid-list-md>
             <v-layout wrap>

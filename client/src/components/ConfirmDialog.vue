@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" :max-width="options.width" @keydown.esc="cancel">
+  <v-dialog v-model="dialog" @keydown.esc.prevent="cancel">
     <v-card>
       <v-toolbar dark :color="options.titleColor" dense flat>
         <v-toolbar-title class="white--text">{{ title }}</v-toolbar-title>
@@ -16,20 +16,11 @@
 
 <script>
 /**
- * Vuetify Confirm Dialog component
- *
  * Insert component where you want to use it:
- * <confirm ref="confirm"></confirm>
+ * <confirm-dialog ref="confirmDialog"/>
  *
  * Call it:
- * this.$refs.confirm.open('Delete', 'Are you sure?', { color: 'red' }).then((confirm) => {})
- * Or use await:
- * if (await this.$refs.confirm.open('Delete', 'Are you sure?', { color: 'red' })) {
- *   // yes
- * }
- * else {
- *   // cancel
- * }
+ * this.$refs.confirmDialog.open('Delete', 'Are you sure?', { color: 'red' }).then((confirm) => {})
  *
  * Alternatively you can place it in main App component and access it globally via this.$root.$confirm
  * <template>
@@ -44,7 +35,7 @@
  * }
  */
 export default {
-  name: 'Confirm',
+  name: 'ConfirmDialog',
   data: () => ({
     dialog: false,
     resolve: null,
@@ -55,7 +46,6 @@ export default {
       titleColor: 'primary',
       resolveColor: '',
       rejectColor: '',
-      width: 400,
       resolveText: 'Yes',
       rejectText: 'Cancel'
     }

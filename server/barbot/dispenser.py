@@ -16,7 +16,6 @@ from .models.Pump import Pump, anyPumpsRunning
     
 ST_WAIT = 'wait'
 ST_SETUP = 'setup'
-ST_HOLD = 'hold'
 ST_MANUAL = 'manual'
 
 ST_DISPENSE_START = 'start'
@@ -37,7 +36,6 @@ _exitEvent = Event()
 _thread = None
 _requestSetup = False
 _requestManual = False
-_requestHold = False
 _dispenserEvent = Event()
 _lastDrinkOrderCheckTime = time.time()
 _lastIdleAudioCheckTime = time.time()
@@ -45,6 +43,7 @@ _control = None
 _runningPumps = []
 _pump = None
 
+hold = False
 glass = False
 state = ST_WAIT
 drinkOrder = None
@@ -85,14 +84,8 @@ def inWait():
 def inSetup():
     return state == ST_SETUP
     
-def inHold():
-    return state == ST_HOLD
-    
 def inManual():
     return state == ST_MANUAL
-    
-def isDispensing():
-    return not (inWait() or inSetup() or inHold() or inManual())
     
 def startSetup():
     global _requestSetup
@@ -113,12 +106,14 @@ def stopManual():
     _requestManual = False
 
 def startHold():
-    global _requestHold
-    _requestHold = True
+    global hold
+    hold = True
+    bus.emit('dispenser/hold', True)
     
 def stopHold():
-    global _requestHold
-    _requestHold = False
+    global hold
+    hold = False
+    bus.emit('dispenser/hold', False)
 
 def setControl(ctl):
     global _control
@@ -164,13 +159,6 @@ def stopPump(id):
     _runningPumps.remove(id)
     pump.stop()
     
-#    if state == ST_MANUAL:
-#        if not _runningPumps:
-#            bus.emit('lights/play', 'manualDispenseIdle')
-#    elif state == ST_SETUP:
-#        if not _runningPumps:
-#            bus.emit('lights/play', 'setupDispenserIdle')
-
 def _threadLoop():
     global _lastDrinkOrderCheckTime, state
     _logger.info('Dispenser thread started')
@@ -203,28 +191,22 @@ def _threadLoop():
                 bus.emit('dispenser/state', state, None)
                 bus.emit('lights/play', None)
                 
-            if _requestHold:
-                state = ST_HOLD
-                bus.emit('dispenser/state', state, None)
-                while _requestHold and not _exitEvent.is_set():
-                    _checkIdle()
-                    time.sleep(1)
-                state = ST_WAIT
-                bus.emit('dispenser/state', state, None)
-                
             if not _exitEvent.is_set():
-                t = time.time()
             
-                if (t - _lastDrinkOrderCheckTime) > config.getfloat('dispenser', 'drinkOrderCheckInterval'):
-                    _lastDrinkOrderCheckTime = t
-                    o = DrinkOrder.getFirstPending()
-                    if o:
-                        _dispenseDrinkOrder(o)
-                        _resetTimers()
-                        continue
+                if not hold:
+                    t = time.time()
+                
+                    if (t - _lastDrinkOrderCheckTime) > config.getfloat('dispenser', 'drinkOrderCheckInterval'):
+                        _lastDrinkOrderCheckTime = t
+                        o = DrinkOrder.getFirstPending()
+                        if o:
+                            _dispenseDrinkOrder(o)
+                            _resetTimers()
+                            continue
 
                 _checkIdle()
                 time.sleep(1)
+                
     except Exception as e:
         _logger.exception(str(e))
     _logger.info('Dispenser thread stopped')

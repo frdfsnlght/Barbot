@@ -1,25 +1,23 @@
 <template>
 
-  <v-card
-    flat
-    class="ma-3"
-  >
+  <v-card flat style="height: 93vh; overflow-y: auto;">
+    <div class="pa-3">
     
-    <p
-      v-if="!alerts.length"
-      class="title text-xs-center"
-    >
-      No alerts.
-    </p>
-    
-    <div
-      v-else
-    >
       <p
-        class="subheading"
-        v-for="alert in alerts"
-        :key="alert"
-      >{{alert}}</p>
+        v-if="!alerts.length"
+        class="title text-xs-center"
+      >
+        No alerts.
+      </p>
+    
+      <div v-else>
+        <p
+          class="subheading"
+          v-for="alert in alerts"
+          :key="alert"
+        >{{alert}}</p>
+      </div>
+    
     </div>
     
     <v-btn
@@ -32,7 +30,7 @@
       <v-icon dark>mdi-close</v-icon>
     </v-btn>
     
-    <confirm ref="confirm"></confirm>
+    <confirm-dialog ref="confirmDialog"/>
       
   </v-card>
         
@@ -41,7 +39,7 @@
 <script>
 
 import { mapState } from 'vuex'
-import Confirm from '../components/Confirm'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default {
   name: 'Alerts',
@@ -51,7 +49,7 @@ export default {
   },
   
   components: {
-    Confirm,
+    ConfirmDialog,
   },
   
   created() {
@@ -67,7 +65,7 @@ export default {
   methods: {
   
     clearAlerts() {
-      this.$refs.confirm.open('Clear', 'Are you sure you want to clear all the alerts?').then(() => {
+      this.$refs.confirmDialog.open('Clear', 'Are you sure you want to clear all the alerts?').then(() => {
         this.$socket.emit('alerts_clear', (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)

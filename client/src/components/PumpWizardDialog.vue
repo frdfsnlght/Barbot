@@ -1,14 +1,14 @@
 <template>
   <div>
   
-    <v-dialog v-model="loadDialog" persistent scrollable @keydown.esc="closeLoad" @keydown.enter.prevent="submitLoad">
+    <v-dialog v-model="loadDialog" persistent scrollable>
       <v-card>
         <v-card-title>
           <span v-if="!isReload" class="headline">Load Pump {{pump.name}}</span>
           <span v-else class="headline">Reload Pump {{pump.name}}</span>
         </v-card-title>
         
-        <v-card-text>
+        <v-card-text @keydown.esc.prevent="closeLoad" @keydown.enter.prevent="submitLoad">
           <v-form ref="loadForm" v-model="valid" lazy-validation>
             <v-container grid-list-md>
               <v-layout wrap>
@@ -89,7 +89,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="primeDialog" persistent scrollable @keydown.esc="closePrime">
+    <v-dialog v-model="primeDialog" persistent scrollable @keydown.esc.prevent="closePrime">
       <v-card>
         <v-card-title>
           <span class="headline">Prime Pump {{pump.name}}</span>
@@ -151,7 +151,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="cleanDialog" persistent scrollable @keydown.esc="closeClean">
+    <v-dialog v-model="cleanDialog" persistent scrollable @keydown.esc.prevent="closeClean">
       <v-card>
         <v-card-title>
           <span class="headline">Clean Pump {{pump.name}}</span>

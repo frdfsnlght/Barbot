@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat>
+  <v-card flat style="height: 93vh; overflow-y: auto;">
     
     <loading v-if="loading"></loading>
     
@@ -49,7 +49,7 @@
       </v-list>
         
       <v-divider v-if="!showSort"/>
-      
+        
       <v-list two-line>
         
         <v-list-tile
@@ -137,7 +137,7 @@
       </v-btn>
     </template>
     
-    <confirm ref="confirm"/>
+    <confirm-dialog ref="confirmDialog"/>
     <drink-dialog ref="drinkDialog"/>
     <order-drink-dialog ref="orderDrinkDialog"/>
 
@@ -149,7 +149,7 @@
 
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
-import Confirm from '../components/Confirm'
+import ConfirmDialog from '../components/ConfirmDialog'
 import AlcoholicIcon from '../components/AlcoholicIcon'
 import DrinkDialog from '../components/DrinkDialog'
 import OrderDrinkDialog from '../components/OrderDrinkDialog'
@@ -169,7 +169,7 @@ export default {
   
   components: {
     Loading,
-    Confirm,
+    ConfirmDialog,
     AlcoholicIcon,
     DrinkDialog,
     OrderDrinkDialog,
@@ -243,7 +243,7 @@ export default {
     },
     
     deleteDrink() {
-      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.drink.name + '"?').then(() => {
+      this.$refs.confirmDialog.open('Delete', 'Are you sure you want to delete "' + this.drink.name + '"?').then(() => {
         this.$socket.emit('drink_delete', this.drink.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)

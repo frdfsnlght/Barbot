@@ -2,7 +2,6 @@
   <v-dialog
     v-model="visible"
     persistent
-    max-width="400"
     style="z-index: 800"
   >
     <v-card

@@ -66,7 +66,7 @@
       </v-list-tile>
     </v-list>
     
-    <v-dialog v-model="dialog" persistent scrollable max-width="480px" @keydown.esc="closeDialog" @keydown.enter.prevent="saveItem">
+    <v-dialog v-model="dialog" persistent scrollable>
       <v-card>
         <v-card-title>
           <span
@@ -79,7 +79,7 @@
           >Add Ingredient</span>
         </v-card-title>
         
-        <v-card-text>
+        <v-card-text @keydown.esc.prevent="closeDialog" @keydown.enter.prevent="saveItem">
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-container grid-list-md>
               <v-layout wrap>

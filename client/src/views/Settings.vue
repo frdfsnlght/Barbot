@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat>
+  <v-card flat style="height: 93vh; overflow-y: auto;">
     
     <v-list two-line>
     

@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat>
+  <v-card flat style="height: 93vh; overflow-y: auto;">
     
     <loading v-if="loading"></loading>
     
@@ -36,7 +36,7 @@
       
         </v-list-tile>
       </v-list>
-      
+        
       <v-menu
         v-model="menu"
         :position-x="menuX"
@@ -156,7 +156,7 @@
       </v-card>
     </v-dialog>
 
-    <confirm ref="confirm"></confirm>
+    <confirm-dialog ref="confirmDialog"/>
       
   </v-card>
         
@@ -166,7 +166,7 @@
 
 import { mapState, mapGetters } from 'vuex'
 import Loading from '../components/Loading'
-import Confirm from '../components/Confirm'
+import ConfirmDialog from '../components/ConfirmDialog'
 import SelectUnits from '../components/SelectUnits'
 import bus from '../bus'
 
@@ -185,7 +185,7 @@ export default {
   },
   components: {
     Loading,
-    Confirm,
+    ConfirmDialog,
     SelectUnits
   },
   created() {
@@ -256,7 +256,7 @@ export default {
     },
     
     deleteGlass() {
-      this.$refs.confirm.open('Delete', 'Are you sure you want to delete "' + this.glass.size + ' ' + this.glass.units + ' ' + this.glass.type + '"?').then(() => {
+      this.$refs.confirmDialog.open('Delete', 'Are you sure you want to delete "' + this.glass.size + ' ' + this.glass.units + ' ' + this.glass.type + '"?').then(() => {
         this.$socket.emit('glass_delete', this.glass.id, (res) => {
           if (res.error) {
             this.$store.commit('setError', res.error)
