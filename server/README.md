@@ -8,7 +8,3 @@ Barbot's server.
 * see requirements.txt
 
 ## TODO
-* import data
-* estimate pump settings in default config
-
-* debug sporadic lights
