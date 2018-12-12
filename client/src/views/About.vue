@@ -18,6 +18,7 @@
       </div>
     
       <p>Git: {{gitVersion}}/{{gitBranch}}</p>
+      <p>Built: {{buildDate}}</p>
 
     </div>
     
@@ -42,7 +43,7 @@ li {
 <script>
 
 import { mapState } from 'vuex'
-import git from '../git'
+import build from '../build'
 
 export default {
   name: 'About',
@@ -57,10 +58,13 @@ export default {
   
   computed: {
     gitVersion() {
-      return git.version
+      return build.gitVersion
     },
     gitBranch() {
-      return git.branch
+      return build.gitBranch
+    },
+    buildDate() {
+      return build.buildDate
     },
     serverPort() {
       return document.location.port

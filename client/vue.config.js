@@ -27,11 +27,12 @@ module.exports = {
     configureWebpack: {
         plugins: [
             new ReplacePlugin({
-                include: 'src/git.js',
+                include: 'src/build.js',
                 values: {
                     'GIT_VERSION': gitRevisionPlugin.version(),
                     'GIT_COMMITHASH': gitRevisionPlugin.commithash(),
                     'GIT_BRANCH': gitRevisionPlugin.branch(),
+                    'BUILD_DATE': (new Date()).toLocaleString(),
                 }
             }),            
         ],
