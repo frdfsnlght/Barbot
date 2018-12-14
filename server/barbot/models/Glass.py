@@ -53,7 +53,7 @@ class Glass(BarbotModel):
             out['drinks'] = [d.toDict() for d in self.drinks]
         return out
         
-    def export(self):
+    def export(self, compact = False):
         out = {
             'type': self.type,
             'size': self.size,

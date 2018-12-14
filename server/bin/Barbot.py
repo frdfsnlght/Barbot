@@ -68,6 +68,9 @@ def startServer():
 
     signal.signal(signal.SIGTERM, catchSIGTERM)
     signal.signal(signal.SIGINT, catchSIGINT)
+
+    bus.emit('server/start1')
+    bus.emit('server/start')
     
     # start threads
     
@@ -75,9 +78,6 @@ def startServer():
     webThread.daemon = True
     webThread.start()
 
-    bus.emit('server/start1')
-    bus.emit('server/start')
-    
     logger.info('Server started')
     
     # wait for the end

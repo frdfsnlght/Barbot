@@ -111,11 +111,12 @@ class Ingredient(BarbotModel):
         
         return out
         
-    def export(self, alternatives = False, stats = False):
+    def export(self, alternatives = False, compact = False, stats = False):
         out = {
             'name': self.name,
-            'isAlcoholic': self.isAlcoholic,
         }
+        if self.isAlcoholic or not compact:
+            out['isAlcoholic'] = self.isAlcoholic
         if alternatives:
             alts = [alt.alternative.name for alt in self.prioritizedAlternatives()]
             if alts:

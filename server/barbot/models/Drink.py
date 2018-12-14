@@ -39,6 +39,10 @@ class Drink(BarbotModel):
         return Drink.select().where(Drink.id.in_(ids)).execute()
 
     @staticmethod
+    def getMenuDrinksCount():
+        return len([id for id in _menu.keys() if _menu[id]['onMenu']])
+
+    @staticmethod
     def getDrinksWithIngredients(ingredients):
         from .DrinkIngredient import DrinkIngredient
         return Drink.select(Drink).distinct().join(DrinkIngredient).where(DrinkIngredient.ingredient.in_(list(ingredients))).execute()
@@ -195,21 +199,28 @@ class Drink(BarbotModel):
             out['ingredients'] = [di.toDict(ingredient = True, ingredientAlternatives = ingredientAlternatives) for di in self.ingredients]
         return out
     
-    def export(self, stats = False):
-        out = {
-            'primaryName': self.primaryName,
-            'glass': '{} {} {}'.format(self.glass.size, self.glass.units, self.glass.type),
-            'ingredients': [],
-        }
-        if self.secondaryName:
-            out['secondaryName'] = self.secondaryName
+    def export(self, stats = False, compact = False):
+        if compact:
+            out = {
+                'name': self.name()
+            }
+        else:
+            out = {
+                'primaryName': self.primaryName,
+            }
+            if self.secondaryName:
+                out['secondaryName'] = self.secondaryName
+            
+        out['glass'] = '{} {} {}'.format(self.glass.size, self.glass.units, self.glass.type)
+        out['ingredients'] = []
+            
         if self.instructions:
             out['instructions'] = self.instructions
         if stats:
             out['isFavorite'] = self.isFavorite
             out['timesDispensed'] = self.timesDispensed
         for di in self.ingredients:
-            out['ingredients'].append(di.export())
+            out['ingredients'].append(di.export(compact))
         return out
     
     class Meta:

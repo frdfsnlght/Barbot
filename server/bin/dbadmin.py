@@ -22,7 +22,9 @@ from barbot.models.DrinkIngredient import DrinkIngredient
 from barbot.models.Drink import Drink
 
 
-glassPattern = re.compile(r"([\d\.]+) (\w+) (.*)")
+namePattern = re.compile(r"([\w ]+),?\s*([\w ]*)")
+glassPattern = re.compile(r"([\d\.]+)\s+(\w+)\s+(.*)")
+ingredientPattern = re.compile(r"(\d+)\.\s+([\d\.\\]+)\s+(\w+)\s+(.*)")
 
 args = None
 
@@ -55,9 +57,9 @@ def doExport(args):
                     ingredients.append(di.ingredient)
         
     data = {}
-    data['glasses'] = [glass.export() for glass in glasses]
-    data['ingredients'] = [ingredient.export(stats = args.stats, alternatives = True) for ingredient in ingredients]
-    data['drinks'] = [drink.export(stats = args.stats) for drink in drinks]
+    data['glasses'] = [glass.export(compact = args.compact) for glass in glasses]
+    data['ingredients'] = [ingredient.export(stats = args.stats, compact = args.compact, alternatives = True) for ingredient in ingredients]
+    data['drinks'] = [drink.export(stats = args.stats, compact = args.compact) for drink in drinks]
     
     print('Writing {}...'.format(args.file))
     with open(args.file, 'w') as file:
@@ -187,25 +189,35 @@ def importIngredients(ingredients):
 def importDrinks(drinks, glasses, ingredients):
     count = 0
     for drink in drinks:
+        drinkName = 'unknown'
         try:
             d = Drink()
-            d.primaryName = drink['primaryName']
-            if 'secondaryName' in drink:
-                d.secondaryName = drink['secondaryName']
+            
+            if 'name' in drink:
+                drinkName = drink['name'].strip()
+                match = namePattern.match(drinkName)
+                if not match:
+                    raise ValueError('drink name format not recognized')
+                d.primaryName = match.group(1)
+                if match.group(2):
+                    d.secondaryName = match.group(2)
+                
+            elif 'primaryName' in drink:
+                d.primaryName = drink['primaryName'].strip()
+                if 'secondaryName' in drink:
+                    d.secondaryName = drink['secondaryName'].strip()
+                drinkName = d.name()
+                    
+            else:
+                raise ValueError('drink requires a name')
+                
             if 'instructions' in drink:
                 d.instructions = drink['instructions'].strip()
         
             if 'glass' in drink:
-                match = glassPattern.match(drink['glass'])
+                match = glassPattern.match(drink['glass'].strip())
                 if not match:
                     raise ValueError('glass "{}" format not recognized'.format(drink['glass']))
-#                print(match.group(1))
-#                print(match.group(2))
-#                print(match.group(3))
-                
-#                for g in Glass.select():
-#                    print('{} {} {}'.format(g.size, g.units, g.type))
-                
                 glass = Glass.get_or_none(Glass.type == match.group(3), Glass.size == match.group(1), Glass.units == match.group(2))
                 if not glass:
                     raise ValueError('glass "{}" not found'.format(drink['glass']))
@@ -219,11 +231,11 @@ def importDrinks(drinks, glasses, ingredients):
                 if 'isFavorite' in drink:
                     d.isFavorite = drink['isFavorite']
                 if 'timesDispensed' in drink:
-                    d.timesDispensed = drink['timesDispensed']
+                    d.timesDispensed = int(drink['timesDispensed'])
             d.source = args.source
             od = d.alreadyExists()
             if d.alreadyExists():
-                print('Drink "{}" already exists'.format(d.name()))
+                print('Drink "{}" already exists'.format(drinkName))
                 continue
 
             d.save()
@@ -234,31 +246,56 @@ def importDrinks(drinks, glasses, ingredients):
                 di = DrinkIngredient()
                 di.drink_id = d.id
                 
-                if 'ingredient' in drinkIngredient:
-                    ingredient = Ingredient.get_or_none(Ingredient.name == drinkIngredient['ingredient'])
+                if isinstance(drinkIngredient, str):
+                    match = ingredientPattern.match(drinkIngredient)
+                    if not match:
+                        raise ValueError('ingredient format not recognized')
+                    di.step = int(match.group(1))
+                        
+                    if match.group(2) == '1/4': di.amount = 0.25
+                    elif match.group(2) == '1/3': di.amount = 0.333
+                    elif match.group(2) == '1/2': di.amount = 0.5
+                    elif match.group(2) == '2/3': di.amount = 0.667
+                    elif match.group(2) == '3/4': di.amount = 0.75
+                    else:
+                        di.amount = float(match.group(2))
+            
+                    di.units = match.group(3)
+
+                    ingredient = Ingredient.get_or_none(Ingredient.name == match.group(4))
                     if not ingredient:
-                        raise DBAdminError('Drink "{}": ingredient "{}" not found!'.format(drink['primaryName'], drinkIngredient['ingredient']))
+                        raise ValueError('ingredient "{}" not found!'.format(match.group(4)))
                     di.ingredient_id = ingredient.id
+
                 else:
-                    ingredient = [ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']][0]
-                    di.ingredient_id = ingredient['local_id']
+                    if 'ingredient' in drinkIngredient:
+                        ingredient = Ingredient.get_or_none(Ingredient.name == drinkIngredient['ingredient'])
+                        if not ingredient:
+                            raise ValueError('ingredient "{}" not found!'.format(drinkIngredient['ingredient']))
+                        di.ingredient_id = ingredient.id
+                        
+                    else:
+                        ingredient = [ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']][0]
+                        di.ingredient_id = ingredient['local_id']
+                        
+                    if 'amount' not in drinkIngredient:
+                        raise ValueError('ingredient {} requires an amount'.format(di.ingredient.name))
+                    if drinkIngredient['amount'] == '1/4': di.amount = 0.25
+                    elif drinkIngredient['amount'] == '1/3': di.amount = 0.333
+                    elif drinkIngredient['amount'] == '1/2': di.amount = 0.5
+                    elif drinkIngredient['amount'] == '2/3': di.amount = 0.667
+                    elif drinkIngredient['amount'] == '3/4': di.amount = 0.75
+                    else:
+                        di.amount = float(drinkIngredient['amount'])
                     
-                if 'amount' not in drinkIngredient:
-                    raise ValueError('ingredient {} requires an amount'.format(di.ingredient.name))
-                if drinkIngredient['amount'] == '1/4': di.amount = 0.25
-                elif drinkIngredient['amount'] == '1/2': di.amount = 0.5
-                elif drinkIngredient['amount'] == '3/4': di.amount = 0.75
-                else:
-                    di.amount = float(drinkIngredient['amount'])
-                
-                if 'units' not in drinkIngredient:
-                    raise ValueError('ingredient {} requires units'.format(di.ingredient.name))
-                di.units = drinkIngredient['units']
-                
-                if 'step' in drinkIngredient:
-                    di.step = drinkIngredient['step']
-                else:
-                    di.step = 1
+                    if 'units' not in drinkIngredient:
+                        raise ValueError('ingredient {} requires units'.format(di.ingredient.name))
+                    di.units = drinkIngredient['units']
+                    
+                    if 'step' in drinkIngredient:
+                        di.step = drinkIngredient['step']
+                    else:
+                        di.step = 1
                     
                 ingredients.append(di)
                 
@@ -268,9 +305,9 @@ def importDrinks(drinks, glasses, ingredients):
             count = count + 1
             
         except ValueError as e:
-            raise DBAdminError('Drink "{}": {}'.format(drink['primaryName'], str(e)))
+            raise DBAdminError('Drink "{}": {}'.format(drinkName, str(e)))
         except ModelError as e:
-            raise DBAdminError('Drink "{}": {}'.format(drink['primaryName'], str(e)))
+            raise DBAdminError('Drink "{}": {}'.format(drinkName, str(e)))
         
     return count
     
@@ -346,6 +383,8 @@ if __name__ == '__main__':
                       help = 'the name of the source to export')
     subp.add_argument('--stats', action = 'store_true',
                       help = 'should ingredient/drink stats be exported')
+    subp.add_argument('-c', '--compact', action = 'store_true',
+                      help = 'export in as compact form as possible')
     subp.add_argument('file',
                       help = 'the name of the output file')
     subp.set_defaults(func = doExport)

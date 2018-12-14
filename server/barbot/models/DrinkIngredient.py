@@ -36,13 +36,16 @@ class DrinkIngredient(BarbotModel):
             out['ingredient'] = self.ingredient.toDict(alternatives = ingredientAlternatives)
         return out
         
-    def export(self):
-        return {
-            'ingredient': self.ingredient.name,
-            'amount': self.amount,
-            'units': self.units,
-            'step': self.step,
-        }
+    def export(self, compact = False):
+        if compact:
+            return '{}. {} {} {}'.format(self.step, self.amount, self.units, self.ingredient.name)
+        else:
+            return {
+                'ingredient': self.ingredient.name,
+                'amount': self.amount,
+                'units': self.units,
+                'step': self.step,
+            }
         
     class Meta:
         database = db
