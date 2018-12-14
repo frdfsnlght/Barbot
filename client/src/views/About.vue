@@ -17,7 +17,13 @@
         </ul>
       </div>
     
-      <p>Git: {{gitVersion}}/{{gitBranch}}</p>
+      <p class="mb-0">{{statistics.drinks}} drinks</p>
+      <p class="mb-0">{{statistics.ingredients}} ingredients</p>
+      <p class="mb-0">{{statistics.glasses}} glasses</p>
+      <p class="mb-0">{{statistics.menuDrinks}} drinks on the menu</p>
+      <p>{{statistics.drinksServed}} drinks served since startup</p>
+    
+      <p class="mb-0">Git: {{gitVersion}}/{{gitBranch}}</p>
       <p>Built: {{buildDate}}</p>
 
     </div>
@@ -49,6 +55,7 @@ export default {
   name: 'About',
   data() {
     return {
+      statistics: {},
     }
   },
   
@@ -77,6 +84,18 @@ export default {
   
   methods: {
   
+  },
+  
+  beforeRouteEnter(to, from, next) {
+    next(t => {
+      t.$socket.emit('core_statistics', (res) => {
+        if (res.error) {
+            t.$store.commit('setError', res.error)
+        } else {
+          t.statistics = res
+        }
+      })
+    });
   },
   
 }

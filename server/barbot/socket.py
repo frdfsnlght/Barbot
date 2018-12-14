@@ -51,6 +51,10 @@ def success(d = None, **kwargs):
 def error(msg):
     return {'error': str(msg)}
 
+def socketEmit(*args, **kwargs):
+    if not socket.server: return
+    socket.emit(*args, **kwargs)
+
 #--------------------------------
 # decorators
 #
@@ -189,9 +193,22 @@ def _socket_logout():
 #-------------------------------
 # core
 #
+
+@socket.on('core_statistics')
+def _socket_core_statistics():
+    _logger.debug('recv core_statistics')
+    stats = {
+        'drinks': Drink.select().count(),
+        'ingredients': Ingredient.select().count(),
+        'glasses': Glass.select().count(),
+        'menuDrinks': Drink.getMenuDrinksCount(),
+        'drinksServed': dispenser.drinksServed,
+    }
+    return success(stats)
     
 @socket.on('core_restartX')
-def _socket_restartX():
+def _socket_core_restartX():
+    _logger.debug('recv core_restartX')
     if not checkAdmin('restartXRequiresAdmin'):
         return error('Permission denied!')
     _logger.info('Client requested restart X')
@@ -202,7 +219,8 @@ def _socket_restartX():
         return error(e)
 
 @socket.on('core_restart')
-def _socket_restart():
+def _socket_core_restart():
+    _logger.debug('recv core_restart')
     if not checkAdmin('restartRequiresAdmin'):
         return error('Permission denied!')
     _logger.info('Client requested restart')
@@ -213,7 +231,8 @@ def _socket_restart():
         return error(e)
 
 @socket.on('core_shutdown')
-def _socket_shutdown():
+def _socket_core_shutdown():
+    _logger.debug('recv core_shutdown')
     if not checkAdmin('shutdownRequiresAdmin'):
         return error('Permission denied!')
     _logger.info('Client requested shutdown')
@@ -229,6 +248,7 @@ def _socket_shutdown():
         
 @socket.on('audio_setVolume')
 def _socket_audio_setVolume(volume):
+    _logger.debug('recv audio_setVolume')
     audio.setVolume(float(volume))
     return success()
 
@@ -514,6 +534,12 @@ def _socket_drink_getAll():
 def _socket_drink_getMenu():
     _logger.debug('recv drink_getMenu')
     return success(drinks = [d.toDict() for d in Drink.getMenuDrinks()])
+    
+@socket.on('drink_rebuildMenu')
+def _socket_drink_rebuildMenu():
+    _logger.debug('recv drink_rebuildMenu')
+    Drink.rebuildMenu()
+    return success()
     
 @socket.on('drink_getOne')
 def _socket_drink_getOne(id):
@@ -844,12 +870,12 @@ def socket_alerts_clear():
     
 @bus.on('config/loaded')
 def _but_config_loaded():
-    socket.emit('units', units.export())
+    socketEmit('units', units.export())
     
 @bus.on('settings/loaded')
 @bus.on('settings/changed')
 def _but_settings_loaded():
-    socket.emit('settings', settings.export())
+    socketEmit('settings', settings.export())
     
 @bus.on('serial/event')
 def _bus_serial_event(e):
@@ -857,7 +883,7 @@ def _bus_serial_event(e):
         m = _shutdownEventPattern.match(e)
         if m:
             _logger.debug('Got shutdown request')
-            socket.emit('shutdownRequest', room = _consoleSessionId)
+            socketEmit('shutdownRequest', room = _consoleSessionId)
     
 #-------------------------------
 # alert
@@ -867,7 +893,7 @@ def _bus_serial_event(e):
 @bus.on('alerts/clear')
 def _bus_alerts():
     try:
-        socket.emit('alerts_changed', alerts.getAll())
+        socketEmit('alerts_changed', alerts.getAll())
     except:
         pass
     
@@ -879,15 +905,15 @@ def _bus_alerts():
 def _bus_dispenser_state(state, drinkOrder):
     if drinkOrder:
         drinkOrder = drinkOrder.toDict(drink = True, glass = True)
-    socket.emit('dispenser_state', {'state': state, 'drinkOrder': drinkOrder})
+    socketEmit('dispenser_state', {'state': state, 'drinkOrder': drinkOrder})
     
 @bus.on('dispenser/glass')
 def _bus_dispenser_glass(ready):
-    socket.emit('dispenser_glass', ready)
+    socketEmit('dispenser_glass', ready)
 
 @bus.on('dispenser/hold')
 def _bus_dispenser_hold(hold):
-    socket.emit('dispenser_hold', hold)
+    socketEmit('dispenser_hold', hold)
 
 #-------------------------------
 # wifi
@@ -895,7 +921,7 @@ def _bus_dispenser_hold(hold):
 
 @bus.on('wifi/state')
 def _bus_wifi_state(state):
-    socket.emit('wifi_state', state)
+    socketEmit('wifi_state', state)
     
 #-------------------------------
 # audio
@@ -905,19 +931,19 @@ def _bus_wifi_state(state):
 def _bus_audio_playFile(file, console, sessionId, broadcast):
     if broadcast:
         _logger.debug('Play {} everywhere'.format(file))
-        socket.emit('audio_playFile', file)
+        socketEmit('audio_playFile', file)
     else:
         if sessionId:
             _logger.debug('Play {} on client {}'.format(file, sessionId))
-            socket.emit('audio_playFile', file, room = sessionId)
+            socketEmit('audio_playFile', file, room = sessionId)
         elif console and _consoleSessionId:
             _logger.debug('Play {} on console'.format(file))
-            socket.emit('audio_playFile', file, room = _consoleSessionId)
+            socketEmit('audio_playFile', file, room = _consoleSessionId)
 
 @bus.on('audio/volume')
 def _bus_audio_volume(volume):
     if _consoleSessionId:
-        socket.emit('audio_volume', volume, room = _consoleSessionId)
+        socketEmit('audio_volume', volume, room = _consoleSessionId)
         
 #-------------------------------
 # glass
@@ -926,12 +952,12 @@ def _bus_audio_volume(volume):
 @bus.on('model/glass/saved')
 def _bus_model_glass_saved(g):
     _logger.debug('emit glass_changed')
-    socket.emit('glass_changed', g.toDict(drinks = True))
+    socketEmit('glass_changed', g.toDict(drinks = True))
 
 @bus.on('model/glass/deleted')
 def _bus_model_glass_deleted(g):
     _logger.debug('emit glass_delete')
-    socket.emit('glass_deleted', g.toDict())
+    socketEmit('glass_deleted', g.toDict())
 
 #-------------------------------
 # ingredient
@@ -940,12 +966,12 @@ def _bus_model_glass_deleted(g):
 @bus.on('model/ingredient/saved')
 def _bus_model_ingredient_saved(i):
     _logger.debug('emit ingredient_changed')
-    socket.emit('ingredient_changed', i.toDict(drinks = True, alternatives = True))
+    socketEmit('ingredient_changed', i.toDict(drinks = True, alternatives = True))
 
 @bus.on('model/ingredient/deleted')
 def _bus_model_ingredient_deleted(i):
     _logger.debug('emit ingredient_deleted')
-    socket.emit('ingredient_deleted', i.toDict())
+    socketEmit('ingredient_deleted', i.toDict())
                  
 #-------------------------------
 # drink
@@ -953,14 +979,13 @@ def _bus_model_ingredient_deleted(i):
 
 @bus.on('model/drink/saved')
 def _bus_model_drink_saved(d):
-    if not socket.server: return
     _logger.debug('emit drink_changed')
-    socket.emit('drink_changed', d.toDict(glass = True, ingredients = True))
+    socketEmit('drink_changed', d.toDict(glass = True, ingredients = True))
 
 @bus.on('model/drink/deleted')
 def _bus_model_drink_deleted(d):
     _logger.debug('emit drink_deleted')
-    socket.emit('drink_deleted', d.toDict())
+    socketEmit('drink_deleted', d.toDict())
     
 #-------------------------------
 # drinkOrder
@@ -969,12 +994,12 @@ def _bus_model_drink_deleted(d):
 @bus.on('model/drinkOrder/saved')
 def _bus_model_drinkOrder_saved(o):
     _logger.debug('emit drinkOrder_changed')
-    socket.emit('drinkOrder_changed', o.toDict(drink = True))
+    socketEmit('drinkOrder_changed', o.toDict(drink = True))
 
 @bus.on('model/drinkOrder/deleted')
 def _bus_model_drinkOrder_deleted(o):
     _logger.debug('emit drinkOrder_deleted')
-    socket.emit('drinkOrder_deleted', o.toDict())
+    socketEmit('drinkOrder_deleted', o.toDict())
          
 #-------------------------------
 # pump
@@ -983,6 +1008,6 @@ def _bus_model_drinkOrder_deleted(o):
 @bus.on('model/pump/saved')
 def _bus_model_pump_saved(p):
     _logger.debug('emit pump_changed')
-    socket.emit('pump_changed', p.toDict(ingredient = True))
+    socketEmit('pump_changed', p.toDict(ingredient = True))
     
 

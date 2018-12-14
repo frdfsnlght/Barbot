@@ -47,6 +47,7 @@ hold = False
 glass = False
 state = ST_WAIT
 drinkOrder = None
+drinksServed = 0
 
 
 class DispenserError(Exception):
@@ -228,7 +229,7 @@ def _checkIdle():
             bus.emit('audio/play', 'idle', console = True)
     
 def _dispenseDrinkOrder(o):
-    global state, drinkOrder, _control
+    global state, drinkOrder, _control, drinksServed
     state = ST_DISPENSE_START
     drinkOrder = o
     _logger.info('Preparing to dispense {}'.format(drinkOrder.desc()))
@@ -341,6 +342,7 @@ def _dispenseDrinkOrder(o):
         drink.save()
         drinkOrder.completedDate = datetime.datetime.now()
         drinkOrder.save()
+        drinksServed = drinksServed + 1
         state = ST_DISPENSE_PICKUP
         bus.emit('dispenser/state', state, drinkOrder)
         bus.emit('audio/play', 'endDispense', console = True)
