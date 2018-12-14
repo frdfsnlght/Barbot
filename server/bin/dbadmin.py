@@ -22,9 +22,9 @@ from barbot.models.DrinkIngredient import DrinkIngredient
 from barbot.models.Drink import Drink
 
 
-namePattern = re.compile(r"([\w ]+),?\s*([\w ]*)")
+namePattern = re.compile(r"([^,]+),?\s*(.*)")
 glassPattern = re.compile(r"([\d\.]+)\s+(\w+)\s+(.*)")
-ingredientPattern = re.compile(r"(\d+)\.\s+([\d\.\\]+)\s+(\w+)\s+(.*)")
+ingredientPattern = re.compile(r"(\d+)\.\s+([\d\.\/]+)\s+(\w+)\s+(.*)")
 
 args = None
 
@@ -249,7 +249,7 @@ def importDrinks(drinks, glasses, ingredients):
                 if isinstance(drinkIngredient, str):
                     match = ingredientPattern.match(drinkIngredient)
                     if not match:
-                        raise ValueError('ingredient format not recognized')
+                        raise ValueError('ingredient format not recognized: {}'.format(drinkIngredient))
                     di.step = int(match.group(1))
                         
                     if match.group(2) == '1/4': di.amount = 0.25
@@ -274,9 +274,14 @@ def importDrinks(drinks, glasses, ingredients):
                             raise ValueError('ingredient "{}" not found!'.format(drinkIngredient['ingredient']))
                         di.ingredient_id = ingredient.id
                         
-                    else:
-                        ingredient = [ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']][0]
+                    elif 'ingredient_id' in drinkIngredient:
+                        ingredient = next(iter([ingredient for ingredient in ingredients if ingredient['id'] == drinkIngredient['ingredient_id']]), None)
+                        if not ingredient:
+                            raise ValueError('ingredient {} not found'.format(drinkIngredient['ingredient_id']))
                         di.ingredient_id = ingredient['local_id']
+                        
+                    else:
+                        raise ValueError('invalid ingredient {}'.format(drinkIngredient))
                         
                     if 'amount' not in drinkIngredient:
                         raise ValueError('ingredient {} requires an amount'.format(di.ingredient.name))
