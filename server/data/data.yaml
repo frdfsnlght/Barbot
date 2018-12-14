@@ -8,28 +8,39 @@ glasses:
     can be repurposed for tiki drinks made with crushed ice.
 - size: 2
   units: oz
-  type: Shot glass
+  type: Shot
   description: Standard shot glass.
 - size: 6
   units: oz
-  type: Coupe glass
+  type: Coupe
   description: >
     Good for cocktails served "up," meaning it's been shaken or
     stirred with ice and then served chilled, without ice - like
     a Martini. The stem means you don't heat up the cocktail
     with your hand as you sip it.
-- id: 4
-  size: 8
+- size: 8
   units: oz
-  type: Single Rocks glass
+  type: Coupe
+  description: >
+    Good for cocktails served "up," meaning it's been shaken or
+    stirred with ice and then served chilled, without ice - like
+    a Martini. The stem means you don't heat up the cocktail
+    with your hand as you sip it.
+- size: 6
+  units: oz
+  type: Tequila
+  description: >
+    Good for sipping tequila.
+- size: 8
+  units: oz
+  type: Rocks
   description: >
     Used for anything neat, any spirit on the rocks, though also
     used for stirred, chilled, spirituous cocktails served "down,"
     meaning it's served chilled, but in a glass without a stem.
-- id: 5
-  size: 12
+- size: 12
   units: oz
-  type: Double Rocks glass
+  type: Rocks
   description: >
     Same as a single rocks glass, but a little bigger.
     
@@ -37,12 +48,8 @@ glasses:
     
 ingredients:
 
-# Alcoholic
+# Alcohols
 
-- name: Absolute Vodka
-  isAlcoholic: true
-  alternatives:
-    - Vodka
 - name: Vodka
   isAlcoholic: true
 - name: Gin
@@ -63,13 +70,13 @@ ingredients:
   isAlcoholic: true
 - name: Bourbon
   isAlcoholic: true
+- name: Whiskey
+  isAlcoholic: true
 - name: Cognac
   isAlcoholic: true
 - name: Tequila
   isAlcoholic: true
 - name: Triple Sec
-  isAlcoholic: true
-- name: Rye Whiskey
   isAlcoholic: true
 - name: Hpnotiq
   isAlcoholic: true
@@ -79,6 +86,8 @@ ingredients:
   isAlcoholic: true
 - name: Peach Schnapps
   isAlcoholic: true
+- name: Orange Liqueur
+  isAlcoholic: true
   
 # Non-alcholic
 - name: Water
@@ -86,6 +95,7 @@ ingredients:
 - name: Coca Cola
 - name: Sprite
 - name: Ginger Ale
+- name: Root Beer
 - name: Lime Juice
 - name: Lemon Juice
 - name: Cranberry Juice
@@ -101,376 +111,642 @@ ingredients:
 
 drinks:
 
-- primaryName: Rum and Coke
-  secondaryName: Traditional
+- name: Coca Cola
   glass: 12 oz Highball
   ingredients:
-  - amount: 2.0
-    units: oz
-    ingredient: Light Rum
-    step: 1
-  - amount: 4.0
-    units: oz
-    ingredient: Coca Cola
-    step: 1
+  - 1. 8.0 oz Coca Cola
+  
+- name: Sprite
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Sprite
+  
+- name: Root Beer
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Root Beer
+  
+- name: Ginger Ale
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Ginger Ale
+  
+- name: Cranberry Juice
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Cranberry Juice
+  
+- name: Orange Juice
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Orange Juice
+  
+- name: Lemonade
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Lemonade
+  
+- name: Iced Tea
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 8.0 oz Iced Tea
+  
+- name: Rum and Coke, Traditional
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 2.0 oz Light Rum
+  - 1. 4.0 oz Coca Cola
   instructions: Pour the rum into a highball glass filled with ice and top with cola.
 
-- primaryName: Spiced Rum and Coke
+- name: Rum and Root Beer
   glass: 12 oz Highball
   ingredients:
-  - amount: 3.0
-    units: oz
-    ingredient: Spiced Rum
-    step: 1
-  - amount: 6.0
-    units: oz
-    ingredient: Coca Cola
-    step: 1
+  - 1. 2.0 oz Light Rum
+  - 1. 4.0 oz Root Beer
+  instructions: Pour the rum into a highball glass filled with ice and top with root beer.
+
+- name: Spiced Rum and Coke
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 3.0 oz Spiced Rum
+  - 1. 6.0 oz Coca Cola
   instructions: Pour the rum into a highball glass filled with ice and top with cola.
 
-- primaryName: Swedish Lemonade
+- name: Swedish Lemonade
   glass: 12 oz Highball
   ingredients:
-  - amount: 2.0
-    units: oz
-    ingredient: Vodka
-    step: 1
-  - amount: 2.0
-    units: oz
-    ingredient: Sweet and Sour
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Cranberry Juice
-    step: 2
+  - 1. 2.0 oz Vodka
+  - 1. 2.0 oz Sweet and Sour
+  - 2. 0.5 oz Cranberry Juice
   instructions: Half vodka, half sweet and sour, and a dash of cranberry juice for color. On the rocks is better.
 
-- primaryName: Kamikaze
-  glass: 8 oz Single Rocks glass
+- name: Kamikaze
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.0
-    units: oz
-    ingredient: Vodka
-  - amount: 1.0
-    units: oz
-    ingredient: Lime Juice
-  - amount: 1.0
-    units: oz
-    ingredient: Triple Sec
-  instructions: >
-    Combine lime juice, triple sec, and vodka in a cocktail shaker.
-    Add ice, cover and shake until chilled.
-    Strain into chilled glass.
+  - 1. 1.0 oz Vodka
+  - 1. 1.0 oz Lime Juice
+  - 1. 1.0 oz Triple Sec
+  instructions: Combine lime juice, triple sec, and vodka in a cocktail shaker. Add ice, cover and shake until chilled. Strain into chilled glass.
   
-- primaryName: Caipirinha
-  glass: 8 oz Single Rocks glass
+- name: Caipirinha
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 2.0
-    units: oz
-    ingredient: Cachaca
-  - amount: 2.0
-    units: oz
-    ingredient: Lime Juice
-  - amount: 1.0
-    units: oz
-    ingredient: Sugar Syrup
+  - 1. 2.0 oz Cachaca
+  - 1. 2.0 oz Lime Juice
+  - 1. 1.0 oz Sugar Syrup
 
-- primaryName: Caipiroska
-  glass: 8 oz Single Rocks glass
+- name: Caipiroska
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 2.0
-    units: oz
-    ingredient: Vodka
-  - amount: 2.0
-    units: oz
-    ingredient: Lime Juice
-  - amount: 1.0
-    units: oz
-    ingredient: Sugar Syrup
+  - 1. 2.0 oz Vodka
+  - 1. 2.0 oz Lime Juice
+  - 1. 1.0 oz Sugar Syrup
 
-- primaryName: Margarita
-  glass: 8 oz Single Rocks glass
+- name: Margarita
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.0
-    units: oz
-    ingredient: Tequila
-  - amount: 0.67
-    units: oz
-    ingredient: Triple Sec
-  - amount: 1.0
-    units: oz
-    ingredient: Lime Juice
+  - 1. 1.0 oz Tequila
+  - 1. 0.67 oz Triple Sec
+  - 1. 1.0 oz Lime Juice
 
-- primaryName: Mai Tai
-  glass: 8 oz Single Rocks glass
+- name: Mai Tai
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.0
-    units: oz
-    ingredient: Dark Rum
-    step: 1
-  - amount: 1.0
-    units: oz
-    ingredient: Light Rum
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Triple Sec
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Lime Juice
-    step: 2
-  - amount: 1.0
-    units: oz
-    ingredient: Orange Juice
-    step: 2
-  - amount: 0.1
-    units: oz
-    ingredient: Sugar Syrup
-    step: 2
+  - 1. 1.0 oz Dark Rum
+  - 1. 1.0 oz Light Rum
+  - 1. 0.5 oz Triple Sec
+  - 2. 0.5 oz Lime Juice
+  - 2. 1.0 oz Orange Juice
+  - 2. 0.1 oz Sugar Syrup
 
-- primaryName: Whiskey and Coke
-  glass: 8 oz Single Rocks glass
+- name: Whiskey and Coke
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Rye Whiskey
-  - amount: 5.0
-    units: oz
-    ingredient: Coca Cola
+  - 1. 1.5 oz Whiskey
+  - 1. 5.0 oz Coca Cola
 
-- primaryName: Whiskey and Ginger Ale
-  glass: 8 oz Single Rocks glass
+- name: Whiskey and Ginger Ale
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Rye Whiskey
-  - amount: 5.0
-    units: oz
-    ingredient: Ginger Ale
+  - 1. 1.5 oz Whiskey
+  - 1. 5.0 oz Ginger Ale
 
-- primaryName: Incredible Hulk
-  glass: 2 oz Shot glass
+- name: Incredible Hulk
+  glass: 2 oz Shot
   ingredients:
-  - amount: 0.5
-    units: oz
-    ingredient: Cognac
-  - amount: 0.5
-    units: oz
-    ingredient: Hpnotiq
+  - 1. 0.5 oz Cognac
+  - 1. 0.5 oz Hpnotiq
 
-- primaryName: Blue Coco Mojito
-  glass: 8 oz Single Rocks glass
+- name: Blue Coco Mojito
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Coconut Rum
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Blue Curacao
-    step: 1
-  - amount: 0.375
-    units: oz
-    ingredient: Lime Juice
-    step: 2
-  - amount: 0.375
-    units: oz
-    ingredient: Lemon Juice
-    step: 2
-  - amount: 0.75
-    units: oz
-    ingredient: Sugar Syrup
-    step: 2
-  - amount: 1.5
-    units: oz
-    ingredient: Club Soda
-    step: 2
+  - 1. 1.5 oz Coconut Rum
+  - 1. 0.5 oz Blue Curacao
+  - 2. 0.375 oz Lime Juice
+  - 2. 0.375 oz Lemon Juice
+  - 2. 0.75 oz Sugar Syrup
+  - 2. 1.5 oz Club Soda
 
-- primaryName: Sunsicle
-  glass: 8 oz Single Rocks glass
+- name: Sunsicle
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Vanilla Rum
-    step: 1
-  - amount: 0.25
-    units: oz
-    ingredient: Lime Juice
-    step: 1
-  - amount: 0.25
-    units: oz
-    ingredient: Lemon Juice
-    step: 1
-  - amount: 2.0
-    units: oz
-    ingredient: Orange Juice
-    step: 2
-  - amount: 0.5
-    units: oz
-    ingredient: Sugar Syrup
-    step: 2
-  - amount: 1.0
-    units: oz
-    ingredient: Club Soda
-    step: 2
+  - 1. 1.5 oz Vanilla Rum
+  - 1. 0.25 oz Lime Juice
+  - 1. 0.25 oz Lemon Juice
+  - 2. 2.0 oz Orange Juice
+  - 2. 0.5 oz Sugar Syrup
+  - 2. 1.0 oz Club Soda
 
-- primaryName: Sunsicle
-  secondaryName: Simplified
-  glass: 8 oz Single Rocks glass
+- name: Sunsicle, Simplified
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Vanilla Rum
-    step: 1
-  - amount: 2.0
-    units: oz
-    ingredient: Sprite
-    step: 2
-  - amount: 2.0
-    units: oz
-    ingredient: Orange Juice
-    step: 2
+  - 1. 1.5 oz Vanilla Rum
+  - 2. 2.0 oz Sprite
+  - 2. 2.0 oz Orange Juice
 
-- primaryName: Sex On The Beach
+- name: Sex On The Beach
   glass: 12 oz Highball
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Vodka
-    step: 1
-  - amount: 2.0
-    units: oz
-    ingredient: Orange Juice
-    step: 2
-  - amount: 2.0
-    units: oz
-    ingredient: Pineapple Juice
-    step: 2
-  - amount: 1.5
-    units: oz
-    ingredient: Peach Schnapps
-    step: 2
-  - amount: 2.0
-    units: oz
-    ingredient: Cranberry Juice
-    step: 2
-  instructions: >
-    Pour all ingredients into shaker.
-    Fill a Highball glass almost full of ice cubes, and dump ice into shaker.
-    Shake well and pour drink into Highball glass.
+  - 1. 1.5 oz Vodka
+  - 2. 2.0 oz Orange Juice
+  - 2. 2.0 oz Pineapple Juice
+  - 2. 1.5 oz Peach Schnapps
+  - 2. 2.0 oz Cranberry Juice
+  instructions: Pour all ingredients into shaker. Fill a Highball glass almost full of ice cubes, and dump ice into shaker. Shake well and pour drink into Highball glass.
 
-- primaryName: Shirley Temple
+- name: Shirley Temple
   glass: 12 oz Highball
   ingredients:
-  - amount: 0.167
-    units: oz
-    ingredient: Grenadine
-  - amount: 3.0
-    units: oz
-    ingredient: Ginger Ale
-  - amount: 3.0
-    units: oz
-    ingredient: Sprite
-  instructions: >
-    Fill a Highball glass almost full of ice cubes.
-    Pour all ingredients into the Highball glass and stir well.
-    Garnish with a Lime Wedge and a Maraschino Cherry.
+  - 1. 0.167 oz Grenadine
+  - 1. 3.0 oz Ginger Ale
+  - 1. 3.0 oz Sprite
+  instructions: Fill a Highball glass almost full of ice cubes. Pour all ingredients into the Highball glass and stir well. Garnish with a Lime Wedge and a Maraschino Cherry.
 
-- primaryName: Candy Cane Twist
-  glass: 8 oz Single Rocks glass
+- name: Candy Cane Twist
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Vodka
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Grenadine
-    step: 1
-  - amount: 1.5
-    units: oz
-    ingredient: Peppermint Schnapps
-    step: 1
-  - amount: 0.25
-    units: oz
-    ingredient: Sprite
-    step: 2
-  - amount: 3.0
-    units: oz
-    ingredient: Cranberry Juice
-    step: 2
-  instructions: >
-    Rim cocktail glass with crushed candy cane.
-    Mix vodka, schnapps, cranberry juice, and grenadine
-    into shaker along with ice and shake.
-    Strain into glass. Top with lemon lime soda and
-    garnish with small peppermint candy cane.
+  - 1. 1.5 oz Vodka
+  - 1. 0.5 oz Grenadine
+  - 1. 1.5 oz Peppermint Schnapps
+  - 2. 0.25 oz Sprite
+  - 2. 3.0 oz Cranberry Juice
+  instructions: Rim cocktail glass with crushed candy cane. Mix vodka, schnapps, cranberry juice, and grenadine into shaker along with ice and shake. Strain into glass. Top with lemon lime soda and garnish with small peppermint candy cane.
 
-- primaryName: Rudolph the Red Nose Reindeer
-  glass: 8 oz Single Rocks glass
+- name: Rudolph the Red Nose Reindeer
+  glass: 8 oz Rocks
   ingredients:
-  - amount: 0.5
-    units: oz
-    ingredient: Grenadine
-    step: 1
-  - amount: 2.0
-    units: oz
-    ingredient: Light Rum
-    step: 1
-  - amount: 2.0
-    units: oz
-    ingredient: Lemon Juice
-    step: 2
-  - amount: 4.0
-    units: oz
-    ingredient: Cranberry Juice
-    step: 2
-  instructions: >
-    Mix ingredients together in glass with ice. Stir and serve.
+  - 1. 0.5 oz Grenadine
+  - 1. 2.0 oz Light Rum
+  - 2. 2.0 oz Lemon Juice
+  - 2. 4.0 oz Cranberry Juice
+  instructions: Mix ingredients together in glass with ice. Stir and serve.
 
-- primaryName: John Daly
+- name: John Daly
   glass: 12 oz Highball
   ingredients:
-  - amount: 1.5
-    units: oz
-    ingredient: Vodka
-  - amount: 2.0
-    units: oz
-    ingredient: Lemonade
-  - amount: 2.0
-    units: oz
-    ingredient: Iced Tea
-  instructions: >
-    Fill a large highball glass with ice, add vodka, tea, and lemonade.
-    Gently stir and garnish with a lemon slice.
+  - 1. 1.5 oz Vodka
+  - 1. 2.0 oz Lemonade
+  - 1. 2.0 oz Iced Tea
+  instructions: Fill a large highball glass with ice, add vodka, tea, and lemonade. Gently stir and garnish with a lemon slice.
 
-- primaryName: Long Island Iced Tea
+- name: Long Island Ice Tea
   glass: 12 oz Highball
   ingredients:
-  - amount: 1.0
-    units: oz
-    ingredient: Vodka
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Light Rum
-    step: 1
-  - amount: 0.5
-    units: oz
-    ingredient: Lemon Juice
-    step: 1
-  - amount: 1.0
-    units: oz
-    ingredient: Tequila
-    step: 2
-  - amount: 1.0
-    units: oz
-    ingredient: Gin
-    step: 2
-  instructions: >
-    Fill a shaker half full with ice cubes.
-    Pour all ingredients into shaker and shake well.
-    Fill a highball glass almost full of ice cubes, and strain drink into glass.
-    Garnish with a Lemon Wedge, and serve.
+  - 1. 1.0 oz Vodka
+  - 1. 0.5 oz Light Rum
+  - 1. 0.5 oz Lemon Juice
+  - 2. 1.0 oz Tequila
+  - 2. 1.0 oz Gin
+  instructions: Combine the ingredients over ice in a highball glass.
     
+- name: Triple Kiss
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 0.5 oz Triple Sec
+  - 1. 0.5 oz Peach Schnapps
+  - 2. 0.5 oz Lemon Juice
+  - 2. 0.5 oz Orange Juice
+  - 2. 0.5 oz Lime Juice
+  - 3. 2 oz Sprite
+  - 4. 0.25 oz Grenadine
+  instructions: Pour liquor into glass. Add lemon, lime, and orange juice until glass is 3/4 full. Add Sprite to fill glass. Add splash of grenadine. Garnish with lemon wedge.
+
+- name: Adios
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 2 oz Sweet and Sour
+  - 1. 0.5 oz Vodka
+  - 1. 0.5 oz Light Rum
+  - 2. 0.5 oz Blue Curacao
+  - 2. 0.5 oz Gin
+  - 3. 0.5 oz Club Soda
+  instructions: Pour spirits in glass full of ice. Splash soda and stir gently.
+
+- name: Chicken In A Blender
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 2 oz Vodka
+  - 1. 2 oz Bourbon
+  - 1. 1 oz Tequila
+  - 2. 1 oz Grenadine
+  - 2. 0.5 oz Lemon Juice
+  - 3. 2 oz Sprite
+  instructions: Mix all ingredients except Sprite over ice in a highball glass, then fill to top with Sprite. Garnish with lemon slice.
+
+- name: Dirty Texas Tea
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 0.75 oz Vodka
+  - 1. 0.75 oz Light Rum
+  - 1. 0.75 oz Tequila
+  - 2. 0.75 oz Triple Sec
+  - 2. 2.5 oz Orange Juice
+  - 3. 2 oz Coca Cola
+  instructions: Mix all ingredients except Coke over ice. Add Coke.
+
+- name: Electric Harbor Tea
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 0.5 oz Vodka
+  - 1. 0.5 oz Gin
+  - 1. 0.5 oz Light Rum
+  - 2. 0.5 oz Blue Curacao
+  - 2. 1.5 oz Sweet and Sour
+  - 3. 3 oz Coca Cola
+  instructions: Fill 10 oz glass with ice. Combine ingredients and pour over ice, garnish with a lemon slice.
+
+- name: Golden Glow
+  glass: 8 oz Coupe
+  ingredients:
+  - 1. 2 oz Bourbon
+  - 1. 1 oz Dark Rum
+  - 2. 2 oz Orange Juice
+  - 2. 0.5 oz Lemon Juice
+  - 2. 0.2 oz Sugar Syrup
+  - 3. 0.3 oz Grenadine
+  instructions: Combine all ingredients, except grenadine, with cracked ice in a cocktail shaker. Shake well and strain into a chilled cocktail glass. Float grenadine on top.
+
+- name: Rock Bottom
+  glass: 12 oz Rocks
+  ingredients:
+  - 1. 2 oz Vodka
+  - 1. 2 oz Gin
+  - 2. 1/3 oz Lemon Juice
+  - 2. 1/3 oz Lime Juice
+  - 2. 1/3 oz Pineapple Juice
+  - 3. 2 oz Tequila
+  instructions: Mix all ingredients apart from tequila, which you pour in slowly.
+
+- name: Spankin'
+  glass: 2 oz Shot
+  ingredients:
+  - 1. 0.25 oz Spiced Rum
+  - 1. 0.25 oz Coconut Rum
+  - 1. 0.25 oz Peach Schnapps
+  - 2. 0.25 oz Orange Juice
+  - 2. 0.25 oz Pineapple Juice
+  - 3. 0.25 oz Grenadine
+  instructions: Chill and shake all the ingrediants except the grenadine. Pour into shot glass then add grenadine and let drip to bottom.
+
+- name: Alpine Lemonade
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 1 oz Vodka
+  - 1. 1 oz Gin
+  - 1. 1 oz Light Rum
+  - 2. 2 oz Lemonade
+  - 2. 2 oz Cranberry Juice
+  instructions: Blend ingredients together in shaker and serve in tall glass over ice.
+
+- name: Brisk Blue Blazer
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1 oz Whiskey
+  - 1. 1 oz Lemon Juice
+  - 1. 0.25 oz Sugar Syrup
+  - 2. 0.25 oz Blue Curacao
+  instructions: Put some crushed ice in a small glass. Mix whiskey, lemon juice, sugar syrup. Pour the resulting milky fluid over the crushed ice. Pour all the blue Curacao over the ice.
+
+- name: Bushmills O'thentic Irish Kiss
+  glass: 12 oz Rocks
+  ingredients:
+  - 1. 1.5 oz Whiskey
+  - 1. 1 oz Peach Schnapps
+  - 2. 2 oz Orange Juice
+  - 2. 5 oz Ginger Ale
+  instructions: Build in rocks glass with ice and garnish with a wedge of lime.
+
+- name: Hurricane Carolyn
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1 oz Coconut Rum
+  - 1. 1 oz Spiced Rum
+  - 1. 1 oz Light Rum
+  - 2. 1 oz Orange Juice
+  - 2. 1 oz Cranberry Juice
+  instructions: Blend ingredients in shaker with ice. Serve on the rocks.
+
+- name: Margarita La Bamba
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1.25 oz Tequila
+  - 1. 0.5 oz Triple Sec
+  - 1. 0.25 oz Grenadine
+  - 2. 0.25 oz Pineapple Juice
+  - 2. 1.5 oz Orange Juice
+  instructions: Shake with ice and pour in martini glass. Garnish with pineapple.
+
+- name: Punch in the Head
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 1.5 oz Coconut Rum
+  - 1. 1 oz Dark Rum
+  - 2. 2 oz Pineapple Juice
+  - 2. 2 oz Orange Juice
+  - 2. 0.5 oz Grenadine
+  instructions: Shake with ice. Pour into a large tiki head. Optionally garnish with orange and cherry.
+
+- name: Blue Wave
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1 oz Light Rum
+  - 1. 0.5 oz Peach Schnapps
+  - 2. 0.25 oz Blue Curacao
+  - 2. 2 oz Sweet and Sour
+  instructions: Combine all ingredients together over ice in a margarita glass. Garnish with a lemon wedge.
+
+- name: Cosmopolitan, Caribbean
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1.5 oz Light Rum
+  - 1. 1 oz Cranberry Juice
+  - 1. 1 oz Triple Sec
+  - 1. 0.5 oz Lime Juice
+  instructions: Shake all ingredients with ice and strain into a chilled martini glass. Garnish with a flamed orange peel.
+
+- name: Cobra
+  glass: 6 oz Tequila
+  ingredients:
+  - 1. 1 oz Vodka
+  - 1. 1 oz Blue Curacao
+  - 1. 1 oz Coconut Rum
+  - 1. 1 oz Pineapple Juice
+  instructions: Mix all in a shaker, pour into tequila glass.
+
+- name: Cosmopolitan, Classic
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 1 oz Cranberry Juice
+  - 1. 1.0 oz Triple Sec
+  - 1. 0.5 oz Lime Juice
+  instructions: Shake all ingredients with ice and strain into a chilled martini glass.
+
+- name: Country Club Lemonade
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 1.5 oz Sweet and Sour
+  - 2. 0.5 oz Triple Sec
+  - 3. 3 oz Sprite
+  instructions: Shake together sweet and sour mix and vodka. Pour into glass and stir together with Triple Sec. Top off with Sprite and garnish with orange slice and cherry.
+
+- name: Damn Fine In Blue
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1.5 oz Blue Curacao
+  - 1. 0.5 oz Light Rum
+  - 1. 0.5 oz Coconut Rum
+  - 1. 0.5 oz Triple Sec
+  instructions: Blend and serve. Garnish with pineapple wedge and a cherry held together with an umberella.
+
+- name: Gin and Sin
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 2 oz Lemon Juice
+  - 1. 2 oz Orange Juice
+  - 1. 0.5 oz Grenadine
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker. Strain into chilled cocktail glass.
+
+- name: Gin Fizz
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 1.5 oz Gin
+  - 1. 0.75 oz Lemon Juice
+  - 1. 1 oz Sugar Syrup
+  - 2. 3 oz Club Soda
+  instructions: Shake all but the soda with ice and strain into a highball glass. Fill with the soda.
+
+- name: Judge Jr.
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 2 oz Light Rum
+  - 1. 1 oz Lemon Juice
+  - 1. 2 tsp Grenadine
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker. Shake well and strain into chilled cocktail glass.
+
+- name: Lady's Gentleman
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1.5 oz Whiskey
+  - 1. 1.5 oz Orange Liqueur
+  - 1. 1 oz Orange Juice
+  instructions: Combine all ingredients in a shaker with ice. Shake and strain into a chilled cocktail glass. Garnish with an orange slice.
+
+- name: Little Devil
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 1.5 oz Light Rum
+  - 1. 1 oz Triple Sec
+  - 1. 1 oz Lemon Juice
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker. Shake well and strain into chilled cocktail glass.
+
+- name: Maiden's Blush
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 0.5 tsp Triple Sec
+  - 1. 0.5 tsp Grenadine
+  - 1. 0.5 tsp Lemon Juice
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker. Shake well and strain into chilled cocktail glass.
+
+- name: Maiden's Prayer
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 1 oz Blue Curacao
+  - 1. 0.5 oz Lemon Juice
+  - 1. 1 tbsp Orange Juice
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker and shake well. Strain into chilled cocktail glass.
+
+- name: Perfect Parnum
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 25 ml Vodka
+  - 1. 25 ml Peach Schnapps
+  - 1. 25 ml Coconut Rum
+  - 1. 75 ml Orange Juice
+  instructions: Pour into a glass, stir slightly add a little ice.
+
+- name: Sex In The Water
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 2 oz Blue Curacao
+  - 2. 1.5 oz Peach Schnapps
+  - 3. 1.5 oz Vodka
+  - 4. 3 oz Lemonade
+  instructions: Add the blue curacao, then the schnapps, then the vodka. Finnaly top with lemonade & garnish with a lemmon wheel or twist.
+
+- name: TGV
+  glass: 2 oz Shot
+  ingredients:
+  - 1. 0.4 oz Tequila
+  - 1. 0.4 oz Gin
+  - 1. 0.4 oz Vodka
+  - 2. 2 tsp Blue Curacao
+  instructions: Mix in a shotglass. Add Curacao last, to a nice blue-green color.
+
+- name: The Huntsman
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 0.5 oz Light Rum
+  - 1. 0.75 oz Lime Juice
+  - 1. 0.25 oz Sugar Syrup
+  instructions: Shake and double strain into a coupe glass. Garnish with a lime wheel.
+
+- name: Wild Eyed Rose
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 2 oz Whiskey
+  - 1. 0.75 oz Lime Juice
+  - 1. 0.75 oz Grenadine
+  instructions: Traditional garnishes include a brandied cherry and a lime wedge. Sometimes garnished with an apple slice.
+
+- name: Bay Breeze
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 1 oz Pineapple Juice
+  - 1. 1 oz Cranberry Juice
+  instructions: Mix in rocks glass and garnish with lime wheel.
+
+- name: Black Widow
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1 oz Vodka
+  - 1. 1 oz Cranberry Juice
+  - 1. 1 oz Lemonade
+  instructions: Pour into a martini glass.
+
+- name: Bourbon Sidecar
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Bourbon
+  - 1. 1 oz Triple Sec
+  - 1. 0.5 oz Lemon Juice
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker and shake well. Strain into chilled cocktail glass.
+
+- name: California Gimlit
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 3/4 oz Lime Juice
+  - 1. 1 oz Sugar Syrup
+  instructions: Shake and strain, garnish with lime wheel
+
+- name: Carolina Blue Whale
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 4 oz Light Rum
+  - 1. 2 oz Blue Curacao
+  - 1. 4 oz Pineapple Juice
+  instructions: Combine all ingredients in a pint glass. Stir to combine. Add ice and stir once more to chill.
+
+- name: Gin Sidecar
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 1 oz Triple Sec
+  - 1. 1 oz Lemon Juice
+  instructions: Combine all ingredients with cracked ice in a cocktail shaker and shake well. Strain into chilled cocktail glass.
+
+- name: Hawaiian Cocktail
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 2 oz Gin
+  - 1. 1/2 oz Triple Sec
+  - 1. 1/2 oz Pineapple Juice
+  instructions: Combine all ingredients in cocktail shaker and shake well. Strain into chilled sour glass.
+
+- name: Hole in One
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 3 oz Cranberry Juice
+  - 2. 1 oz Orange Juice
+  instructions: Mix vodka and cranberry juice over ice in a glass. Top with orange juice and serve.
+
+- name: Hoola Hoop
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 1.5 oz Gin
+  - 1. 1 oz Orange Juice
+  - 1. 1 oz Pineapple Juice
+  instructions: Mix Gin with the 2 juices and serve with an orange slice.
+
+- name: Nut Shot
+  glass: 2 oz Shot
+  ingredients:
+  - 1. 1 oz Whiskey
+  - 1. 1/2 oz Light Rum
+  instructions: Mix in a shot glass.
+
+- name: Rum Special
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 1 oz Spiced Rum
+  - 2. 1.5 oz Lime Juice
+  - 3. 3 oz Sprite
+  instructions: Put the rum into a tall glass with ice, followed by the lime juice, then top with Sprite.
+
+- name: Soylent Green
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 1 oz Blue Curacao
+  - 1. 4 oz Orange Juice
+  instructions: Pour ingredients into collins glass with ice.
+
+- name: Tequila Sunrise
+  glass: 12 oz Highball
+  ingredients:
+  - 1. 4 oz Orange Juice
+  - 1. 2 oz Tequila
+  - 2. 1/2 oz Grenadine
+  instructions: Pour the tequila and the orange juice into a highball glass with ice cubes. Stir. Slowly pour the grenadine around the inside edge of the glass, it will sink and slowly rise to mix with the other ingredients naturally. Garnish with the orange slice and cherry.
+
+- name: Fuzzball
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1 oz Peach Schnapps
+  - 1. 2 oz Sprite
+  instructions: Combine and pour over ice.
+
+- name: Gimlit
+  glass: 6 oz Coupe
+  ingredients:
+  - 1. 3 oz Gin
+  - 1. 1 oz Lime Juice
+  instructions: Combine ingredients with cracked ice in a cocktail shaker and shake well. Strain into chilled cocktail glass.
+
+- name: Screwdriver
+  glass: 8 oz Rocks
+  ingredients:
+  - 1. 1.5 oz Vodka
+  - 1. 4 oz Orange Juice
+  instructions: Pour ingredients into a collins glass.
+
