@@ -11,6 +11,12 @@
       app
     >
       <v-list>
+        <v-list-tile @click="drawer = false">
+          <v-list-tile-action>
+            <v-icon>mdi-arrow-left</v-icon>
+          </v-list-tile-action>
+        </v-list-tile>
+      
         <v-list-tile @click="gotoDrinks()">
           <v-list-tile-action>
             <v-icon>mdi-cup-water</v-icon>
@@ -39,6 +45,13 @@
           <v-list-tile-title>Pumps</v-list-tile-title>
         </v-list-tile>
       
+        <v-list-tile @click="gotoAbout()">
+          <v-list-tile-action>
+            <v-icon>mdi-information</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title>About</v-list-tile-title>
+        </v-list-tile>
+          
         <v-divider/>
         
         <v-list-group
@@ -92,18 +105,8 @@
                 <v-icon>mdi-power</v-icon>
               </v-list-tile-action>
             </v-list-tile>
-            
           
           </template>
-          
-          <v-divider/>
-          
-          <v-list-tile @click="gotoAbout()">
-            <v-list-tile-title>About</v-list-tile-title>
-            <v-list-tile-action>
-              <v-icon>mdi-information</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
           
         </v-list-group>
         
