@@ -122,11 +122,10 @@ def setControl(ctl):
     _dispenserEvent.set()
         
 def startPump(id, parentalCode = False):
+    if id in _runningPumps: return
     pump = Pump.get_or_none(Pump.id == id)
     if not pump:
         raise ValueError('Invalid pump Id!')
-    if id in _runningPumps:
-        stopPump(id)
     
     if state == ST_MANUAL:
 
