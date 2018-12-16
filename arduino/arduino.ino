@@ -39,7 +39,7 @@ IN THE SOFTWARE.
 #include <FireNeoPixelPattern.h>
 #include <Colors.h>
 
-#define DEBUG_PATTERNS
+//#define DEBUG_PATTERNS
 
 constexpr unsigned long SERIAL_SPEED    = 115200;
 
@@ -74,6 +74,7 @@ constexpr unsigned long BUTTON_PRESS_SHORT          = 1000;
 constexpr unsigned long BUTTON_PRESS_LONG           = 8000;
 constexpr unsigned long RELAY1_ON_DELAY             = 1000;
 constexpr unsigned long RELAY2_ON_DELAY             = 0;
+constexpr int POWERDOWNTIME_DISABLED                = -1;
 
 constexpr byte PATTERN_WIPE             = 0;
 constexpr byte PATTERN_MULTIWIPE        = 1;
@@ -134,7 +135,7 @@ uint32_t lastSensorReadTime = 0;
 bool ledOn = false;
 uint32_t lastLEDToggleTime = 0;
 
-int powerDownTime = -1;
+int powerDownTime = POWERDOWNTIME_DISABLED;
 uint32_t lastPowerDownTickTime = 0;
 
 uint8_t state = STATE_OFF;
@@ -321,12 +322,12 @@ void loopSensor() {
 }
 
 void loopPower() {
-    if (powerDownTime == -1) return;
+    if (powerDownTime == POWERDOWNTIME_DISABLED) return;
     
     if ((millis() - lastPowerDownTickTime) >= 1000) {
         lastPowerDownTickTime = millis();
         powerDownTime--;
-        if (powerDownTime == -1) {
+        if (powerDownTime == POWERDOWNTIME_DISABLED) {
             powerDown();
             state = STATE_OFF;
         }
@@ -592,9 +593,9 @@ void cmdPowerTime(char* str) {
 }
 
 void cmdPowerStop(char* str) {
-    if (powerDownTime != -1) {
+    if (powerDownTime != POWERDOWNTIME_DISABLED) {
         turnOffLights();
-        powerDownTime = -1;
+        powerDownTime = POWERDOWNTIME_DISABLED;
     }
     turnOnRelays();
     sendOK();
