@@ -137,7 +137,11 @@ def status():
 def getDaemonPID():
     try:
         pf = open(getPIDFile(), 'r')
-        pid = int(pf.read().strip())
+        pid = pf.read().strip()
+        if pid:
+            pid = int(pid)
+        else:
+            pid = None
         pf.close()
     except IOError:
         pid = None

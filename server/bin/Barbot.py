@@ -105,7 +105,7 @@ if __name__ == '__main__':
     elif args.cmd == 'restart':
         daemon.restart(startServer)
     elif args.cmd == 'status':
-        args.daemon.status()
+        daemon.status()
     elif args.cmd == 'debug':
         startServer()
     sys.exit(0)
