@@ -85,6 +85,7 @@ def _bus_serialEvent(e):
                         if units.toML(pump.amount, pump.units) < config.getint('pumps', 'ingredientEmptyAmount'):
                             pump.setState(Pump.EMPTY)
                             rebuildMenu = True
+                            bus.emit('audio/play', 'pumpEmpty', console = True)
                         
                         ingredient = pump.ingredient
                         ingredient.timesDispensed = ingredient.timesDispensed + 1

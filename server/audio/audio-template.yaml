@@ -100,3 +100,7 @@ clips:
         - What, no one's drinking anymore?
         - I guess I'll just check my fluids.
                 
+    pumpEmpty: # Played on the console
+        - Pump empty.
+        - I need a refill over here.
+        
