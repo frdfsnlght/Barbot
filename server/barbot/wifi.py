@@ -173,7 +173,7 @@ def _getState():
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
             universal_newlines = True)
-        state['ipAddresses'] = out.stdout.splitlines(False)
+        state['ipAddresses'] = [addr.strip() for addr in out.stdout.splitlines(False)]
     except IOError as e:
         _logger.error(e)
         
@@ -182,7 +182,7 @@ def _getState():
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
             universal_newlines = True)
-        state['shortHostname'] = out.stdout
+        state['shortHostname'] = out.stdout.strip()
     except IOError as e:
         _logger.error(e)
         
@@ -191,7 +191,7 @@ def _getState():
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
             universal_newlines = True)
-        state['longHostname'] = out.stdout
+        state['longHostname'] = out.stdout.strip()
     except IOError as e:
         _logger.error(e)
     
