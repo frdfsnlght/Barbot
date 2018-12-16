@@ -51,8 +51,8 @@
         @click="toggleSetting('enableLocalAudio')"
       >
         <v-list-tile-avatar>
-          <v-icon v-if="settings.enableLocalAudio">mdi-lock</v-icon>
-          <v-icon v-else>mdi-lock-open</v-icon>
+          <v-icon v-if="settings.enableLocalAudio">mdi-volume-high</v-icon>
+          <v-icon v-else>mdi-volume-off</v-icon>
         </v-list-tile-avatar>
         <v-list-tile-content>
           <v-list-tile-title>Local audio</v-list-tile-title>
@@ -70,8 +70,8 @@
         @click="toggleSetting('enableRemoteAudio')"
       >
         <v-list-tile-avatar>
-          <v-icon v-if="settings.enableRemoteAudio">mdi-lock</v-icon>
-          <v-icon v-else>mdi-lock-open</v-icon>
+          <v-icon v-if="settings.enableRemoteAudio">mdi-volume-high</v-icon>
+          <v-icon v-else>mdi-volume-off</v-icon>
         </v-list-tile-avatar>
         <v-list-tile-content>
           <v-list-tile-title>Remote audio</v-list-tile-title>
@@ -89,8 +89,8 @@
         @click="toggleSetting('enableIdleAudio')"
       >
         <v-list-tile-avatar>
-          <v-icon v-if="settings.enableIdleAudio">mdi-lock</v-icon>
-          <v-icon v-else>mdi-lock-open</v-icon>
+          <v-icon v-if="settings.enableIdleAudio">mdi-volume-high</v-icon>
+          <v-icon v-else>mdi-volume-off</v-icon>
         </v-list-tile-avatar>
         <v-list-tile-content>
           <v-list-tile-title>Idle audio</v-list-tile-title>

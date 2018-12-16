@@ -144,7 +144,14 @@ export default {
   beforeRouteLeave(to, from, next) {
     this.$store.commit('drinksMenu/destroy')
     next()
-  }
+  },
+  
+  sockets: {
+    connect() {
+      this.$store.dispatch('drinksMenu/getAll')
+    },
+  },
+  
   
 }
 
