@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat style="height: 93vh; overflow-y: auto;">
+  <v-card flat style="height: 92.5vh; overflow-y: auto;">
     <div class="pa-3">
     
       <p

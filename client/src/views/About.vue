@@ -1,6 +1,6 @@
 <template>
 
-  <v-card flat style="height: 93vh; overflow-y: auto;">
+  <v-card flat style="height: 92.5vh; overflow-y: auto;">
   
     <div class="pa-3 text-xs-center">
 
@@ -11,8 +11,8 @@
       <div class="ma-3" v-if="wifiState">
         <p>Connect with any of the following URLs:</p>
         <ul>
+          <li v-if="wifiState.shortHostname">http://{{wifiState.shortHostname}}:{{serverPort}}/</li>
           <li v-if="wifiState.shortHostname">http://{{wifiState.shortHostname}}.local:{{serverPort}}/</li>
-          <li v-if="wifiState.longHostname">http://{{wifiState.longHostname}}:{{serverPort}}/</li>
           <li v-for="addr in wifiState.ipAddresses" :key="addr">http://{{addr}}:{{serverPort}}/</li>
         </ul>
       </div>
