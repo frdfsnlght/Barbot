@@ -95,16 +95,6 @@ def _on_audioPlay(clip, console = False, sessionId = False, broadcast = False):
         'broadcast': broadcast,
     })
     
-def setVolume(volume):
-    open(config.getpath('audio', 'volumeFile'), 'w').write(str(volume))
-    bus.emit('audio/volume', volume)
-
-def getVolume():
-    try:
-        return float(open(config.getpath('audio', 'volumeFile')).read().rstrip())
-    except IOError:
-        return 1
-    
 def _load():
     global _lastConfigModifiedTime, _audioConfig, _clips
     

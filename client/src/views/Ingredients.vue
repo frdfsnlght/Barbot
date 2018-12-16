@@ -180,7 +180,13 @@ export default {
   beforeRouteLeave(to, from, next) {
     this.$store.commit('ingredients/destroy')
     next()
-  }
+  },
+  
+  sockets: {
+    connect() {
+      this.$store.dispatch('ingredients/getAll')
+    },
+  },
   
 }
 

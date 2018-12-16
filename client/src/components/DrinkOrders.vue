@@ -182,5 +182,11 @@ export default {
     
   },
 
+  sockets: {
+    connect() {
+      this.$store.dispatch('drinkOrders/getWaiting')
+    },
+  },
+  
 }
 </script>

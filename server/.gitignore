@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.swp
 var/*.log
 var/*.log.*
 var/*.db*

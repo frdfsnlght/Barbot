@@ -160,7 +160,6 @@ def _socket_connect():
     if request.remote_addr == '127.0.0.1':
         newConnect = _consoleSessionId != request.sid
         _consoleSessionId = request.sid
-        emit('audio_volume', audio.getVolume())
         if newConnect:
             bus.emit('socket/consoleConnect')
 
@@ -234,16 +233,6 @@ def _socket_core_shutdown():
         return success()
     except core.CoreError as e:
         return error(e)
-
-#-------------------------------
-# audio
-#
-        
-@socket.on('audio_setVolume')
-def _socket_audio_setVolume(volume):
-    _logger.debug('recv audio_setVolume')
-    audio.setVolume(float(volume))
-    return success()
 
 #-------------------------------
 # dispenser

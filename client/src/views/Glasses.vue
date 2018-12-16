@@ -276,7 +276,13 @@ export default {
   beforeRouteLeave(to, from, next) {
     this.$store.commit('glasses/destroy')
     next()
-  }
+  },
+  
+  sockets: {
+    connect() {
+      this.$store.dispatch('glasses/getAll')
+    },
+  },
   
 }
 
