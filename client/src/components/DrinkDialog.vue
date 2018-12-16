@@ -55,6 +55,7 @@
                   item-text="name"
                   item-value="id"
                   label="Glass"
+                  :data-kbHide="true"
                   v-model="drink.glass_id"
                   :rules="[v => !!v || 'Glass is required']"
                   required
