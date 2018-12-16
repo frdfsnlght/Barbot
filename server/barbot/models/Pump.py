@@ -241,7 +241,8 @@ class Pump(BarbotModel):
             if state == Pump.READY:
                 newState = state
             elif state == Pump.UNUSED:
-                newState = state
+                self.state = state
+                return
         elif self.isReady():
             if state == Pump.EMPTY:
                 newState = state
