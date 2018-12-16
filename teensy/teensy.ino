@@ -552,9 +552,9 @@ void cmdPumpPump(char* str) {
     pumpControllers[pumpNum] = ctrl;
     pumpDir = dir;
 
-    if ((steps == 1) || (step == -1)) {
+    if ((steps == 1) || (steps == -1)) {
         allPumps[pumpNum]->setMaxSpeed(speed * dir);
-        ctrl->rotateAsync($allPumps[pumpNum])
+        ctrl->rotateAsync(*allPumps[pumpNum]);
     } else {
         allPumps[pumpNum]->setMaxSpeed(speed);
         allPumps[pumpNum]->setTargetAbs(steps);
