@@ -23,6 +23,8 @@
       <p class="mb-0">{{statistics.menuDrinks}} drinks on the menu</p>
       <p>{{statistics.drinksServed}} drinks served since startup</p>
     
+      <p>Storage: {{statistics.diskFree}}%</p>
+      
       <p class="mb-0">Git: {{gitVersion}}/{{gitBranch}}</p>
       <p>Built: {{buildDate}}</p>
 

@@ -197,14 +197,7 @@ def _socket_logout():
 @socket.on('core_statistics')
 def _socket_core_statistics():
     _logger.debug('recv core_statistics')
-    stats = {
-        'drinks': Drink.select().count(),
-        'ingredients': Ingredient.select().count(),
-        'glasses': Glass.select().count(),
-        'menuDrinks': Drink.getMenuDrinksCount(),
-        'drinksServed': dispenser.drinksServed,
-    }
-    return success(stats)
+    return success(core.getStatistics())
     
 @socket.on('core_restartX')
 def _socket_core_restartX():
