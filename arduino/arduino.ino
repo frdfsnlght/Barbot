@@ -29,14 +29,12 @@ IN THE SOFTWARE.
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <NeoPixelController.h>
-#include <WipeNeoPixelPattern.h>
 #include <MultiWipeNeoPixelPattern.h>
 #include <BlinkNeoPixelPattern.h>
 #include <RainbowNeoPixelPattern.h>
 #include <ChaseNeoPixelPattern.h>
 #include <ScanNeoPixelPattern.h>
 #include <FadeNeoPixelPattern.h>
-#include <FireNeoPixelPattern.h>
 #include <Colors.h>
 
 //#define DEBUG_PATTERNS
@@ -76,14 +74,12 @@ constexpr unsigned long RELAY1_ON_DELAY             = 1000;
 constexpr unsigned long RELAY2_ON_DELAY             = 0;
 constexpr int POWERDOWNTIME_DISABLED                = -1;
 
-constexpr byte PATTERN_WIPE             = 0;
-constexpr byte PATTERN_MULTIWIPE        = 1;
-constexpr byte PATTERN_BLINK            = 2;
-constexpr byte PATTERN_RAINBOW          = 3;
-constexpr byte PATTERN_CHASE            = 4;
-constexpr byte PATTERN_SCAN             = 5;
-constexpr byte PATTERN_FADE             = 6;
-constexpr byte PATTERN_FIRE             = 7;
+constexpr byte PATTERN_MULTIWIPE        = 0;
+constexpr byte PATTERN_BLINK            = 1;
+constexpr byte PATTERN_RAINBOW          = 2;
+constexpr byte PATTERN_CHASE            = 3;
+constexpr byte PATTERN_SCAN             = 4;
+constexpr byte PATTERN_FADE             = 5;
 
 constexpr byte STATE_OFF                = 0;
 constexpr byte STATE_OFF_P              = 1;
@@ -127,6 +123,13 @@ uint8_t segments = 0;
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
 // and minimize distance between controller and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
+
+MultiWipeNeoPixelPattern multiWipePatterns[NUM_SEGMENTS] = {};
+BlinkNeoPixelPattern blinkPatterns[NUM_SEGMENTS] = {};
+RainbowNeoPixelPattern rainbowPatterns[NUM_SEGMENTS] = {};
+ChaseNeoPixelPattern chasePatterns[NUM_SEGMENTS] = {};
+ScanNeoPixelPattern scanPatterns[NUM_SEGMENTS] = {};
+FadeNeoPixelPattern fadePatterns[NUM_SEGMENTS] = {};
 
 
 bool sensors[NUM_SENSORS];
@@ -910,32 +913,10 @@ uint8_t playLightPattern(char* str) {
 
     prepareLightSegments();
 
-    // lp1:2:3:4,1,2,30:30:30,0,20,7
-    // lp1:2:3:4,1,2,30:0:0,0,20,7
+    // lp0:2:3:4,1,2,30:30:30,0,20,7
+    // lp0:2:3:4,1,2,30:0:0,0,20,7
 
     switch (patNum) {
-        case PATTERN_WIPE:
-            colors[0] = readColor(&str);
-            readDelim(&str);
-            interval1 = (unsigned long)readUInt(&str);
-            readDelim(&str);
-            mode = (uint8_t)readUInt(&str);
-            
-#ifdef DEBUG_PATTERNS
-            send("# color: "); sendColor(colors[0]); sendChar('\n');
-            send("# interval: "); sendInt(interval1); sendChar('\n');
-            send("# mode: "); sendInt(mode); sendChar('\n');
-#endif
-            
-            for (int i = 0; i < NUM_SEGMENTS; i++) {
-                if (segments & (1 << i)) {
-                    WipeNeoPixelPattern* pattern = new WipeNeoPixelPattern();
-                    pattern->setup(colors[0], interval1, mode);
-                    lights.play(*pattern, i);
-                    if (i == 0) break;
-                }
-            }
-            break;
         case PATTERN_MULTIWIPE:
             steps = readUInt(&str);
             readDelim(&str);
@@ -960,12 +941,11 @@ uint8_t playLightPattern(char* str) {
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
-                    MultiWipeNeoPixelPattern* pattern = new MultiWipeNeoPixelPattern(steps);
+                    multiWipePatterns[i].setup(steps, interval1, mode);
                     for (int idx = 0; idx < steps; idx++) {
-                        pattern->setColor(idx, colors[idx]);
+                        multiWipePatterns[i].setColor(idx, colors[idx]);
                     }
-                    pattern->setup(interval1, mode);
-                    lights.play(*pattern, i);
+                    lights.play(multiWipePatterns[i], i);
                     if (i == 0) break;
                 }
             }
@@ -988,9 +968,8 @@ uint8_t playLightPattern(char* str) {
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
-                    BlinkNeoPixelPattern* pattern = new BlinkNeoPixelPattern();
-                    pattern->setup(colors[0], colors[1], interval1, interval2);
-                    lights.play(*pattern, i);
+                    blinkPatterns[i].setup(colors[0], colors[1], interval1, interval2);
+                    lights.play(blinkPatterns[i], i);
                     if (i == 0) break;
                 }
             }
@@ -1007,9 +986,8 @@ uint8_t playLightPattern(char* str) {
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
-                    RainbowNeoPixelPattern* pattern = new RainbowNeoPixelPattern();
-                    pattern->setup(interval1, direction);
-                    lights.play(*pattern, i);
+                    rainbowPatterns[i].setup(interval1, direction);
+                    lights.play(rainbowPatterns[i], i);
                     if (i == 0) break;
                 }
             }
@@ -1032,9 +1010,8 @@ uint8_t playLightPattern(char* str) {
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
-                    ChaseNeoPixelPattern* pattern = new ChaseNeoPixelPattern();
-                    pattern->setup(colors[0], colors[1], interval1, direction);
-                    lights.play(*pattern, i);
+                    chasePatterns[i].setup(colors[0], colors[1], interval1, direction);
+                    lights.play(chasePatterns[i], i);
                     if (i == 0) break;
                 }
             }
@@ -1051,9 +1028,8 @@ uint8_t playLightPattern(char* str) {
             
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
-                    ScanNeoPixelPattern* pattern = new ScanNeoPixelPattern();
-                    pattern->setup(colors[0], interval1);
-                    lights.play(*pattern, i);
+                    scanPatterns[i].setup(colors[0], interval1);
+                    lights.play(scanPatterns[i], i);
                     if (i == 0) break;
                 }
             }
@@ -1079,34 +1055,8 @@ uint8_t playLightPattern(char* str) {
 
             for (int i = 0; i < NUM_SEGMENTS; i++) {
                 if (segments & (1 << i)) {
-                    FadeNeoPixelPattern* pattern = new FadeNeoPixelPattern();
-                    pattern->setup(colors[0], colors[1], steps, interval1, mode);
-                    lights.play(*pattern, i);
-                    if (i == 0) break;
-                }
-            }
-            break;
-        case PATTERN_FIRE:
-            cooling = (uint16_t)readUInt(&str);
-            readDelim(&str);
-            sparking = (uint16_t)readUInt(&str);
-            readDelim(&str);
-            interval1 = (unsigned long)readUInt(&str);
-            readDelim(&str);
-            direction = (uint8_t)readUInt(&str);
-            
-#ifdef DEBUG_PATTERNS
-            send("# cooling: "); sendInt(cooling); sendChar('\n');
-            send("# sparking: "); sendInt(sparking); sendChar('\n');
-            send("# interval: "); sendInt(interval1); sendChar('\n');
-            send("# direction: "); sendInt(direction); sendChar('\n');
-#endif
-            
-            for (int i = 0; i < NUM_SEGMENTS; i++) {
-                if (segments & (1 << i)) {
-                    FireNeoPixelPattern* pattern = new FireNeoPixelPattern();
-                    pattern->setup(cooling, sparking, interval1, direction);
-                    lights.play(*pattern, i);
+                    fadePatterns[i].setup(colors[0], colors[1], steps, interval1, mode);
+                    lights.play(fadePatterns[i], i);
                     if (i == 0) break;
                 }
             }
