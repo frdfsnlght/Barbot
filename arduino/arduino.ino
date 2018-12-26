@@ -864,14 +864,12 @@ void prepareLightSegments() {
     NeoPixelPattern* pattern = lights.getPattern(0);
     if (pattern) {
         lights.stop(0);
-        free(pattern);
     }
     for (int i = 1; i < NUM_SEGMENTS; i++) {
         if ((segments & (1 << i)) || (segments & 1)) {
             pattern = lights.getPattern(i);
             if (pattern) {
                 lights.stop(i);
-                free(pattern);
             }
         }
     }
