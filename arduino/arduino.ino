@@ -919,7 +919,7 @@ uint8_t playLightPattern(char* str) {
             steps = readUInt(&str);
             readDelim(&str);
             if (steps == 0) return ERR_INVALID_PATTERN;
-            if (steps > 3) return ERR_INVALID_PATTERN;
+            if (steps > 4) return ERR_INVALID_PATTERN;
             for (int i = 0; i < steps; i++) {
                 colors[i] = readColor(&str);
                 readDelim(&str);
