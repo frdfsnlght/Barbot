@@ -922,11 +922,6 @@ def _bus_audio_playFile(file, console, sessionId, broadcast):
             _logger.debug('Play {} on console'.format(file))
             socketEmit('audio_playFile', file, room = _consoleSessionId)
 
-@bus.on('audio/volume')
-def _bus_audio_volume(volume):
-    if _consoleSessionId:
-        socketEmit('audio_volume', volume, room = _consoleSessionId)
-        
 #-------------------------------
 # glass
 #
