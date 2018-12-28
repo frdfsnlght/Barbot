@@ -233,6 +233,7 @@ class Pump(BarbotModel):
         return self.state == Pump.DIRTY
 
     def setState(self, state):
+        if state == self.state: return
         newState = None
         if self.isUnused():
             if state == Pump.LOADED:
