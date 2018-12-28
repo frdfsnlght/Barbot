@@ -173,7 +173,7 @@ def _threadLoop():
                     time.sleep(1)
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
-                bus.emit('lights/play', None)
+                bus.emit('lights/play', 'idle')
                 
             if _requestManual:
                 state = ST_MANUAL
@@ -189,7 +189,7 @@ def _threadLoop():
                         
                 state = ST_WAIT
                 bus.emit('dispenser/state', state, None)
-                bus.emit('lights/play', None)
+                bus.emit('lights/play', 'idle')
                 
             if not _exitEvent.is_set():
             
@@ -261,7 +261,7 @@ def _dispenseDrinkOrder(o):
             state = ST_WAIT
             _resetTimers()
             bus.emit('dispenser/state', state, drinkOrder)
-            bus.emit('lights/play', None)
+            bus.emit('lights/play', 'idle')
             return
         
         if _control == CTL_START and glass:
@@ -324,7 +324,7 @@ def _dispenseDrinkOrder(o):
                     drinkOrder = None
                     state = ST_DISPENSE_CLEAR_CANCEL
                     bus.emit('dispenser/state', state, drinkOrder)
-                    bus.emit('lights/play', None)
+                    bus.emit('lights/play', 'idle')
 
         if state != ST_DISPENSE_RUN:
             break
@@ -361,7 +361,7 @@ def _dispenseDrinkOrder(o):
                 state = ST_WAIT
                     
     bus.emit('dispenser/state', state, drinkOrder)
-    bus.emit('lights/play', None)
+    bus.emit('lights/play', 'idle')
     _resetTimers()
     
 
