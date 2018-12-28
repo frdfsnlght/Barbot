@@ -8,8 +8,8 @@ from .bus import bus
 _levelPattern = re.compile(r"^level\.(.*)")
 
 
-@bus.on('config/reloaded')
-def _bus_configReloaded():
+@bus.on('config/loaded')
+def _bus_config_loaded():
     _setLoggingLevels()
     
 def configure():
