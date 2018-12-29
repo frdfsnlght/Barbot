@@ -584,7 +584,6 @@ void processPowerCommand(char* cmd) {
 
 void cmdPowerOn(char* str) {
     state = STATE_ON;
-    turnOffLights();
     sendOK();
 }
 
