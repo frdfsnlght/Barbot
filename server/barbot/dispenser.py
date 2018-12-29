@@ -162,6 +162,7 @@ def stopPump(id):
 def _threadLoop():
     global _lastDrinkOrderCheckTime, state
     _logger.info('Dispenser thread started')
+    bus.emit('lights/play', 'idle')
     try:
         while not _exitEvent.is_set():
         
