@@ -200,7 +200,7 @@ export default {
     },
     
     captureIngredient(ingredient, amount) {
-      amount = Math.round(units.toOther(amount, units.defaultUnits()) * 10) / 10
+      amount = Math.round(units.toOther(amount, units.defaultUnits()) * 1000) / 1000
       
       // find max step
       let maxStep = 1
