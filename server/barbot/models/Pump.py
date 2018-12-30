@@ -300,16 +300,17 @@ class Pump(BarbotModel):
         if not self.isUnused():
             self.setState(Pump.DIRTY)
             ing = self.ingredient
-            ing.lastContainerAmount = self.containerAmount
-            ing.lastAmount = self.amount
-            ing.lastUnits = self.units
-            ing.save()
-            self.ingredient = None
-            self.containerAmount = 0
-            self.amount = 0
-            self.units = 'ml'
-            self.save()
-            Drink.rebuildMenu()
+            if ing:
+                ing.lastContainerAmount = self.containerAmount
+                ing.lastAmount = self.amount
+                ing.lastUnits = self.units
+                ing.save()
+                self.ingredient = None
+                self.containerAmount = 0
+                self.amount = 0
+                self.units = 'ml'
+                self.save()
+                Drink.rebuildMenu()
 
     def clean(self):
         amount = self.volume * config.getfloat('pumps', 'cleanFactor')
