@@ -12,6 +12,7 @@ from .models.Ingredient import Ingredient
 
 
 _logger = logging.getLogger('Core')
+_firstConnect = False
 
 
 class CoreError(Exception):
@@ -19,10 +20,14 @@ class CoreError(Exception):
 
 @bus.on('socket/consoleConnect')
 def _bus_consoleConnect():
-    try:
-        serial.write('RO', timeout = 1)  # power on, turn off lights
-    except serial.SerialError as e:
-        _logger.error(e)
+    global _firstConnect
+    if not _firstConnect:
+        _firstConnect = True
+        try:
+            serial.write('RO', timeout = 1)  # power on
+        except serial.SerialError as e:
+            _logger.error(e)
+        bus.emit('core/firstConnect')
 
 def getStatistics():
     stats = {

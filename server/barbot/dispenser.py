@@ -54,22 +54,26 @@ class DispenserError(Exception):
     pass
 
 @bus.on('server/start')
-def _bus_serverStart():
+def _bus_server_start():
     global _thread
     _exitEvent.clear()
     _thread = Thread(target = _threadLoop, name = 'DispenserThread', daemon = True)
     _thread.start()
 
 @bus.on('server/stop')
-def _bus_serverStop():
+def _bus_server_stop():
     _exitEvent.set()
 
 @bus.on('socket/consoleConnect')
-def _bus_consoleConnect():
+def _bus_socket_consoleConnect():
     _resetTimers()
     
+@bus.on('core/firstConnect')
+def _bus_core_firstConnect():
+    bus.emit('lights/play', 'idle')
+    
 @bus.on('serial/event')
-def _bus_serialEvent(e):
+def _bus_serial_event(e):
     global glass
     m = _sensorEventPattern.match(e)
     if m and m.group(1) == '0':
@@ -162,7 +166,6 @@ def stopPump(id):
 def _threadLoop():
     global _lastDrinkOrderCheckTime, state
     _logger.info('Dispenser thread started')
-    bus.emit('lights/play', 'idle')
     try:
         while not _exitEvent.is_set():
         
