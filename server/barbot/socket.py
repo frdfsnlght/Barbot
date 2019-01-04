@@ -710,7 +710,7 @@ def _socket_drinkOrder_toggleHold(id):
 @socket.on('pump_getAll')
 def _socket_pump_getAll():
     _logger.debug('recv pump_getAll')
-    return success(items = [p.toDict(ingredient = True) for p in Pump.select()])
+    return success(pumps = [p.toDict(ingredient = True) for p in Pump.select()])
  
 @socket.on('pump_load')
 @requireDispenserState(dispenser.ST_SETUP)

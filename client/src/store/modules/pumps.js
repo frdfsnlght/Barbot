@@ -90,7 +90,7 @@ export default {
                             commit('setError', res.error, {root: true})
                             reject()
                         } else {
-                            commit('loadedAll', res.items)
+                            commit('loadedAll', res.pumps)
                             resolve()
                         }
                     })
